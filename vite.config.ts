@@ -3,7 +3,16 @@ import { playwright } from "vite-plus/test/browser-playwright";
 
 export default defineConfig({
   fmt: { ignorePatterns: ["docs/**"] },
-  lint: { options: { typeAware: true, typeCheck: true } },
+  pack: {
+    entry: { index: "src/index.ts", three: "src/three.ts", element: "src/element.ts" },
+    format: ["esm"],
+    dts: true,
+    platform: "browser",
+    exports: true,
+    publint: true,
+    attw: { profile: "esm-only" },
+  },
+  lint: { ignorePatterns: ["fixtures/**"], options: { typeAware: true, typeCheck: true } },
   test: {
     projects: [
       {

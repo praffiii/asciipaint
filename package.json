@@ -1,14 +1,58 @@
 {
   "name": "asciipaint",
+  "version": "0.1.0",
+  "description": "Paint any image, video, canvas or three.js scene as coloured ASCII glyphs on WebGL2.",
+  "keywords": [
+    "ascii",
+    "ascii-art",
+    "canvas",
+    "image",
+    "shader",
+    "three",
+    "threejs",
+    "webgl",
+    "webgl2"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/praffiii/asciipaint.git"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": [
+    "./dist/element.js"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./element": "./dist/element.js",
+    "./three": "./dist/three.js",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "size": "bun scripts/size.ts",
+    "release:check": "vp check && vp test && vp pack && bun run size"
+  },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
+    "@types/bun": "^1.4.4",
     "@types/three": "^0.187.0",
     "@vitest/browser-playwright": "5.1.0",
     "playwright": "^1.65.0",
+    "publint": "^0.3.25",
     "three": "^0.187.0",
     "typescript": "^7.0.2",
     "vite-plus": "^1.6.0"
+  },
+  "peerDependencies": {
+    "three": ">=0.170"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
   },
   "packageManager": "bun@1.4.4"
 }
