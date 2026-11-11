@@ -59,8 +59,10 @@ export function asciipaintThree(
       const { __webglTexture: texture } = renderer.properties.get(
         target.texture,
       ) as TextureProperties;
-      // The size carries the grid's aspect, not the target's, so the whole view maps 1:1 onto the
-      // cells (no cover crop), exactly as the hero samples it.
+      // `size` carries the grid's aspect, not the target's, so the cover fit is identity and the
+      // whole view maps 1:1 onto the cells, exactly as the hero samples it. The LOD this implies
+      // (~0.77) has no effect only because the target is NEAREST with no mipmaps: adding mipmaps
+      // to the target would change the sampling.
       const area = { width: grid.cols * o.cell[0], height: grid.rows * o.cell[1] };
       engine.run(
         { texture, size: area, flipY: false, alpha: false },

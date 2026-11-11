@@ -89,7 +89,7 @@ const avg = (all: Px[]) => all.reduce((s, c) => s + (c[0] + c[1] + c[2]) / 3, 0)
 
 it("paints a lit scene as glyphs on three's own canvas", () => {
   const r = renderer(200, 100);
-  const p = paint(r, { edgeFade: 0 });
+  const p = paint(r, { edgeFade: 0, background: "#000" }); // black paper: a paper-only frame fails
   p.render(whitePlaneScene(), camera);
   const all = readAll(r);
   expect(all.some((c) => c[0] > 200)).toBe(true);
@@ -108,11 +108,11 @@ it("leaves three's state intact for the next render", () => {
 
 it("follows renderer.setSize without a resize call", () => {
   const r = renderer(64, 64);
-  const p = paint(r, { edgeFade: 0 });
+  const p = paint(r, { edgeFade: 0, background: "#000" }); // a stale grid leaves black paper
   p.render(whitePlaneScene(), camera);
   r.setSize(128, 64, false);
   p.render(whitePlaneScene(), camera);
-  expect(px(r, 120, 32)[0]).toBeGreaterThan(100); // painted, not stale or empty
+  expect(readAll(r).every((c) => c[0] > 100)).toBe(true); // the whole 128-wide grid is painted
 });
 
 it("uses toneMappingExposure", () => {
