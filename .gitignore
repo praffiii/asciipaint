@@ -4,3 +4,5 @@ dist/
 .superpowers/
 parity/
 .vitest/
+docs/
+.playwright-mcp/
