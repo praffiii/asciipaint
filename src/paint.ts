@@ -1,6 +1,6 @@
 import { createEngine, type SourceTexture } from "./engine";
 import { gridFor, sourceSize, type Size } from "./grid";
-import { coverSize, rasterize, rasterSize } from "./raster";
+import { coverSize, isSvgUrl, rasterize, rasterSize } from "./raster";
 import { resolveOptions, type LiveOptions, type Options } from "./options";
 
 export interface Paint {
@@ -74,7 +74,11 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
         // Still loading, no source at all, or no grid to paint it on.
         if (!source.complete || !source.currentSrc || !sample.width || !sample.height) return;
         // Small or size-less (viewBox-only SVG) images are redrawn at the sample size, so they stay crisp.
-        const r = rasterSize({ width: source.naturalWidth, height: source.naturalHeight }, sample);
+        // An SVG is rasterised up front too: Chrome reports a viewBox-only one at 150 × 150 and WebGL refuses it.
+        const natural = { width: source.naturalWidth, height: source.naturalHeight };
+        const r =
+          rasterSize(natural, sample) ??
+          (isSvgUrl(source.currentSrc) ? coverSize(natural, sample) : null);
         if (r) {
           const raster = rasterize(source, r, scratch);
           if (!raster) return; // broken

@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from "vite-plus/test";
 import { asciipaint, type Options, type Paint } from "../../src/index";
 import { gridFor } from "../../src/grid";
+import { isSvgUrl } from "../../src/raster";
 import { DEFAULTS } from "../../src/options";
 
 type Px = [number, number, number];
@@ -261,11 +262,32 @@ it("paints an SVG with only a viewBox", async () => {
   expect(readAll(p).some((c) => c[0] === 255 && c[1] === 255)).toBe(true); // white strokes, not skipped
 });
 
+it("rasterises a viewBox-only SVG without a refused WebGL upload", async () => {
+  const img = await svg(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#fff"/></svg>',
+  );
+  const p = make(48, 34, { edgeFade: 0, dpr: 2, background: [1, 0, 0] });
+  const gl = p.canvas.getContext("webgl2")!;
+  const uploads: unknown[] = [];
+  const texImage2D = gl.texImage2D.bind(gl) as (...a: unknown[]) => void;
+  gl.texImage2D = ((...a: unknown[]) => {
+    uploads.push(a.at(-1));
+    texImage2D(...a);
+  }) as typeof gl.texImage2D;
+  p.draw(img);
+  expect(uploads.length).toBeGreaterThan(0);
+  expect(uploads).not.toContain(img);
+  expect(gl.getError()).toBe(gl.NO_ERROR);
+});
+
 it("keeps the aspect of a viewBox-only SVG that WebGL refuses", async () => {
   // Chrome reports this at 150 × 150 and refuses to upload it; the fallback raster must stay square.
-  const img = await svg(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="3" y="3" width="4" height="4" fill="#fff"/></svg>',
-  );
+  // A blob: URL hides the type from the up-front SVG check, so this exercises the getError fallback.
+  const markup =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="3" y="3" width="4" height="4" fill="#fff"/></svg>';
+  const img = new Image();
+  img.src = URL.createObjectURL(new Blob([markup], { type: "image/svg+xml" }));
+  await img.decode();
   const p = make(160, 80, { edgeFade: 0, dpr: 2, background: [0, 0, 0] });
   p.draw(img);
   const { cols } = gridFor({ width: 160, height: 80 }, DEFAULTS.cell, 0);
@@ -340,4 +362,9 @@ it("accepts display-p3 and still rejects junk backgrounds", () => {
   const p = make(48, 34, { edgeFade: 0, dpr: 1 });
   expect(() => p.set({ background: "color(display-p3 1 0 0)" })).not.toThrow();
   expect(() => p.set({ background: "banana" })).toThrow(RangeError);
+});
+
+it("resolves a relative .svg path against the document", () => {
+  expect(isSvgUrl("/img/logo.svg?v=1")).toBe(true);
+  expect(isSvgUrl("logo.png")).toBe(false);
 });

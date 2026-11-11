@@ -22,6 +22,16 @@ export function rasterSize(natural: Size, sample: Size): Size | null {
   return size.width * size.height > natural.width * natural.height ? size : null;
 }
 
+/** Whether `url` visibly points at an SVG: a `data:image/svg+xml` URL, or a path ending in `.svg`. */
+export function isSvgUrl(url: string, base = document.baseURI): boolean {
+  if (url.startsWith("data:image/svg+xml")) return true;
+  try {
+    return new URL(url, base).pathname.toLowerCase().endsWith(".svg");
+  } catch {
+    return false;
+  }
+}
+
 /** Draws `img` into `scratch` at `size`; null when the image is broken. */
 export function rasterize(
   img: HTMLImageElement,
