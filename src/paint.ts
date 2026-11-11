@@ -1,4 +1,4 @@
-import { createEngine } from "./engine";
+import { createEngine, type SourceTexture } from "./engine";
 import { sourceSize, type Size } from "./grid";
 import { resolveOptions, type LiveOptions, type Options } from "./options";
 
@@ -22,9 +22,15 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
     powerPreference: "low-power",
   });
   if (!gl) throw new Error("asciipaint needs WebGL2");
+  if (gl.isContextLost()) throw new Error("asciipaint: the WebGL2 context is lost");
   const engine = createEngine(gl, o);
   const texture = gl.createTexture();
   let uploaded: Size = { width: 0, height: 0 };
+  let last: SourceTexture | null = null;
+  // A still drawn before the web font loaded repaints once in the real font.
+  void engine.atlasReady.then(() => {
+    if (last) engine.run(last, null);
+  });
 
   const resize = () => {
     const dpr = o.dpr ?? Math.min(devicePixelRatio, 3);
@@ -39,6 +45,8 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
     canvas,
     draw(source) {
       if (source instanceof HTMLVideoElement && source.readyState < 2) return;
+      if (source instanceof HTMLImageElement && !(source.complete && source.naturalWidth > 0))
+        return;
       const size = sourceSize(source);
       if (!size.width || !size.height) return;
       gl.activeTexture(gl.TEXTURE0);
@@ -57,14 +65,15 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
         uploaded = size;
       }
       gl.generateMipmap(gl.TEXTURE_2D);
-      engine.run({ texture, size, flipY: true }, null);
+      last = { texture, size, flipY: true };
+      engine.run(last, null);
     },
     set: (live) => engine.set(live),
     resize,
     dispose() {
+      last = null;
       engine.dispose();
       gl.deleteTexture(texture);
-      gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };
 }

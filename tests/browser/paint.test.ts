@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from "vite-plus/test";
+import { afterEach, expect, it, vi } from "vite-plus/test";
 import { asciipaint, type Options, type Paint } from "../../src/index";
 import { gridFor } from "../../src/grid";
 import { DEFAULTS } from "../../src/options";
@@ -14,6 +14,7 @@ const paints: Paint[] = [];
 const dprOwn = Object.getOwnPropertyDescriptor(window, "devicePixelRatio");
 
 afterEach(() => {
+  vi.restoreAllMocks();
   for (const p of paints.splice(0)) {
     p.dispose();
     p.canvas.remove();
@@ -168,4 +169,61 @@ it("rejects bad live options without changing state", () => {
   const p = make(48, 34, {});
   expect(() => p.set({ edgeFade: 2 })).toThrow(RangeError);
   expect(() => p.set({ background: "banana" })).toThrow(RangeError);
+});
+
+it("paints the same canvas again after dispose", () => {
+  const first = make(48, 34, { edgeFade: 0, dpr: 2 });
+  first.dispose();
+  const p = asciipaint(first.canvas, { edgeFade: 0, dpr: 2 });
+  paints.push(p);
+  p.draw(solid("#fff", 8, 8));
+  expect(gl(p).getError()).toBe(gl(p).NO_ERROR);
+  expect(readAll(p).some((c) => c[0] === 255)).toBe(true);
+});
+
+it("repaints a still once the font loads", async () => {
+  let loaded = () => {};
+  vi.spyOn(document.fonts, "load").mockReturnValue(
+    new Promise<FontFace[]>((r) => (loaded = () => r([]))),
+  );
+  const p = make(48, 34, { edgeFade: 0, dpr: 1 });
+  const passes = vi.spyOn(gl(p), "drawArrays");
+  p.draw(solid("#fff", 8, 8));
+  expect(passes).toHaveBeenCalledTimes(2);
+  loaded();
+  await new Promise((r) => setTimeout(r, 0));
+  expect(passes).toHaveBeenCalledTimes(4);
+});
+
+it("skips an image that has a layout size but no pixels yet", () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 1 });
+  p.draw(solid("#fff", 50, 50));
+  const before = readAll(p);
+  p.draw(new Image(50, 50)); // no src: width 50, naturalWidth 0
+  expect(gl(p).getError()).toBe(gl(p).NO_ERROR);
+  expect(readAll(p)).toEqual(before);
+});
+
+it("keeps the source upright", () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 1 });
+  p.draw(
+    canvas2d(64, 64, (g) => {
+      g.fillStyle = "#fff";
+      g.fillRect(0, 0, 64, 64);
+      g.fillStyle = "#000";
+      g.fillRect(0, 0, 64, 32); // black on top, white below
+    }),
+  );
+  const { rows } = gridFor({ width: 48, height: 34 }, DEFAULTS.cell, 0);
+  const all = cells(p);
+  const top = all.filter((e) => e.row === 0).map((e) => e.c[0]);
+  const bottom = all.filter((e) => e.row === rows - 1).map((e) => e.c[0]);
+  expect(Math.max(...top)).toBeLessThan(10);
+  expect(Math.min(...bottom)).toBeGreaterThan(130);
+});
+
+it("names a lost context instead of failing deep inside", () => {
+  const c = document.createElement("canvas");
+  c.getContext("webgl2")!.getExtension("WEBGL_lose_context")!.loseContext();
+  expect(() => asciipaint(c)).toThrow("asciipaint: the WebGL2 context is lost");
 });

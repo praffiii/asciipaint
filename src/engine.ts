@@ -15,6 +15,8 @@ export interface Engine {
   set(live: LiveOptions): void;
   run(src: SourceTexture, aces: { exposure: number } | null): void;
   compile(): Promise<void>;
+  /** Settles once the font has loaded (or failed) and the atlas is redrawn for the next run(). */
+  atlasReady: Promise<void>;
   dispose(): void;
 }
 
@@ -46,7 +48,7 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
   };
   let paper = toRgb(o.background, normalize);
   // CPU only: the new atlas is uploaded on the next run(), never from a callback.
-  void document.fonts.load(fontAt(o.font, 8)).then(redraw, redraw);
+  const atlasReady = document.fonts.load(fontAt(o.font, 8)).then(redraw, redraw);
 
   const parallel = gl.getExtension("KHR_parallel_shader_compile");
   const shader = (type: GLenum, src: string) => {
@@ -95,6 +97,7 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
   const du = uniforms(drawProg);
 
   return {
+    atlasReady,
     resize(next, nextDpr) {
       const g = gridFor(next, o.cell, edgeFade);
       cellsDirty ||= g.cols !== grid.cols || g.rows !== grid.rows;
