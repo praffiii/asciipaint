@@ -1,20 +1,22 @@
 import { fontAt } from "./atlas";
-import { parseColor } from "./color";
 import { DEFAULTS, validate, type Color } from "./options";
 import { asciipaint, type Paint } from "./paint";
 
 /** `<ascii-img>`'s constructor; `undefined` on the server, where there is no `HTMLElement`. */
 export let AsciiImg: typeof HTMLElement | undefined;
 
-if (typeof customElements !== "undefined") {
-  AsciiImg = define();
-  if (!customElements.get("ascii-img")) customElements.define("ascii-img", AsciiImg);
-}
-
 // One hidden painter (one WebGL context) paints every element in turn; each copies the result out.
 let shared: { paint: Paint; key: string } | null = null;
 let queue = Promise.resolve();
 let fonts: Promise<void> | undefined;
+let probe: CanvasRenderingContext2D | undefined;
+
+// The atlas is drawn when the painter is made, so the first paint waits for its font.
+const fontsReady = () =>
+  (fonts ??= document.fonts.load(fontAt(DEFAULTS.font, 8)).then(
+    () => {},
+    () => {},
+  ));
 
 function painter(cell: readonly [number, number], ramp: string): Paint {
   const key = `${cell.join(" ")}|${ramp}`;
@@ -30,13 +32,26 @@ function painter(cell: readonly [number, number], ramp: string): Paint {
   return shared.paint;
 }
 
+/** The element's parent, stepping out of a shadow root to its host. */
+const up = (e: Element): Element | null =>
+  e.parentElement ?? (e.parentNode instanceof ShadowRoot ? e.parentNode.host : null);
+
 /** The first `background-color` up the tree that isn't fully transparent, else white. */
 function pageBackground(el: Element): Color {
-  for (let e: Element | null = el; e; e = e.parentElement) {
-    const c = getComputedStyle(e).backgroundColor;
-    if (c !== "transparent" && !/^rgba\(.*,\s*0\)$/.test(c)) return parseColor(c) ?? "#fff";
+  probe ??= Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext(
+    "2d",
+    { willReadFrequently: true },
+  )!;
+  for (let e: Element | null = el; e; e = up(e)) {
+    // Chrome keeps oklch / color-mix / display-p3 as written (computed style and fillStyle alike),
+    // so paint one pixel and read back its sRGB bytes and alpha.
+    probe.clearRect(0, 0, 1, 1);
+    probe.fillStyle = getComputedStyle(e).backgroundColor;
+    probe.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data;
+    if (a) return [r! / 255, g! / 255, b! / 255];
   }
-  return "#fff";
+  return [1, 1, 1];
 }
 
 function size(v: string): number {
@@ -151,15 +166,11 @@ function define(): typeof HTMLElement {
     #request() {
       if (this.#queued) return;
       this.#queued = true;
-      // The atlas is drawn when the painter is made, so wait for its font first.
-      fonts ??= document.fonts.load(fontAt(DEFAULTS.font, 8)).then(
-        () => {},
-        () => {},
-      );
+      // The flag clears first, so nothing the turn throws can leave the element stuck.
       queue = queue
-        .then(() => fonts)
-        .then(() => {
+        .then(async () => {
           this.#queued = false;
+          await fontsReady();
           this.#paint();
         })
         .catch(reportError);
@@ -207,4 +218,10 @@ function define(): typeof HTMLElement {
       }
     }
   };
+}
+
+// Last, so the module state above exists when `define` upgrades elements already in the page.
+if (typeof customElements !== "undefined") {
+  AsciiImg = define();
+  if (!customElements.get("ascii-img")) customElements.define("ascii-img", AsciiImg);
 }

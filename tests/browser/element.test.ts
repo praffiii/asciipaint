@@ -79,6 +79,26 @@ it("takes the page's background by default", async () => {
   expect(pixel(el, 1, 1)).toEqual([0x12, 0x34, 0x56]);
 });
 
+it("reads a modern CSS background and skips a transparent one", async () => {
+  const el = mount(
+    `<div style="background:oklch(0.3 0.1 250)"><div style="background:oklch(0.5 0.1 250 / 0)">` +
+      `<ascii-img src="${transparentPng}" width="48" height="34"></ascii-img></div></div>`,
+  ).querySelector("ascii-img")!;
+  await painted(el);
+  // oklch(0.3 0.1 250) is sRGB ≈ (0, 46, 93) via OKLab (red just out of gamut, clipped).
+  const [r, g, b] = pixel(el, 1, 1);
+  expect([r! <= 2, Math.abs(g! - 46) <= 2, Math.abs(b! - 93) <= 2]).toEqual([true, true, true]);
+});
+
+it("looks past a shadow root for the page background", async () => {
+  const host = mount(`<div style="background:#123456"><div></div></div>`).firstElementChild!;
+  const root = host.attachShadow({ mode: "open" });
+  root.innerHTML = `<ascii-img src="${transparentPng}" width="48" height="34"></ascii-img>`;
+  const el = root.firstElementChild!;
+  await painted(el);
+  expect(pixel(el, 1, 1)).toEqual([0x12, 0x34, 0x56]);
+});
+
 it("paints 24 elements on one shared WebGL context", async () => {
   const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext");
   const els = Array.from({ length: 24 }, () =>
