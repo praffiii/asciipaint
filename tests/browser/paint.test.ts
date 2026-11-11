@@ -248,6 +248,8 @@ it("dissolves half-transparent cells about half the time", () => {
   const paper = all.filter((c) => c[0] === 255 && c[1] === 0).length / all.length;
   expect(paper).toBeGreaterThan(0.3);
   expect(paper).toBeLessThan(0.7);
+  // Surviving glyphs are white composited over red, so pink, not the grey of the bare samples.
+  expect(all.filter((c) => !(c[0] === 255 && c[1] === 0)).every((c) => c[0] > c[1])).toBe(true);
 });
 
 it("paints an SVG with only a viewBox", async () => {
@@ -257,6 +259,25 @@ it("paints an SVG with only a viewBox", async () => {
   const p = make(48, 34, { edgeFade: 0, dpr: 2, background: [1, 0, 0] });
   p.draw(img);
   expect(readAll(p).some((c) => c[0] === 255 && c[1] === 255)).toBe(true); // white strokes, not skipped
+});
+
+it("keeps the aspect of a viewBox-only SVG that WebGL refuses", async () => {
+  // Chrome reports this at 150 × 150 and refuses to upload it; the fallback raster must stay square.
+  const img = await svg(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect x="3" y="3" width="4" height="4" fill="#fff"/></svg>',
+  );
+  const p = make(160, 80, { edgeFade: 0, dpr: 2, background: [0, 0, 0] });
+  p.draw(img);
+  const { cols } = gridFor({ width: 160, height: 80 }, DEFAULTS.cell, 0);
+  const lit = cells(p).filter((e) => e.c[0] > 40);
+  const litCols = [...new Set(lit.map((e) => e.col))];
+  const litRows = new Set(lit.map((e) => e.row));
+  const [cw, ch] = DEFAULTS.cell;
+  const mid = litCols.reduce((a, b) => a + b, 0) / litCols.length;
+  expect(Math.abs(mid - (cols - 1) / 2)).toBeLessThan(2); // centred
+  const ratio = (litCols.length * cw) / (litRows.size * ch); // the lit square's width / height in CSS px
+  expect(ratio).toBeGreaterThan(0.8);
+  expect(ratio).toBeLessThan(1.25);
 });
 
 it("keeps a 24 px SVG crisp at 120 px", async () => {

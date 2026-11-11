@@ -1,6 +1,6 @@
 import { createEngine, type SourceTexture } from "./engine";
 import { gridFor, sourceSize, type Size } from "./grid";
-import { rasterize, rasterSize } from "./raster";
+import { coverSize, rasterize, rasterSize } from "./raster";
 import { resolveOptions, type LiveOptions, type Options } from "./options";
 
 export interface Paint {
@@ -71,7 +71,8 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
       let source: TexImageSource = input;
       if (source instanceof HTMLVideoElement && source.readyState < 2) return;
       if (source instanceof HTMLImageElement) {
-        if (!source.complete || !source.currentSrc) return; // still loading, or no source at all
+        // Still loading, no source at all, or no grid to paint it on.
+        if (!source.complete || !source.currentSrc || !sample.width || !sample.height) return;
         // Small or size-less (viewBox-only SVG) images are redrawn at the sample size, so they stay crisp.
         const r = rasterSize({ width: source.naturalWidth, height: source.naturalHeight }, sample);
         if (r) {
@@ -84,11 +85,12 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
       if (!size.width || !size.height) return;
       upload(source, size);
       if (source instanceof HTMLImageElement && gl.getError() === gl.INVALID_VALUE) {
-        // Chrome gives a viewBox-only SVG a default natural size, then WebGL refuses it: rasterise it.
+        // Chrome gives a viewBox-only SVG a default natural size, then WebGL refuses it: rasterise it
+        // at that size's aspect, scaled to cover the sample, and let the cover fit crop it.
         uploaded = { width: 0, height: 0 };
-        const raster = sample.width && sample.height ? rasterize(source, sample, scratch) : null;
+        const raster = rasterize(source, (size = coverSize(size, sample)), scratch);
         if (!raster) return;
-        upload(raster, (size = sample));
+        upload(raster, size);
       }
       gl.generateMipmap(gl.TEXTURE_2D);
       last = { texture, size, flipY: true, alpha: true };

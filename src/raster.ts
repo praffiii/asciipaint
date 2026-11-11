@@ -1,14 +1,25 @@
 import type { Size } from "./grid";
 
+const MAX_RASTER = 4096; // px a side, within every browser's canvas and texture limits
+
+/** `natural` scaled up or down to just cover `sample`, keeping its aspect, at most 4096 px a side. */
+export function coverSize(natural: Size, sample: Size): Size {
+  const k = Math.min(
+    Math.max(sample.width / natural.width, sample.height / natural.height),
+    MAX_RASTER / Math.max(natural.width, natural.height),
+  );
+  return { width: Math.round(natural.width * k), height: Math.round(natural.height * k) };
+}
+
 /**
- * The size to rasterise an image at so it covers the grid's `sample` size, keeping its aspect, or
- * null when its natural pixels already do. No natural size (an SVG with only a viewBox) → `sample`.
+ * The size to rasterise an image at so it covers the grid's `sample` size, or null when its natural
+ * pixels already do (or there is no grid). No natural size (an SVG with only a viewBox) → `sample`.
  */
 export function rasterSize(natural: Size, sample: Size): Size | null {
-  if (!natural.width || !natural.height) return sample;
-  const k = Math.max(sample.width / natural.width, sample.height / natural.height);
-  if (k <= 1) return null;
-  return { width: Math.round(natural.width * k), height: Math.round(natural.height * k) };
+  if (!sample.width || !sample.height) return null;
+  if (!natural.width || !natural.height) return coverSize(sample, sample); // no aspect to keep
+  const size = coverSize(natural, sample);
+  return size.width * size.height > natural.width * natural.height ? size : null;
 }
 
 /** Draws `img` into `scratch` at `size`; null when the image is broken. */

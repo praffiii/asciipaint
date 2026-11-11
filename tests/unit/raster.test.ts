@@ -16,3 +16,9 @@ it("upscales small images keeping their aspect, to cover the sample", () =>
 
 it("leaves images that already cover the sample alone", () =>
   expect(rasterSize({ width: 800, height: 600 }, { width: 100, height: 75 })).toBeNull());
+
+it("caps rasters at 4096 px a side, keeping the aspect", () => {
+  const s = rasterSize({ width: 1, height: 1000 }, { width: 100, height: 100 })!;
+  expect(Math.max(s.width, s.height)).toBeLessThanOrEqual(4096);
+  expect(Math.abs(s.width - s.height / 1000)).toBeLessThanOrEqual(1);
+});
