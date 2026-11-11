@@ -8,6 +8,8 @@ export interface SourceTexture {
   texture: WebGLTexture;
   size: Size;
   flipY: boolean;
+  /** Display sources keep their alpha (uploaded premultiplied); three.js scenes don't. */
+  alpha: boolean;
 }
 
 export interface Engine {
@@ -147,7 +149,7 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
           gl.TEXTURE_2D,
           0,
           gl.RGBA8,
-          2 * cols,
+          3 * cols,
           rows,
           0,
           gl.RGBA,
@@ -160,13 +162,13 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
         cellsDirty = false;
       }
 
-      // Pass 1: each cell's average and brightest sample, read from the cover-fitted source.
+      // Pass 1: each cell's average, brightest sample and coverage, read from the cover-fitted source.
       const fit = coverUv(
         src.size,
         { width: cols * o.cell[0], height: rows * o.cell[1] },
         src.flipY,
       );
-      gl.viewport(0, 0, 2 * cols, rows);
+      gl.viewport(0, 0, 3 * cols, rows);
       gl.useProgram(cellProg);
       gl.bindTexture(gl.TEXTURE_2D, src.texture);
       gl.uniform1i(cu("uSrc"), 0);
@@ -176,6 +178,8 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
       gl.uniform1f(cu("uLod"), lodFor(src.size, fit, grid));
       gl.uniform1f(cu("uAces"), aces ? 1 : 0);
       gl.uniform1f(cu("uExposure"), aces?.exposure ?? 1);
+      gl.uniform3f(cu("uBackground"), ...paper);
+      gl.uniform1f(cu("uAlpha"), src.alpha ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
       // Pass 2: every device pixel draws its cell's glyph.

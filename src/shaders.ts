@@ -5,8 +5,10 @@ void main() {
 }`;
 
 /**
- * Pass 1, one fragment per cell (a 2·cols × rows target): the left half stores each cell's
- * average colour and brightness, the right half its brightest sample.
+ * Pass 1, one fragment per cell (a 3·cols × rows target): the first block stores each cell's
+ * average colour and brightness, the second its brightest sample, the third its coverage (mean alpha).
+ * With uAlpha on, each premultiplied sample is composited over the background first; with it off
+ * (three.js) samples are taken as they are and coverage is 1.
  */
 export const CELL_FRAG = /* glsl */ `#version 300 es
 precision highp float;
@@ -18,6 +20,8 @@ uniform vec2 uOffset;
 uniform float uLod;
 uniform float uAces;
 uniform float uExposure;
+uniform vec3 uBackground;
+uniform float uAlpha;
 out vec4 outColor;
 
 // three.js's ACES filmic fit, so the print matches the prototype's grade.
@@ -32,19 +36,23 @@ float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
 void main() {
   vec2 fc = floor(gl_FragCoord.xy);
-  bool hot = fc.x >= uCells.x;
-  vec2 cell = vec2(hot ? fc.x - uCells.x : fc.x, fc.y); // rows counted from the bottom
+  float block = fc.x >= 2.0 * uCells.x ? 2.0 : fc.x >= uCells.x ? 1.0 : 0.0;
+  vec2 cell = vec2(fc.x - block * uCells.x, fc.y); // rows counted from the bottom
   vec3 sum = vec3(0.0);
   vec4 best = vec4(0.0);
+  float cover = 0.0;
   for (int k = 0; k < 4; k++) {
     vec2 uv = (cell * 2.0 + vec2(float(k - (k / 2) * 2), float(k / 2)) + 0.5) / (uCells * 2.0);
-    vec3 c = textureLod(uSrc, uOffset + uv * uScale, uLod).rgb;
+    vec4 s = textureLod(uSrc, uOffset + uv * uScale, uLod);
+    vec3 c = uAlpha > 0.5 ? s.rgb + (1.0 - s.a) * uBackground : s.rgb;
     if (uAces > 0.5) c = srgb(aces(c));
     sum += c;
+    cover += s.a;
     float l = luma(c);
     if (l > best.a) best = vec4(c, l);
   }
-  outColor = hot ? best : vec4(sum / 4.0, luma(sum / 4.0));
+  if (block == 2.0) outColor = vec4(uAlpha > 0.5 ? cover / 4.0 : 1.0);
+  else outColor = block == 1.0 ? best : vec4(sum / 4.0, luma(sum / 4.0));
 }`;
 
 /** Pass 2, every device pixel: one lookup per cell, then the glyph from the atlas. */
@@ -71,6 +79,7 @@ vec4 cellAt(vec2 cell, int side) {
 }
 vec4 tintAt(vec2 cell) { return cellAt(cell, 0); }
 vec4 hotAt(vec2 cell) { return cellAt(cell, int(uCells.x)); }
+float coverAt(vec2 cell) { return cellAt(cell, 2 * int(uCells.x)).r; }
 float hash(vec2 cell) { return fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453); }
 float glyph(float slot, vec2 f) { return texelFetch(tAtlas, ivec2(floor((slot + f.x) * uGlyphW), floor(f.y * uAtlasH)), 0).a; }
 
@@ -80,7 +89,7 @@ void main() {
   vec2 f = fract(px / uCell);
   vec2 centre = (cell + 0.5) * uCell;
   float fade = uFeather == 0.0 ? 1.0 : clamp(min(min(centre.x, uSize.x - centre.x), min(centre.y, uSize.y - centre.y)) / uFeather, 0.0, 1.0);
-  if (cell.x >= uCells.x || cell.y >= uCells.y || hash(cell) >= fade) { outColor = vec4(uPaper, 1.0); return; }
+  if (cell.x >= uCells.x || cell.y >= uCells.y || hash(cell) >= min(fade, coverAt(cell))) { outColor = vec4(uPaper, 1.0); return; }
 
   vec4 tint = tintAt(cell);
   vec4 hot = hotAt(cell);

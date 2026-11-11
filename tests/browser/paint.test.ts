@@ -227,3 +227,70 @@ it("names a lost context instead of failing deep inside", () => {
   c.getContext("webgl2")!.getExtension("WEBGL_lose_context")!.loseContext();
   expect(() => asciipaint(c)).toThrow("asciipaint: the WebGL2 context is lost");
 });
+
+async function svg(markup: string): Promise<HTMLImageElement> {
+  const img = new Image();
+  img.src = "data:image/svg+xml," + encodeURIComponent(markup);
+  await img.decode();
+  return img;
+}
+
+it("lets the background show through transparent pixels", () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 1, background: [1, 0, 0] });
+  p.draw(solid("rgba(0,0,0,0)", 8, 8));
+  expect(readAll(p).every((c) => c[0] === 255 && c[1] === 0)).toBe(true);
+});
+
+it("dissolves half-transparent cells about half the time", () => {
+  const p = make(240, 170, { edgeFade: 0, dpr: 1, background: [1, 0, 0] });
+  p.draw(solid("rgba(255,255,255,0.5)", 8, 8));
+  const all = readAll(p);
+  const paper = all.filter((c) => c[0] === 255 && c[1] === 0).length / all.length;
+  expect(paper).toBeGreaterThan(0.3);
+  expect(paper).toBeLessThan(0.7);
+});
+
+it("paints an SVG with only a viewBox", async () => {
+  const img = await svg(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#fff"/></svg>',
+  );
+  const p = make(48, 34, { edgeFade: 0, dpr: 2, background: [1, 0, 0] });
+  p.draw(img);
+  expect(readAll(p).some((c) => c[0] === 255 && c[1] === 255)).toBe(true); // white strokes, not skipped
+});
+
+it("keeps a 24 px SVG crisp at 120 px", async () => {
+  // 50 × 35 cells sample 100 × 70, so the icon is rasterised at 100 × 100 and its 1-unit stripe
+  // spans 50/24 ≈ 2.1 cells (2 lit columns). Uploaded as is, linear magnification smears it wider.
+  const img = await svg(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24"/><rect x="12" width="1" height="24" fill="#fff"/></svg>',
+  );
+  const p = make(120, 120, { edgeFade: 0, dpr: 2 });
+  p.draw(img);
+  const lit = new Set(
+    cells(p)
+      .filter((e) => e.c[0] > 40)
+      .map((e) => e.col),
+  );
+  expect(lit.size).toBeGreaterThan(0);
+  expect(lit.size).toBeLessThanOrEqual(2);
+});
+
+it("sizes an off-DOM canvas from an explicit size", () => {
+  const p = asciipaint(document.createElement("canvas"), { dpr: 2 });
+  paints.push(p);
+  p.resize({ width: 60, height: 30 });
+  expect([p.canvas.width, p.canvas.height]).toEqual([120, 60]);
+});
+
+it("skips a broken image and keeps the last frame", async () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 1 });
+  p.draw(solid("#fff", 8, 8));
+  const before = readAll(p);
+  const broken = new Image();
+  broken.src = "data:image/png;base64,AAAA";
+  await broken.decode().catch(() => {});
+  p.draw(broken);
+  expect(gl(p).getError()).toBe(gl(p).NO_ERROR);
+  expect(readAll(p)).toEqual(before);
+});
