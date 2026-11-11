@@ -1,3 +1,5 @@
+import { LEAD } from "./atlas";
+
 /** One full-screen triangle from gl_VertexID, so no buffers are needed. */
 export const QUAD_VERT = /* glsl */ `#version 300 es
 void main() {
@@ -81,7 +83,7 @@ vec4 tintAt(vec2 cell) { return cellAt(cell, 0); }
 vec4 hotAt(vec2 cell) { return cellAt(cell, int(uCells.x)); }
 float coverAt(vec2 cell) { return cellAt(cell, 2 * int(uCells.x)).r; }
 float hash(vec2 cell) { return fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453); }
-float glyph(float slot, vec2 f) { return texelFetch(tAtlas, ivec2(floor((slot + f.x) * uGlyphW), floor(f.y * uAtlasH)), 0).a; }
+float glyph(float slot, vec2 f) { return texelFetch(tAtlas, ivec2(floor((slot + ${LEAD}.0 + f.x) * uGlyphW), floor(f.y * uAtlasH)), 0).a; }
 
 void main() {
   vec2 px = vec2(gl_FragCoord.x, uSize.y * uDpr - gl_FragCoord.y) / uDpr; // CSS px from the top left

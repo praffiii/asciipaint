@@ -4,6 +4,9 @@ export interface AtlasLayout {
   height: number; // device px
 }
 
+/** Empty slots before the first glyph: the hero draws its glyphs 3 cells in, which fixes their sub-pixel phase. */
+export const LEAD = 3;
+
 const LEADING_TOKENS = /^((?:(?:normal|italic|oblique|bold|bolder|lighter|small-caps|\d{3})\s+)*)/;
 
 export function atlasLayout(
@@ -14,7 +17,7 @@ export function atlasLayout(
   const glyphs = [...ramp, "+", "*"];
   return {
     glyphs,
-    width: Math.ceil(glyphs.length * cell[0] * dpr),
+    width: Math.ceil((LEAD + glyphs.length) * cell[0] * dpr),
     height: Math.ceil(cell[1] * dpr),
   };
 }
@@ -39,6 +42,6 @@ export function drawAtlas(
   g.font = fontAt(font, cell[1] + 1);
   g.textBaseline = "top";
   g.fillStyle = "#fff";
-  layout.glyphs.forEach((ch, i) => g.fillText(ch, i * cell[0], -1));
+  layout.glyphs.forEach((ch, i) => g.fillText(ch, (LEAD + i) * cell[0], -1));
   return c;
 }

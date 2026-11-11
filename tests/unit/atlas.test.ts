@@ -1,10 +1,10 @@
 import { expect, it } from "vite-plus/test";
 import { atlasLayout, fontAt } from "../../src/atlas";
 
-it("lays the ramp then + and *", () => {
+it("lays the ramp then + and *, after 3 empty slots", () => {
   expect(atlasLayout(["-", "=", "+", "*", "#", "%", "@"], [2.4, 3.4], 2)).toEqual({
     glyphs: ["-", "=", "+", "*", "#", "%", "@", "+", "*"],
-    width: 44,
+    width: 58,
     height: 7,
   });
 });
