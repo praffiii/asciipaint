@@ -3,8 +3,14 @@ import { asciipaint, autoRender, type Loop } from "../../src/index";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const paintOn = (canvas: HTMLCanvasElement) => ({ canvas, resize() {} });
-const mql = (matches: boolean) =>
-  ({ matches, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList;
+const mql = (matches: boolean): MediaQueryList =>
+  Object.assign(new EventTarget(), {
+    matches,
+    media: "(prefers-reduced-motion: reduce)",
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+  });
 
 let canvas: HTMLCanvasElement;
 const loops: Loop[] = [];
@@ -36,6 +42,18 @@ it("runs at ~30 fps while visible and stops on stop()", async () => {
   const at = n;
   await wait(200);
   expect(n).toBe(at);
+});
+
+it("keeps one frame chain when events fire while running", async () => {
+  let n = 0;
+  const loop = start(paintOn(canvas), () => n++);
+  for (let i = 0; i < 20; i++) {
+    canvas.style.width = `${100 + i}px`;
+    loop.requestFrame();
+    document.dispatchEvent(new Event("visibilitychange"));
+    await wait(25);
+  }
+  expect(n).toBeLessThanOrEqual(20);
 });
 
 it("pauses off screen", async () => {

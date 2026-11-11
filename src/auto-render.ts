@@ -18,13 +18,17 @@ export function autoRender(
   let stopped = false;
   let scheduled = false;
   let raf = 0;
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  let last = -Infinity;
 
+  // One rAF chain, gated by elapsed time. It dies when nothing is visible or motion is reduced.
   const run = (now: number) => {
     scheduled = false;
     if (stopped || !onScreen || document.hidden) return;
-    frame(now);
-    if (!calm.matches) timer = setTimeout(schedule, FRAME_MS);
+    if (calm.matches || now - last >= FRAME_MS - 2) {
+      last = now;
+      frame(now);
+    }
+    if (!calm.matches) schedule();
   };
   function schedule() {
     if (scheduled || stopped) return;
@@ -51,7 +55,6 @@ export function autoRender(
   function stop() {
     stopped = true;
     cancelAnimationFrame(raf);
-    clearTimeout(timer);
     resizeObserver.disconnect();
     intersectionObserver.disconnect();
     document.removeEventListener("visibilitychange", onVisibility);
