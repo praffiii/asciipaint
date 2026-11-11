@@ -41,14 +41,7 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
     atlas = drawAtlas(layout, o.font, o.cell, dpr);
     atlasDirty = true;
   };
-  // The atlas's 2D context turns any CSS colour into one `parseColor` reads.
-  const normalize = (s: string) => {
-    if (!CSS.supports("color", s)) return s;
-    const g = atlas.getContext("2d")!;
-    g.fillStyle = s;
-    return String(g.fillStyle);
-  };
-  let paper = toRgb(o.background, normalize);
+  let paper = toRgb(o.background);
   // CPU only: the new atlas is uploaded on the next run(), never from a callback.
   const atlasReady = document.fonts.load(fontAt(o.font, 8)).then(redraw, redraw);
 
@@ -113,7 +106,7 @@ export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
 
     set(live) {
       validate(live);
-      paper = live.background === undefined ? paper : toRgb(live.background, normalize);
+      paper = live.background === undefined ? paper : toRgb(live.background);
       if (live.edgeFade !== undefined) grid = gridFor(css, o.cell, (edgeFade = live.edgeFade));
       if (live.sparkle !== undefined) sparkle = live.sparkle;
     },

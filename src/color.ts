@@ -20,11 +20,33 @@ export function parseColor(css: string): Rgb | null {
   return [r! / 255, g! / 255, b! / 255];
 }
 
-export function toRgb(c: Color, normalize: (css: string) => string): Rgb {
+let probe: CanvasRenderingContext2D | undefined;
+
+/**
+ * Any CSS colour as sRGB bytes and alpha, or null if the browser rejects it. One pixel is
+ * painted and read back, because Chrome keeps oklch / oklab / display-p3 as written.
+ * The canvas is made on first use, so importing this stays safe on the server.
+ */
+export function cssToRgba(css: string): [number, number, number, number] | null {
+  if (!CSS.supports("color", css)) return null;
+  probe ??= Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext(
+    "2d",
+    { willReadFrequently: true },
+  )!;
+  probe.clearRect(0, 0, 1, 1);
+  probe.fillStyle = css;
+  probe.fillRect(0, 0, 1, 1);
+  const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data;
+  return [r!, g!, b!, a!];
+}
+
+export function toRgb(c: Color): Rgb {
   if (typeof c === "string") {
-    const rgb = parseColor(c) ?? parseColor(normalize(c));
-    if (!rgb) throw new RangeError(`color: cannot parse "${c}"`);
-    return rgb;
+    const fast = parseColor(c);
+    if (fast) return fast;
+    const px = cssToRgba(c);
+    if (!px) throw new RangeError(`color: cannot parse "${c}"`);
+    return [px[0] / 255, px[1] / 255, px[2] / 255];
   }
   if (c.length !== 3 || !c.every((v) => v >= 0 && v <= 1)) {
     throw new RangeError("color: tuple must be 3 numbers in [0, 1]");

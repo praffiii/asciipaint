@@ -9,8 +9,8 @@ it("parses hex and rgb", () => {
   expect(parseColor("banana")).toBeNull();
 });
 
-it("normalizes names, rejects junk and out-of-range tuples", () => {
-  expect(toRgb("white", () => "#ffffff")).toEqual([1, 1, 1]);
-  expect(() => toRgb("banana", (s) => s)).toThrow(RangeError);
-  expect(() => toRgb([2, 0, 0], (s) => s)).toThrow(RangeError);
+it("passes tuples through and rejects out-of-range ones", () => {
+  expect(toRgb([0.5, 0, 1])).toEqual([0.5, 0, 1]);
+  expect(() => toRgb([2, 0, 0])).toThrow(RangeError);
+  expect(() => toRgb([0, 0] as unknown as [number, number, number])).toThrow(RangeError);
 });

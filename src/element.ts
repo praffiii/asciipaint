@@ -1,4 +1,5 @@
 import { fontAt } from "./atlas";
+import { cssToRgba } from "./color";
 import { DEFAULTS, validate, type Color } from "./options";
 import { asciipaint, type Paint } from "./paint";
 
@@ -9,7 +10,6 @@ export let AsciiImg: typeof HTMLElement | undefined;
 let shared: { paint: Paint; key: string } | null = null;
 let queue = Promise.resolve();
 let fonts: Promise<void> | undefined;
-let probe: CanvasRenderingContext2D | undefined;
 
 // The atlas is drawn when the painter is made, so the first paint waits for its font.
 const fontsReady = () =>
@@ -38,18 +38,10 @@ const up = (e: Element): Element | null =>
 
 /** The first `background-color` up the tree that isn't fully transparent, else white. */
 function pageBackground(el: Element): Color {
-  probe ??= Object.assign(document.createElement("canvas"), { width: 1, height: 1 }).getContext(
-    "2d",
-    { willReadFrequently: true },
-  )!;
   for (let e: Element | null = el; e; e = up(e)) {
-    // Chrome keeps oklch / color-mix / display-p3 as written (computed style and fillStyle alike),
-    // so paint one pixel and read back its sRGB bytes and alpha.
-    probe.clearRect(0, 0, 1, 1);
-    probe.fillStyle = getComputedStyle(e).backgroundColor;
-    probe.fillRect(0, 0, 1, 1);
-    const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data;
-    if (a) return [r! / 255, g! / 255, b! / 255];
+    // Chrome keeps oklch / color-mix / display-p3 as written, so read back sRGB bytes and alpha.
+    const px = cssToRgba(getComputedStyle(e).backgroundColor);
+    if (px?.[3]) return [px[0] / 255, px[1] / 255, px[2] / 255];
   }
   return [1, 1, 1];
 }

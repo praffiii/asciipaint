@@ -315,3 +315,29 @@ it("skips a broken image and keeps the last frame", async () => {
   expect(gl(p).getError()).toBe(gl(p).NO_ERROR);
   expect(readAll(p)).toEqual(before);
 });
+
+/** What a 1×1 canvas reads back for a CSS colour. */
+function readback(css: string): Px {
+  const g = canvas2d(1, 1, (c) => {
+    c.fillStyle = css;
+    c.fillRect(0, 0, 1, 1);
+  }).getContext("2d")!;
+  const [r, g2, b] = g.getImageData(0, 0, 1, 1).data;
+  return [r!, g2!, b!];
+}
+
+it("paints an oklch background as the sRGB colour the browser resolves it to", () => {
+  const css = "oklch(0.3 0.1 250)";
+  const p = make(48, 34, { background: css, edgeFade: 0, dpr: 1 });
+  p.draw(solid("rgba(0, 0, 0, 0)", 8, 8)); // fully transparent: nothing but paper
+  const want = readback(css);
+  for (const c of readAll(p)) {
+    c.forEach((v, i) => expect(Math.abs(v - want[i]!)).toBeLessThanOrEqual(2));
+  }
+});
+
+it("accepts display-p3 and still rejects junk backgrounds", () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 1 });
+  expect(() => p.set({ background: "color(display-p3 1 0 0)" })).not.toThrow();
+  expect(() => p.set({ background: "banana" })).toThrow(RangeError);
+});
