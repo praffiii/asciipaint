@@ -1,0 +1,81 @@
+---
+import Keycap from "../components/Keycap.astro";
+
+const links = [
+  { label: "Docs", href: "/docs/", tone: "dark" },
+  { label: "Playground", href: "/playground/", tone: "violet" },
+  { label: "GitHub ↗", href: "https://github.com/praffiii/asciipaint", tone: "dark" },
+] as const;
+// The landing's banner, outside <main>; it lies over the top of the hero, as in the frames.
+---
+
+<header class="top">
+  <div class="bar">
+    <Keycap href="/">asciipaint</Keycap>
+    <nav class="nav" aria-label="Main">
+      {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
+    </nav>
+    <details class="menu">
+      <summary class="keycap keycap-dark keycap-md">Menu <span aria-hidden="true">☰</span></summary>
+      <nav class="menu-panel" aria-label="Main">
+        {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
+      </nav>
+    </details>
+  </div>
+</header>
+
+<style>
+  /* The hero's unit (a px of the 1440 px frame, scaled), measured on this full-width box. */
+  .top {
+    container-type: inline-size;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 3;
+  }
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    padding: max(16px, calc(28 * 100cqw / 1440)) max(16px, calc(32 * 100cqw / 1440)) 0;
+  }
+  .nav {
+    display: flex;
+    gap: 8px;
+  }
+  .bar :global(.keycap) {
+    padding: 8px 14px;
+    font: 500 13px/16px var(--font-mono);
+  }
+  .menu {
+    display: none;
+    position: relative;
+  }
+  .menu summary {
+    list-style: none;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 14px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .nav {
+      display: none;
+    }
+    .menu {
+      display: block;
+    }
+    .bar {
+      padding: 16px 16px 0;
+    }
+  }
+</style>

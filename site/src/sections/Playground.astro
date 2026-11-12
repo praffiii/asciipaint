@@ -291,6 +291,15 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
   .pg[data-fallback] .stage-hud {
     display: none;
   }
+  /* A still picture, or one held frame under reduced motion, isn't live. */
+  .pg[data-painting="file"] .stage-hud-live {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage-hud-live {
+      display: none;
+    }
+  }
   .drop {
     --keycap-edge: var(--cobalt);
     position: absolute;

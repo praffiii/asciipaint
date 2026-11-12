@@ -1,27 +1,9 @@
 ---
 import Keycap from "../components/Keycap.astro";
 
-const links = [
-  { label: "Docs", href: "/docs/", tone: "dark" },
-  { label: "Playground", href: "/playground/", tone: "violet" },
-  { label: "GitHub ↗", href: "https://github.com/praffiii/asciipaint", tone: "dark" },
-] as const;
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <header class="bar">
-    <Keycap href="/">asciipaint</Keycap>
-    <nav class="nav" aria-label="Main">
-      {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
-    </nav>
-    <details class="menu">
-      <summary class="keycap keycap-dark keycap-md">Menu <span aria-hidden="true">☰</span></summary>
-      <nav class="menu-panel" aria-label="Main">
-        {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
-      </nav>
-    </details>
-  </header>
-
   <div class="pitch">
     <p class="facts">
       ~6 KB <span class="sep">·</span> <span class="wide">ZERO DEPENDENCIES</span><span class="narrow">ZERO DEPS</span> <span class="sep">·</span> WEBGL2
@@ -81,42 +63,10 @@ const links = [
     min-width: 0;
   }
 
-  .bar {
-    position: relative;
-    z-index: 3;
-    align-self: start;
-    display: flex;
-    justify-content: space-between;
-    padding: max(16px, calc(28 * var(--u))) max(16px, calc(32 * var(--u))) 0;
-  }
-  .nav {
-    display: flex;
-    gap: 8px;
-  }
   .hero :global(.keycap) {
     padding: 8px 14px;
     font: 500 13px/16px var(--font-mono);
   }
-  .menu {
-    display: none;
-    position: relative;
-  }
-  .menu summary {
-    list-style: none;
-  }
-  .menu summary::-webkit-details-marker {
-    display: none;
-  }
-  .menu-panel {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 14px);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 12px;
-  }
-
   .pitch {
     position: relative;
     z-index: 2;
@@ -226,6 +176,13 @@ const links = [
   .hero[data-fallback] .hud {
     display: none;
   }
+  /* Under reduced motion the hero holds one frame and the slabs don't tilt, so it claims neither. */
+  @media (prefers-reduced-motion: reduce) {
+    .live,
+    .hud {
+      display: none;
+    }
+  }
   .hero[data-fallback] .lens {
     clip-path: none !important;
   }
@@ -299,7 +256,6 @@ const links = [
       --edge: 10;
       display: block;
     }
-    .nav,
     .leads,
     .hud,
     .wide {
@@ -311,14 +267,9 @@ const links = [
     .line {
       white-space: normal;
     }
-    .bar {
-      padding: 16px 16px 0;
-    }
-    .menu {
-      display: block;
-    }
     .pitch {
-      margin-top: 43px;
+      /* The banner lies over the hero: its 16 px inset and 34 px keys, then the frame's 43 px. */
+      margin-top: 93px;
       padding: 0 16px;
     }
     h1 {
