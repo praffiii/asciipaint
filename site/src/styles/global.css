@@ -27,7 +27,7 @@ pre {
   font-family: var(--font-mono);
 }
 :focus-visible {
-  outline: 2px solid var(--blue-light);
+  outline: 2px solid var(--focus, var(--blue-light));
   outline-offset: 3px;
 }
 .skip {
@@ -48,5 +48,112 @@ pre {
   *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* Keycap: a hard offset edge that the press collapses. */
+.keycap {
+  display: inline-block;
+  padding: 12px 20px;
+  border: 1.5px solid var(--keycap-edge, var(--cobalt));
+  border-radius: 0;
+  box-shadow: var(--keycap) var(--keycap) 0 var(--keycap-edge, var(--cobalt));
+  font: 700 var(--body-md) / 1 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 80ms, box-shadow 80ms;
+}
+.keycap-sm {
+  padding: 7px 12px;
+  font: 500 12px/1 var(--font-mono);
+}
+.keycap-dark {
+  background: var(--navy);
+  color: var(--lavender);
+}
+.keycap-violet {
+  background: var(--violet);
+  color: var(--black);
+}
+.keycap-light {
+  background: var(--lavender);
+  color: var(--navy);
+}
+.keycap:active,
+.keycap[aria-pressed="true"] {
+  transform: translate(var(--keycap), var(--keycap));
+  box-shadow: none;
+}
+.keycap[data-state="copied"] {
+  background: var(--lilac);
+  color: var(--navy);
+}
+
+.slab {
+  box-shadow: var(--slab-depth, var(--slab)) var(--slab-depth, var(--slab)) 0 var(--slab-edge);
+}
+
+.chip {
+  display: inline-block;
+  padding: 6px 10px;
+  font: 500 12px/1 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.chip-violet {
+  background: var(--violet);
+  color: var(--black);
+}
+.chip-lavender {
+  background: var(--lavender);
+  color: var(--navy);
+}
+.chip-black {
+  background: var(--black);
+  color: var(--lavender);
+}
+
+/* Bands */
+.band {
+  position: relative;
+  padding: var(--space-6) var(--gutter);
+  background-color: var(--band);
+  background-image: var(--grain, none);
+  color: var(--band-ink, var(--lavender));
+}
+.band-black { --band: var(--black); }
+.band-navy { --band: var(--navy); }
+.band-violet { --band: var(--violet); --band-ink: var(--black); }
+.band-cobalt { --band: var(--cobalt); }
+.band-violet-deep { --band: var(--violet-deep); }
+.band-lavender {
+  --band: var(--lavender);
+  --band-ink: var(--navy);
+  --keycap-edge: var(--black);
+  --focus: var(--cobalt);
+  --slab-edge: var(--violet);
+}
+.band-edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 160px;
+  pointer-events: none;
+}
+.band-edge ascii-img {
+  display: block;
+}
+@media (max-width: 639px) {
+  .band-edge {
+    height: 72px;
+  }
+}
+.band[data-edged] {
+  padding-bottom: calc(160px + var(--space-5));
+}
+@media (max-width: 639px) {
+  .band[data-edged] {
+    padding-bottom: calc(72px + var(--space-5));
   }
 }

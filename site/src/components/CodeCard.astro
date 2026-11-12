@@ -1,0 +1,94 @@
+---
+import { Code } from "astro:components";
+import shikiNight from "../../shiki-night.json";
+import Keycap from "./Keycap.astro";
+
+interface Props {
+  file: string;
+  note?: string;
+  code: string;
+  lang?: string;
+  tone?: "dark" | "light";
+  /** Renders an empty `<pre><code id="code-<file>">` that client code fills. */
+  live?: boolean;
+}
+const { file, note, code, lang = "ts", tone = "dark", live = false } = Astro.props;
+const id = `code-${file.replace(/\W+/g, "-")}`;
+---
+
+<figure class={`card card-${tone}`}>
+  <figcaption class="card-head">
+    <span class="card-file">{file}</span>
+    {note && <span class="card-note">{note}</span>}
+    <Keycap tone={tone === "dark" ? "violet" : "light"} size="sm" data-copy={id}>[ copy ]</Keycap>
+  </figcaption>
+  {
+    live ? (
+      <pre class="card-live" tabindex="0"><code id={id} /></pre>
+    ) : (
+      <Code id={id} code={code} lang={lang as never} theme={shikiNight as never} />
+    )
+  }
+</figure>
+
+<script>
+  import { wireCopy } from "../lib/copy";
+  wireCopy(document);
+</script>
+
+<style>
+  .card {
+    margin: 0;
+    border: 1.5px solid var(--cobalt);
+    box-shadow: var(--slab) var(--slab) 0 var(--card-edge, var(--cobalt));
+    background: var(--navy);
+    color: var(--lavender);
+    min-width: 0;
+  }
+  .card-light {
+    background: var(--lavender);
+    color: var(--navy);
+    border-color: var(--black);
+    --card-edge: var(--black);
+  }
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--ink-2);
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.04em;
+  }
+  .card-light .card-head {
+    background: var(--lilac);
+  }
+  .card-note {
+    flex: 1;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card-light .card-note {
+    color: var(--muted-light);
+  }
+  .card-file {
+    flex: none;
+  }
+  .card-head :global(.keycap) {
+    margin-left: auto;
+  }
+  .card :global(pre) {
+    margin: 0;
+    padding: var(--space-3);
+    overflow-x: auto;
+    font: 400 14px/1.6 var(--font-mono);
+    background: transparent !important;
+    color: inherit;
+  }
+  .card :global(pre code) {
+    font: inherit;
+  }
+  .card-light :global(pre span) {
+    color: var(--violet-ink) !important;
+  }
+</style>

@@ -1,0 +1,22 @@
+---
+interface Props {
+  href?: string;
+  tone?: "dark" | "violet" | "light";
+  pressed?: boolean;
+  size?: "sm" | "md";
+}
+const { href, tone = "dark", pressed, size = "md", ...rest } = Astro.props;
+const cls = `keycap keycap-${tone} keycap-${size}`;
+---
+
+{
+  href ? (
+    <a class={cls} href={href} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button class={cls} type="button" aria-pressed={pressed} {...rest}>
+      <slot />
+    </button>
+  )
+}

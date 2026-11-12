@@ -1,0 +1,9 @@
+---
+interface Props {
+  edge?: "cobalt" | "violet" | "black";
+  depth?: 4 | 10;
+}
+const { edge = "cobalt", depth = 10 } = Astro.props;
+---
+
+<div class="slab" style={`--slab-depth:${depth}px;--slab-edge:var(--${edge})`}><slot /></div>

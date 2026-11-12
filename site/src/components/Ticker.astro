@@ -1,0 +1,44 @@
+---
+const items = ["IMAGES", "VIDEO", "CANVAS", "THREE.JS", "<ASCII-IMG>", "~6 KB", "ZERO DEPENDENCIES", "WEBGL2"];
+---
+
+<div class="ticker">
+  <div class="ticker-track">
+    <p class="ticker-run">{items.map((item) => <span>{item}</span>)}</p>
+    <p class="ticker-run" aria-hidden="true">{items.map((item) => <span>{item}</span>)}</p>
+  </div>
+</div>
+
+<style>
+  .ticker {
+    overflow: hidden;
+    background: var(--violet);
+    color: var(--black);
+    font: 600 15px/1 var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker 40s linear infinite;
+  }
+  .ticker-run {
+    display: flex;
+    margin: 0;
+    padding: 14px 0;
+  }
+  .ticker-run span::after {
+    content: "*";
+    margin: 0 var(--space-4);
+  }
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none;
+    }
+  }
+</style>

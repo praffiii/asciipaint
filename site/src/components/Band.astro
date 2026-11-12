@@ -1,0 +1,44 @@
+---
+type Tone = "black" | "violet" | "lavender" | "cobalt" | "violet-deep" | "navy";
+interface Props {
+  tone: Tone;
+  grain?: boolean;
+  edgeBelow?: Tone;
+}
+const hex: Record<Tone, string> = {
+  black: "#000000",
+  violet: "#7C5CF2",
+  lavender: "#ECE8FF",
+  cobalt: "#2440D0",
+  "violet-deep": "#4B2AA8",
+  navy: "#0A0D1F",
+};
+const { tone, grain, edgeBelow } = Astro.props;
+---
+
+<section
+  class={`band band-${tone}`}
+  data-edged={edgeBelow ? "" : undefined}
+  data-grain={grain ? `${hex[tone]} ${tone === "lavender" ? "#2440D0 0.18" : "#0A0D1F 0.25"}` : undefined}
+>
+  <slot />
+  {edgeBelow && <div class="band-edge" aria-hidden="true" data-edge={`${hex[tone]} ${hex[edgeBelow]}`} />}
+</section>
+
+<script>
+  import { dissolveCanvas } from "../lib/dissolve";
+  import { grainTile } from "../lib/grain";
+  import { paintStill } from "../lib/still";
+
+  const tiles = new Map<string, string>();
+  document.querySelectorAll<HTMLElement>("[data-grain]").forEach((band) => {
+    const spec = band.dataset.grain!;
+    const [bg = "", tint = "", amp = "0.25"] = spec.split(" ");
+    if (!tiles.has(spec)) tiles.set(spec, grainTile(bg, tint, { amp: Number(amp) }));
+    band.style.setProperty("--grain", `url(${tiles.get(spec)})`);
+  });
+  document.querySelectorAll<HTMLElement>("[data-edge]").forEach((edge) => {
+    const [above = "", below = ""] = edge.dataset.edge!.split(" ");
+    paintStill(edge, (w, h) => dissolveCanvas(w, h, below), { background: above });
+  });
+</script>
