@@ -1,5 +1,17 @@
 import "asciipaint/element";
 
+let webgl2: boolean | undefined;
+
+/** Whether `<ascii-img>` can paint at all. The probe's context is released straight away. */
+function canPaint(): boolean {
+  if (webgl2 === undefined) {
+    const gl = document.createElement("canvas").getContext("webgl2");
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    webgl2 = !!gl;
+  }
+  return webgl2;
+}
+
 interface StillAttrs {
   cell?: string;
   ramp?: string;
@@ -9,13 +21,14 @@ interface StillAttrs {
 
 /**
  * Paints `draw`'s canvas into `host` through one shared `<ascii-img>`: first when `host` is in view,
- * again (debounced) when it resizes. Returns a disposer.
+ * again (debounced) when it resizes. Without WebGL2 it paints nothing. Returns a disposer.
  */
 export function paintStill(
   host: HTMLElement,
   draw: (w: number, h: number) => HTMLCanvasElement,
   attrs: StillAttrs = {},
 ): () => void {
+  if (!canPaint()) return () => {};
   const img = document.createElement("ascii-img");
   img.setAttribute("alt", "");
   for (const [name, value] of Object.entries(attrs)) img.setAttribute(name, value);

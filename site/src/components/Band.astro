@@ -1,18 +1,11 @@
 ---
-type Tone = "black" | "violet" | "lavender" | "cobalt" | "violet-deep" | "navy";
+import { TONES as hex, type Tone } from "../lib/tones";
+
 interface Props {
   tone: Tone;
   grain?: boolean;
   edgeBelow?: Tone;
 }
-const hex: Record<Tone, string> = {
-  black: "#000000",
-  violet: "#7C5CF2",
-  lavender: "#ECE8FF",
-  cobalt: "#2440D0",
-  "violet-deep": "#4B2AA8",
-  navy: "#0A0D1F",
-};
 const { tone, grain, edgeBelow } = Astro.props;
 ---
 

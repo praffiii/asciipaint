@@ -42,6 +42,14 @@ const gpuArgs =
     ? ["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist"]
     : ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"];
 
+/** Keeps WebGL2 buffers readable after compositing, so a test can read the painted pixels. */
+export const preserve = `{
+  const get = HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.getContext = function (type, attrs) {
+    return get.call(this, type, type === "webgl2" ? { ...attrs, preserveDrawingBuffer: true } : attrs);
+  };
+}`;
+
 export interface Opened {
   page: Page;
   /** `pageerror` and console `error` messages. */

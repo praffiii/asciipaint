@@ -1,4 +1,5 @@
 let region: HTMLElement | undefined;
+const wired = new WeakSet<HTMLElement>();
 
 /** One empty live region, in the page before anything is announced into it. */
 function liveRegion(): HTMLElement {
@@ -18,10 +19,12 @@ function announce(text: string, ms?: number) {
   if (ms) setTimeout(() => live.textContent === text && (live.textContent = ""), ms);
 }
 
-/** Makes every `[data-copy="<id>"]` button in `root` copy that element's text. */
+/** Makes every `[data-copy="<id>"]` button in `root` copy that element's text; safe to call again. */
 export function wireCopy(root: ParentNode): void {
   liveRegion();
   root.querySelectorAll<HTMLElement>("[data-copy]").forEach((button) => {
+    if (wired.has(button)) return; // a second call over the same buttons must not copy twice
+    wired.add(button);
     button.addEventListener("click", async () => {
       const target = document.getElementById(button.dataset.copy ?? "");
       if (!target) return;

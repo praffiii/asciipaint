@@ -1,0 +1,369 @@
+---
+import Keycap from "../components/Keycap.astro";
+
+const links = [
+  { label: "Docs", href: "/docs/", tone: "dark" },
+  { label: "Playground", href: "/playground/", tone: "violet" },
+  { label: "GitHub ↗", href: "https://github.com/praffiii/asciipaint", tone: "dark" },
+] as const;
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <header class="bar">
+    <Keycap href="/">asciipaint</Keycap>
+    <nav class="nav" aria-label="Main">
+      {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
+    </nav>
+    <details class="menu">
+      <summary class="keycap keycap-dark keycap-md">Menu <span aria-hidden="true">☰</span></summary>
+      <nav class="menu-panel" aria-label="Main">
+        {links.map((l) => <Keycap href={l.href} tone={l.tone}>{l.label}</Keycap>)}
+      </nav>
+    </details>
+  </header>
+
+  <div class="pitch">
+    <p class="facts">
+      ~6 KB <span class="sep">·</span> <span class="wide">ZERO DEPENDENCIES</span><span class="narrow">ZERO DEPS</span> <span class="sep">·</span> WEBGL2
+    </p>
+    <h1 id="hero-title">Paint <span class="line">anything as</span> <span class="line"><em>coloured</em> ASCII.</span></h1>
+    <p class="sub">
+      Any image, video, canvas or three.js scene, painted in fine coloured glyphs. One WebGL2 pass, about 6 kB.
+    </p>
+    <div class="keys">
+      <Keycap data-copy="hero-npm">$ <span id="hero-npm">npm i asciipaint</span> <span aria-hidden="true">⧉</span></Keycap>
+      <Keycap href="#playground" tone="violet"><span class="wide">Try your picture</span><span class="narrow">Try it</span> ↓</Keycap>
+    </div>
+  </div>
+
+  <div class="stage" aria-hidden="true">
+    <div class="slabs" data-tilt>
+      <div class="slab slab-original"><canvas data-source></canvas></div>
+      <div class="slab slab-painted" data-lens-slab>
+        <canvas data-painted></canvas>
+        <canvas class="lens" data-lens></canvas>
+      </div>
+    </div>
+    <svg class="leads" viewBox="0 0 1440 900" preserveAspectRatio="none">
+      <path d="M790 125 900 186M740 846 880 712" />
+      <circle cx="900" cy="186" r="3.5" />
+      <circle cx="880" cy="712" r="3.5" />
+    </svg>
+    <p class="label label-01"><span class="n">01</span> THE ORIGINAL</p>
+    <p class="label label-02" data-readout><span class="n">02</span> PAINTED<span class="wide"> · <span data-cells>316 × 138</span> CELLS</span> · LIVE</p>
+    <p class="hud"><span class="dot"></span>LIVE · 30 FPS · DRAG TO TILT</p>
+  </div>
+</section>
+
+<script>
+  import { hero } from "../lib/hero";
+  const root = document.querySelector<HTMLElement>(".hero");
+  if (root) hero(root);
+</script>
+
+<style>
+  /* One unit: a px of the 1440 px desktop frame (or the 390 px phone frame), scaled to the viewport. */
+  .hero {
+    --u: calc(100cqw / 1440);
+    --sw: 760;
+    --sh: 470;
+    --edge: 16;
+    container-type: inline-size;
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 1.5px 1.5px, var(--line) 1.2px, transparent 1.6px) 0 0 / 24px 24px,
+      var(--black);
+  }
+  .hero > * {
+    grid-area: 1 / 1;
+    min-width: 0;
+  }
+
+  .bar {
+    position: relative;
+    z-index: 3;
+    align-self: start;
+    display: flex;
+    justify-content: space-between;
+    padding: max(16px, calc(28 * var(--u))) max(16px, calc(32 * var(--u))) 0;
+  }
+  .nav {
+    display: flex;
+    gap: 8px;
+  }
+  .hero :global(.keycap) {
+    padding: 8px 14px;
+    font: 500 13px/16px var(--font-mono);
+  }
+  .menu {
+    display: none;
+    position: relative;
+  }
+  .menu summary {
+    list-style: none;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 14px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .pitch {
+    position: relative;
+    z-index: 2;
+    align-self: start;
+    max-width: calc(580px + max(16px, calc(64 * var(--u))));
+    margin-top: max(110px, calc(266 * var(--u)));
+    padding: 0 0 var(--space-5) max(16px, calc(64 * var(--u)));
+  }
+  .facts {
+    margin: 0;
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--violet);
+  }
+  .sep {
+    margin: 0 6px;
+  }
+  h1 {
+    margin-top: 22px;
+    font-size: var(--display-xl);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+    color: var(--lavender);
+  }
+  h1 em {
+    color: var(--violet);
+  }
+  /* The frame's three lines: Paint / anything as / coloured ASCII. */
+  .line {
+    white-space: nowrap;
+  }
+  .sub {
+    max-width: 400px;
+    margin: 22px 0 0;
+    font: 400 16px/25px var(--font-body);
+    color: var(--muted);
+  }
+  .keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  .narrow {
+    display: none;
+  }
+
+  .stage {
+    position: relative;
+    height: calc(900 * var(--u));
+    background: radial-gradient(
+      calc(490 * var(--u)) calc(260 * var(--u)) at calc(1010 * var(--u)) calc(530 * var(--u)),
+      rgb(36 64 208 / 0.4),
+      transparent
+    );
+  }
+  .slabs {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+  }
+  .slab {
+    position: absolute;
+    left: calc(var(--x) * var(--u));
+    top: calc(var(--y) * var(--u));
+    width: calc(var(--sw) * var(--u));
+    height: calc(var(--sh) * var(--u));
+    transform-origin: 0 0;
+    transform: matrix(0.98, 0.18, -0.46, 0.89, 0, 0);
+    background: var(--navy);
+    outline: 1px solid rgb(236 232 255 / 0.7);
+    /* The edge is 16 px straight down on screen: the pose's inverse of (0, 16) in the slab's own space. */
+    box-shadow:
+      calc(var(--edge) * 0.4817 * var(--u)) calc(var(--edge) * 1.0262 * var(--u)) 0 var(--cobalt),
+      0 0 120px rgb(36 64 208 / 0.35);
+  }
+  .slab-original {
+    --x: 640;
+    --y: 130;
+  }
+  .slab-painted {
+    --x: 730;
+    --y: 260;
+    touch-action: pan-y;
+  }
+  .slab canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  [data-painted] {
+    opacity: 0;
+    transition: opacity 400ms;
+  }
+  .hero[data-live] [data-painted] {
+    opacity: 1;
+  }
+  .lens {
+    clip-path: circle(0 at 50% 50%);
+  }
+  .hero[data-fallback] [data-painted] {
+    display: none;
+  }
+  .hero[data-fallback] .lens {
+    clip-path: none !important;
+  }
+  .hero[data-fallback="gradient"] .slab canvas {
+    background: linear-gradient(125deg, #0e1a5c, #2440d0 40%, #7c5cf2 70%, #3b1e9a);
+  }
+
+  .leads {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .leads path {
+    fill: none;
+    stroke: var(--lavender);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .leads circle {
+    fill: var(--lavender);
+  }
+  .label,
+  .hud {
+    position: absolute;
+    margin: 0;
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--lavender);
+  }
+  .label {
+    padding: 7px 10px;
+    background: var(--black);
+    border: 1px solid var(--lavender);
+    box-shadow: 3px 3px 0 var(--cobalt);
+  }
+  .label .n {
+    color: var(--violet);
+  }
+  .label-01 {
+    left: calc(760 * var(--u));
+    top: calc(96 * var(--u));
+  }
+  .label-02 {
+    left: calc(700 * var(--u));
+    top: calc(846 * var(--u));
+  }
+  .hud {
+    right: max(16px, calc(32 * var(--u)));
+    top: calc(856 * var(--u));
+    padding: 6px 10px 6px 25px;
+    background: var(--navy);
+  }
+  .dot {
+    position: absolute;
+    left: 10px;
+    top: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--violet);
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      --u: calc(100cqw / 390);
+      --sw: 301;
+      --sh: 186;
+      --edge: 10;
+      display: block;
+    }
+    .nav,
+    .leads,
+    .hud,
+    .wide {
+      display: none;
+    }
+    .narrow {
+      display: inline;
+    }
+    .line {
+      white-space: normal;
+    }
+    .bar {
+      padding: 16px 16px 0;
+    }
+    .menu {
+      display: block;
+    }
+    .pitch {
+      margin-top: 43px;
+      padding: 0 16px;
+    }
+    h1 {
+      margin-top: 16px;
+      font-size: 44px;
+      line-height: 1.03;
+      letter-spacing: -0.015em;
+    }
+    .sub {
+      max-width: 340px;
+      margin-top: 16px;
+    }
+    .keys {
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .stage {
+      height: calc(356 * var(--u));
+      margin-top: calc(47 * var(--u));
+      background: radial-gradient(
+        calc(210 * var(--u)) calc(150 * var(--u)) at calc(200 * var(--u)) calc(176 * var(--u)),
+        rgb(36 64 208 / 0.4),
+        transparent
+      );
+    }
+    .slab {
+      box-shadow:
+        calc(var(--edge) * 0.4817 * var(--u)) calc(var(--edge) * 1.0262 * var(--u)) 0 var(--cobalt),
+        0 0 60px rgb(36 64 208 / 0.35);
+    }
+    .slab-original {
+      --x: 84;
+      --y: 24;
+    }
+    .slab-painted {
+      --x: 104;
+      --y: 86;
+    }
+    .label {
+      padding: 5px 8px;
+    }
+    .label-01 {
+      left: calc(220 * var(--u));
+      top: 0;
+    }
+    .label-02 {
+      left: 16px;
+      top: calc(318 * var(--u));
+    }
+  }
+</style>

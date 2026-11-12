@@ -20,7 +20,7 @@ test("every keycap has a hard edge and a visible focus outline", async () => {
   const site = await open("/");
   const { page } = site;
   try {
-    const keycaps = page.locator(".keycap");
+    const keycaps = page.locator(".keycap:visible"); // the phone menu is hidden on desktop
     const count = await keycaps.count();
     expect(count).toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {
