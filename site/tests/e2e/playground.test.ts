@@ -232,3 +232,20 @@ test("Tab runs sources, slider, ramp keys, EDIT, swatches, sparkle, then copy", 
     await site.close();
   }
 });
+
+test("when the playground's code can't load, its message line says so and nothing throws", async () => {
+  const site = await open("/");
+  const { page, errors } = site;
+  try {
+    await page.route("**/playground.*.js", (route) => route.abort());
+    await page.locator("#playground").scrollIntoViewIfNeeded();
+    await page
+      .locator("[data-message]")
+      .filter({ hasText: "The playground couldn't load. Check your connection, then reload." })
+      .waitFor();
+    // The browser's own log of the aborted request is expected; nothing else may be.
+    expect(errors.filter((e) => e !== "Failed to load resource: net::ERR_FAILED")).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});

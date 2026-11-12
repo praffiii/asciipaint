@@ -1,6 +1,7 @@
 import type { Object3D } from "three";
 import { edgeColour } from "../edge-colour";
 import { liquid } from "../liquid";
+import { canPaint } from "../still";
 
 /** An error whose message is written for the reader of the page. */
 export class Problem extends Error {}
@@ -8,7 +9,12 @@ export class Problem extends Error {}
 // three.js is ~500 kB, so the 3D path loads only when a 3D source is picked or a model is dropped.
 export type SceneModule = typeof import("../scene");
 let sceneModule: Promise<SceneModule> | undefined;
-export const loadScene = (): Promise<SceneModule> => (sceneModule ??= import("../scene"));
+// A failed load isn't cached, so picking 3D again retries it.
+export const loadScene = (): Promise<SceneModule> =>
+  (sceneModule ??= import("../scene").catch((error: unknown) => {
+    sceneModule = undefined;
+    throw error;
+  }));
 
 export interface FlatSource {
   kind: "liquid" | "camera" | "file";
@@ -37,6 +43,8 @@ export function liquidSource(): FlatSource {
 }
 
 export async function threeSource(): Promise<ThreeSource> {
+  // Without WebGL2 the scene can't paint, so three.js isn't downloaded only to fail.
+  if (!canPaint()) throw new Problem("asciipaint needs WebGL2");
   return { kind: "three", model: null, three: await loadScene() };
 }
 

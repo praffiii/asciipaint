@@ -167,7 +167,16 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
   // page, or when the landing's band scrolls within 800 px.
   const root = document.querySelector<HTMLElement>("[data-playground]");
   if (root) {
-    const load = () => void import("../lib/playground/playground").then(({ playground }) => playground(root));
+    // Offline, or a stale chunk after a redeploy: say so on the message line rather than die silently.
+    const load = () =>
+      void import("../lib/playground/playground")
+        .then(({ playground }) => playground(root))
+        .catch((error: unknown) => {
+          console.warn("The playground couldn't load.", error);
+          const message = root.querySelector("[data-message]");
+          if (message) message.textContent = "The playground couldn't load. Check your connection, then reload.";
+          root.dataset.fallback = "";
+        });
     if (root.dataset.playground === "full") load();
     else {
       const near = new IntersectionObserver(
