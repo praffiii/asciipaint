@@ -1,0 +1,102 @@
+---
+import { href, NAV } from "../data/nav";
+
+interface Props {
+  current: string;
+}
+const { current } = Astro.props;
+/** Titles that are code (a tag or a call) read in code colour. */
+const code = (title: string) => /[<(]/.test(title);
+---
+
+<nav class="docs-nav" aria-label="Docs">
+  {
+    NAV.map(({ group, items }) => (
+      <div class="group">
+        {group && <p class="label">{group}</p>}
+        <ul>
+          {items.map((item) =>
+            item.external ? (
+              <li>
+                <a class="out" href={href(item)}>
+                  {item.title} <span aria-hidden="true">↗</span>
+                </a>
+              </li>
+            ) : (
+              <li>
+                <a
+                  class:list={["item", { code: code(item.title), "keycap keycap-violet": item.slug === current }]}
+                  href={href(item)}
+                  aria-current={item.slug === current ? "page" : undefined}
+                >
+                  {item.title}
+                </a>
+              </li>
+            ),
+          )}
+        </ul>
+      </div>
+    ))
+  }
+  <slot />
+</nav>
+
+<style>
+  .docs-nav {
+    font-family: var(--font-mono);
+  }
+  .group + .group {
+    margin-top: var(--space-4);
+  }
+  .label {
+    margin: 0 0 6px;
+    font: 500 11px/1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .item {
+    display: inline-block;
+    margin: 2px 0;
+    padding: 7px 12px;
+    font: 400 var(--nav-size, 14px) / 1.3 var(--font-mono);
+    color: var(--lavender);
+    text-decoration: none;
+  }
+  .item:hover {
+    color: var(--lilac);
+  }
+  .code {
+    color: var(--blue-light);
+  }
+  .item.keycap {
+    border-color: var(--lavender);
+    color: var(--black);
+    box-shadow: none;
+    font-weight: 500;
+  }
+  .out {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    box-shadow: var(--keycap) var(--keycap) 0 var(--line);
+    font: 400 var(--nav-size, 14px) / 1.3 var(--font-mono);
+    color: var(--lavender);
+    text-decoration: none;
+  }
+  .out span {
+    color: var(--lilac);
+    font-size: 12px;
+  }
+  .out:hover {
+    border-color: var(--violet);
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+title: Install
+description: Add asciipaint from your package manager, or import it straight from a CDN. It has no dependencies.
+---
+
+## Package manager
+
+```sh
+npm i asciipaint
+```
+
+pnpm, yarn and bun work the same way: `pnpm add asciipaint`, `yarn add asciipaint` or `bun add asciipaint`.
+
+## From a CDN
+
+No bundler? Import it as a module:
+
+```html
+<script type="module">
+  import { asciipaint } from "https://esm.sh/asciipaint";
+</script>
+```
+
+## three.js
+
+`three` is an optional peer dependency (`>=0.170`), needed only for `asciipaint/three`.
+
+## The font
+
+The default font, Geist Mono, is not bundled. Load it yourself, for example from Google Fonts, or the glyphs fall back to `ui-monospace`.

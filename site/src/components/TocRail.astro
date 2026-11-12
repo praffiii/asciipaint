@@ -1,0 +1,164 @@
+---
+import Keycap from "./Keycap.astro";
+
+interface Props {
+  /** The page source's "edit on GitHub" URL. */
+  edit: string;
+}
+const { edit } = Astro.props;
+---
+
+<div class="rail">
+  <nav class="toc" aria-label="On this page" data-toc hidden>
+    <p class="head"><span>On this page</span><span class="count" data-toc-count></span></p>
+    <div class="track">
+      <svg aria-hidden="true" width="30">
+        <path class="glow" data-glow></path>
+        <path class="ahead" data-track></path>
+        <path class="done" data-wave></path>
+      </svg>
+      <ol></ol>
+    </div>
+  </nav>
+  <div class="keys">
+    <Keycap href="#top" size="sm"><span aria-hidden="true">↑&nbsp;&nbsp;</span>Back to top</Keycap>
+    <Keycap href={edit} size="sm">Edit on GitHub <span aria-hidden="true">↗</span></Keycap>
+  </div>
+</div>
+
+<script>
+  import { toc } from "../lib/toc";
+  const root = document.querySelector<HTMLElement>("[data-docs]");
+  if (root) toc(root);
+</script>
+
+<style>
+  .rail {
+    position: sticky;
+    top: var(--space-5);
+    align-self: start;
+  }
+  .toc[hidden] {
+    display: none;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 14px;
+    font: 500 11px/1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-light);
+  }
+  .count {
+    color: var(--violet-deep);
+  }
+  .track {
+    position: relative;
+  }
+  svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: visible;
+  }
+  path {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .glow {
+    stroke: var(--violet);
+    stroke-width: 8;
+    opacity: 0.16;
+  }
+  .done {
+    stroke: var(--violet);
+    stroke-width: 2;
+  }
+  .ahead {
+    stroke: var(--muted-light);
+    stroke-width: 1.5;
+    opacity: 0.55;
+  }
+  svg :global(circle) {
+    fill: var(--violet);
+  }
+  svg :global(circle.next) {
+    fill: var(--lavender);
+    stroke: var(--muted-light);
+    stroke-width: 1.5;
+  }
+  svg :global(.halo) {
+    opacity: 0.22;
+  }
+  ol {
+    margin: 0;
+    padding: 0 0 0 38px;
+    list-style: none;
+  }
+  ol :global(li) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    height: 36px;
+  }
+  ol :global(.toc-link) {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+    color: var(--muted-light);
+    text-decoration: none;
+    font: 400 14px/1.2 var(--font-mono);
+  }
+  ol :global(.toc-n) {
+    font-size: 11px;
+  }
+  ol :global(.toc-t) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  ol :global(.toc-link:hover) {
+    color: var(--navy);
+  }
+  /* Read and being read: every link up to the current one. */
+  ol :global(li:has(~ li [aria-current]) .toc-link),
+  ol :global([aria-current]) {
+    color: var(--navy);
+  }
+  ol :global(li:has(~ li [aria-current]) .toc-n),
+  ol :global([aria-current] .toc-n) {
+    color: var(--violet-deep);
+  }
+  ol :global([aria-current]) {
+    font-weight: 600;
+  }
+  ol :global(.toc-tag) {
+    display: none;
+    padding: 3px 6px;
+    background: var(--black);
+    color: var(--lavender);
+    font: 500 9px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+  }
+  ol :global([aria-current] + .toc-tag) {
+    display: block;
+  }
+  .keys {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: var(--space-3);
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--muted-light) 35%, transparent);
+  }
+  .keys :global(.keycap) {
+    padding: 8px 12px;
+    font: 500 11px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+</style>

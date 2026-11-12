@@ -4,7 +4,7 @@ dist/
 .superpowers/
 parity/
 .vitest/
-docs/
+/docs/
 .playwright-mcp/
 site/dist/
 site/.astro/
