@@ -22,7 +22,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
 <Band tone="lavender" grain edgeBelow="cobalt" id="install">
   <div class="wrap">
     <div class="copy">
-      <Chip label="01 — INSTALL" />
+      <Chip label="01 — INSTALL" tone="black" />
       <h2>Install in one line, <em>paint in three.</em></h2>
       <p class="sub">One WebGL2 pass on the GPU. About 6 kB.</p>
       <div class="tabs" role="tablist" aria-label="Package manager">
@@ -51,7 +51,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     </div>
 
     <div class="how">
-      <p class="how-title"><Chip label="HOW IT PAINTS — ONE PASS ON THE GPU" tone="black" /></p>
+      <p class="how-title chip chip-black">HOW IT PAINTS — ONE PASS ON THE GPU</p>
       <div class="stack" id="stack">
         <span class="link link-l" aria-hidden="true"></span>
         <span class="link link-r" aria-hidden="true"></span>
@@ -66,7 +66,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
           ))
         }
       </div>
-      <ul class="facts">{facts.map((f) => <li><Chip label={f} tone="black" /></li>)}</ul>
+      <ul class="facts">{facts.map((f) => <li class="chip chip-black">{f}</li>)}</ul>
     </div>
   </div>
 </Band>
@@ -277,7 +277,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     .cmd {
       font-size: 16px;
     }
-    .how-title :global(.chip) {
+    .how-title {
       background: none;
       color: var(--navy);
       padding: 0;

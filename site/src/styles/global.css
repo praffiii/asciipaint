@@ -100,7 +100,22 @@ pre {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+/* A section chip: a small square before the label and a hard violet edge. */
+.chip-mark {
+  --chip-dot: var(--violet);
+  box-shadow: var(--keycap) var(--keycap) 0 var(--violet);
+}
+.chip-mark::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  vertical-align: 1px;
+  background: var(--chip-dot);
+}
 .chip-violet {
+  --chip-dot: var(--lavender);
   background: var(--violet);
   color: var(--black);
 }
