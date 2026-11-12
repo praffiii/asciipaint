@@ -30,7 +30,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
           managers.map((name, i) => (
             <Keycap
               size="sm"
-              tone="light"
+              tone="dark"
               role="tab"
               id={`tab-${name}`}
               data-manager={name}
@@ -108,6 +108,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     font-size: var(--body-lg);
   }
   .tabs {
+    --keycap-edge: var(--cobalt);
     display: flex;
     gap: var(--space-3);
   }
@@ -184,9 +185,10 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     top: calc(var(--pitch) * var(--i));
     height: var(--side);
   }
-  .step-picture { --i: 0; }
-  .step-cells { --i: 1; }
-  .step-glyphs { --i: 2; }
+  /* Glyphs on top, picture at the bottom; the DOM keeps 01 → 03. */
+  .step-glyphs { --i: 0; z-index: 3; }
+  .step-cells { --i: 1; z-index: 2; }
+  .step-picture { --i: 2; z-index: 1; }
   .step-label {
     position: absolute;
     z-index: 1;
