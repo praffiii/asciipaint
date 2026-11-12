@@ -6,7 +6,7 @@ test("copy puts the card's code on the clipboard and announces it", async () => 
   const { page, errors } = site;
   try {
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.getByRole("button", { name: "[ copy ]" }).first().click();
+    await page.getByRole("button", { name: "Copy index.html" }).click();
     await page.locator('[aria-live="polite"]').filter({ hasText: "copied" }).waitFor();
     const expected = await page.locator("pre").first().innerText();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected.replace(/\n$/, ""));

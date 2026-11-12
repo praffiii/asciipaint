@@ -24,7 +24,7 @@ test("the CDN card copies the exact script block", async () => {
   const { page } = site;
   try {
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.locator("#install .card").getByRole("button", { name: "[ copy ]" }).click();
+    await page.locator("#install .card").getByRole("button", { name: "Copy index.html" }).click();
     await page.locator('[aria-live="polite"]').filter({ hasText: "copied" }).waitFor();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       '<script type="module">\n  import { asciipaint }\n    from "https://esm.sh/asciipaint";\n</script>',

@@ -30,7 +30,8 @@ export function paintStill(
 ): () => void {
   if (!canPaint()) return () => {};
   const img = document.createElement("ascii-img");
-  img.setAttribute("alt", "");
+  // Every still is decorative: the element always takes role="img", so it is hidden rather than left unnamed.
+  img.setAttribute("aria-hidden", "true");
   for (const [name, value] of Object.entries(attrs)) img.setAttribute(name, value);
   let url: string | undefined;
   let painted = { w: 0, h: 0 };

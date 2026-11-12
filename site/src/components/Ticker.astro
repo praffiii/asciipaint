@@ -1,11 +1,12 @@
 ---
 const base = ["IMAGES", "VIDEO", "CANVAS", "THREE.JS", "<ASCII-IMG>", "~6 KB", "ZERO DEPENDENCIES", "WEBGL2"];
-const items = [...base, ...base]; // one run must be wider than the viewport for a seamless loop
+// One run must be wider than the viewport for a seamless loop; a screen reader hears `base` once.
+const items = [...base, ...base];
 ---
 
 <div class="ticker">
   <div class="ticker-track">
-    <p class="ticker-run">{items.map((item) => <span>{item}</span>)}</p>
+    <p class="ticker-run">{items.map((item, i) => <span aria-hidden={i >= base.length ? "true" : undefined}>{item}</span>)}</p>
     <p class="ticker-run" aria-hidden="true">{items.map((item) => <span>{item}</span>)}</p>
   </div>
 </div>
@@ -30,7 +31,7 @@ const items = [...base, ...base]; // one run must be wider than the viewport for
     min-width: 100vw;
   }
   .ticker-run span::after {
-    content: "*";
+    content: "*" / "";
     margin: 0 var(--space-4);
   }
   @keyframes ticker {

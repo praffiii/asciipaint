@@ -107,3 +107,19 @@ test("the four option demos paint once scrolled into view", async () => {
     await site.close();
   }
 });
+
+test("the painted option demos are hidden from assistive tech, so no image is left without a name", async () => {
+  const site = await open("/docs/options/", { init: countDemos });
+  const { page, errors } = site;
+  try {
+    const demos = page.locator("[data-demo]");
+    for (let i = 0; i < 4; i++) await demos.nth(i).scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => window.__demos.size === 4, null, { timeout: 15000 });
+    expect(await page.locator("[data-demo] ascii-img:not([aria-hidden=true])").count()).toBe(0);
+    // An image the accessibility tree exposes always has a name; the painted titles read as their text.
+    expect(await page.locator("body").ariaSnapshot()).not.toMatch(/- img\s*$/m);
+    expect(errors).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});
