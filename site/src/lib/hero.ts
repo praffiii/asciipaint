@@ -13,7 +13,7 @@ const DRIFT_MS = 12_000;
 export function hero(root: HTMLElement): void {
   wireCopy(root);
   const source = root.querySelector<HTMLCanvasElement>("[data-source]");
-  const painted = root.querySelector<HTMLCanvasElement>("[data-painted]");
+  const painted = root.querySelector<HTMLCanvasElement>("[data-hero-painted]");
   const lens = root.querySelector<HTMLCanvasElement>("[data-lens]");
   const slab = root.querySelector<HTMLElement>("[data-lens-slab]");
   const cells = root.querySelector<HTMLElement>("[data-cells]");
@@ -30,7 +30,9 @@ export function hero(root: HTMLElement): void {
   let paint: Paint | null = null;
   try {
     paint = asciipaint(painted, { font: glyphFont(), background: "#000000", edgeFade: 0 });
-  } catch {
+  } catch (error) {
+    // Kept visible in the console: a bad option or font fails here just like a missing context does.
+    console.warn("asciipaint couldn't start the hero painting; showing the source instead.", error);
     root.dataset.fallback = "source"; // the painted slab shows the unpainted source
   }
 

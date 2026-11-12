@@ -8,7 +8,7 @@ test("the hero paints the liquid live, counts its cells, and lenses to the origi
     await page.locator(".hero[data-live]").waitFor({ state: "attached" });
 
     // The centre of the painted slab is painted, not the black paper.
-    const centre = await page.locator("[data-painted]").evaluate((c: HTMLCanvasElement) => {
+    const centre = await page.locator("[data-hero-painted]").evaluate((c: HTMLCanvasElement) => {
       const copy = document.createElement("canvas");
       copy.width = c.width;
       copy.height = c.height;
@@ -20,7 +20,7 @@ test("the hero paints the liquid live, counts its cells, and lenses to the origi
     expect(centre).toBeGreaterThan(0);
 
     const size = await page
-      .locator("[data-painted]")
+      .locator("[data-hero-painted]")
       .evaluate((c) => ({ w: c.clientWidth, h: c.clientHeight }));
     const readout = await page.locator("[data-readout]").innerText();
     const match = readout.match(/^02 PAINTED · (\d+) × (\d+) CELLS · LIVE$/);

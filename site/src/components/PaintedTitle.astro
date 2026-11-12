@@ -46,7 +46,7 @@ const { text, palette, band, as: Tag = "h2" } = Astro.props;
     if (!host || !text || !isPalette(palette) || !liquid()) return; // the HTML text stays as it is
     await document.fonts.load(`900 100px ${family}`);
     // `paint` doesn't bubble, so the host catches it on the way down.
-    host.addEventListener("paint", () => (box.dataset.painted = ""), { capture: true, once: true });
+    host.addEventListener("paint", () => (box.dataset.stillPainted = ""), { capture: true, once: true });
     paintStill(host, (w, h) => titleCanvas(text, palette, w, h), { background: box.dataset.band ?? "#000000" });
   });
 </script>
@@ -68,7 +68,7 @@ const { text, palette, band, as: Tag = "h2" } = Astro.props;
   .painted-still :global(ascii-img) {
     display: block;
   }
-  .painted-title[data-painted] .painted-text {
+  .painted-title[data-still-painted] .painted-text {
     color: transparent;
   }
 </style>

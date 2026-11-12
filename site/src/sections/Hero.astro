@@ -40,7 +40,7 @@ const links = [
     <div class="slabs" data-tilt>
       <div class="slab slab-original"><canvas data-source></canvas></div>
       <div class="slab slab-painted" data-lens-slab>
-        <canvas data-painted></canvas>
+        <canvas data-hero-painted></canvas>
         <canvas class="lens" data-lens></canvas>
       </div>
     </div>
@@ -50,7 +50,7 @@ const links = [
       <circle cx="880" cy="712" r="3.5" />
     </svg>
     <p class="label label-01"><span class="n">01</span> THE ORIGINAL</p>
-    <p class="label label-02" data-readout><span class="n">02</span> PAINTED<span class="wide"> · <span data-cells>316 × 138</span> CELLS</span> · LIVE</p>
+    <p class="label label-02" data-readout><span class="n">02</span> PAINTED<span class="wide"> · <span data-cells>316 × 138</span> CELLS</span><span class="live"> · LIVE</span></p>
     <p class="hud"><span class="dot"></span>LIVE · 30 FPS · DRAG TO TILT</p>
   </div>
 </section>
@@ -210,17 +210,20 @@ const links = [
     height: 100%;
     pointer-events: none;
   }
-  [data-painted] {
+  [data-hero-painted] {
     opacity: 0;
     transition: opacity 400ms;
   }
-  .hero[data-live] [data-painted] {
+  .hero[data-live] [data-hero-painted] {
     opacity: 1;
   }
   .lens {
     clip-path: circle(0 at 50% 50%);
   }
-  .hero[data-fallback] [data-painted] {
+  /* Not painting live: no painted canvas and no claim of LIVE. */
+  .hero[data-fallback] [data-hero-painted],
+  .hero[data-fallback] .live,
+  .hero[data-fallback] .hud {
     display: none;
   }
   .hero[data-fallback] .lens {

@@ -7,7 +7,7 @@ test("under reduced motion the hero holds one frame, the slabs stay put and the 
   try {
     await page.locator(".hero[data-live]").waitFor({ state: "attached" });
     await page.evaluate(() => new Promise((done) => setTimeout(done, 1000)));
-    const read = () => page.locator("[data-painted]").evaluate((c: HTMLCanvasElement) => c.toDataURL());
+    const read = () => page.locator("[data-hero-painted]").evaluate((c: HTMLCanvasElement) => c.toDataURL());
     const first = await read();
     await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     expect(await read()).toBe(first);
