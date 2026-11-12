@@ -55,6 +55,8 @@ function install() {
       cmd.textContent = b.dataset.cmd ?? "";
     });
   }
+  // The buttons are named by aria-label, so their text changes are announced here instead.
+  const status = el("copied", HTMLElement);
   for (const b of document.querySelectorAll<HTMLButtonElement>("[data-copy]")) {
     let reset = 0;
     b.addEventListener("click", async () => {
@@ -65,8 +67,12 @@ function install() {
       } catch {
         b.textContent = "Select it to copy";
       }
+      status.textContent = b.textContent;
       clearTimeout(reset);
-      reset = window.setTimeout(() => (b.textContent = "Copy"), 1600);
+      reset = window.setTimeout(() => {
+        b.textContent = "Copy";
+        status.textContent = "";
+      }, 1600);
     });
   }
 }
@@ -197,8 +203,17 @@ function playground() {
     };
   }
 
+  /** The 3D stage, made once. Without WebGL2 it fails as the flat path does, with the same message. */
+  function stageFor(three: SceneModule): Stage3d {
+    try {
+      return (scene ??= three.stage3d(solid));
+    } catch (e) {
+      throw new Error("asciipaint needs WebGL2", { cause: e });
+    }
+  }
+
   function startThree(three: SceneModule): Running {
-    const s = (scene ??= three.stage3d(solid));
+    const s = stageFor(three);
     const paint = three.asciipaintThree(s.renderer, settings);
     const loop = autoRender(paint, (now) => s.frame(now, before ? null : paint), {
       onContextLost,
@@ -356,10 +371,14 @@ function playground() {
     stage.classList.toggle("is-before", before && !three);
     let edge: string | null;
     if (picked.kind === "three") {
-      scene ??= picked.three.stage3d(solid);
-      scene.show(picked.model);
-      edge = scene.edge();
       raw.replaceChildren();
+      try {
+        const s = stageFor(picked.three);
+        s.show(picked.model);
+        edge = s.edge();
+      } catch {
+        edge = null; // start() below meets the same failure and says why
+      }
     } else {
       picked.tick?.(performance.now());
       edge = edgeColour(picked.el);
@@ -436,16 +455,14 @@ function playground() {
 
   // -- Snippet
 
-  const quote = (s: string) => (s.includes('"') && !s.includes("'") ? `'${s}'` : JSON.stringify(s));
-
   function snippet() {
     const s = settings;
     const d = DEFAULTS;
     const lines: string[] = [];
     if (s.cell[0] !== d.cell[0] || s.cell[1] !== d.cell[1])
       lines.push(`cell: [${s.cell.join(", ")}]`);
-    if (s.ramp !== d.ramp) lines.push(`ramp: ${quote(s.ramp)}`);
-    if (s.font !== d.font) lines.push(`font: ${quote(s.font)}`);
+    if (s.ramp !== d.ramp) lines.push(`ramp: ${JSON.stringify(s.ramp)}`);
+    if (s.font !== d.font) lines.push(`font: ${JSON.stringify(s.font)}`);
     if (s.background !== PAPER) lines.push(`background: "${s.background}"`);
     if (Math.abs(s.edgeFade - d.edgeFade) > 1e-9) lines.push(`edgeFade: ${s.edgeFade}`);
     if (s.sparkle) lines.push("sparkle: true");

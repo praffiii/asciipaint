@@ -55,12 +55,21 @@
           </div>
           <div class="code">
             <pre><code id="install-cmd">npm i asciipaint</code></pre>
-            <button type="button" class="copy" data-copy="install-cmd">Copy</button>
+            <button
+              type="button"
+              class="copy"
+              data-copy="install-cmd"
+              aria-label="Copy install command"
+            >
+              Copy
+            </button>
           </div>
           <p>No bundler? Import it from a CDN:</p>
           <div class="code">
             <pre><code id="cdn">import { asciipaint } from "https://esm.sh/asciipaint";</code></pre>
-            <button type="button" class="copy" data-copy="cdn">Copy</button>
+            <button type="button" class="copy" data-copy="cdn" aria-label="Copy CDN import">
+              Copy
+            </button>
           </div>
           <p class="note">
             <code>three</code> (0.170 or later) is optional, needed only for
@@ -79,7 +88,14 @@
   import "asciipaint/element";
 &lt;/script&gt;
 &lt;ascii-img src="/logo.svg" alt="Logo" width="160" height="160"&gt;&lt;/ascii-img&gt;</code></pre>
-              <button type="button" class="copy" data-copy="tag-code">Copy</button>
+              <button
+                type="button"
+                class="copy"
+                data-copy="tag-code"
+                aria-label="Copy element snippet"
+              >
+                Copy
+              </button>
             </div>
           </div>
           <figure class="tag-live">
@@ -178,7 +194,14 @@
           <div class="snippet">
             <div class="code">
               <pre><code id="snippet"></code></pre>
-              <button type="button" class="copy" data-copy="snippet">Copy</button>
+              <button
+                type="button"
+                class="copy"
+                data-copy="snippet"
+                aria-label="Copy playground code"
+              >
+                Copy
+              </button>
             </div>
           </div>
         </div>
@@ -247,5 +270,6 @@ paint.render(scene, camera); // replaces renderer.render(scene, camera)</code></
     <footer class="wrap footer">
       <p>MIT licensed. WebGL2 required, in every current browser.</p>
     </footer>
+    <p id="copied" class="visually-hidden" aria-live="polite"></p>
   </body>
 </html>

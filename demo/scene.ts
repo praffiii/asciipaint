@@ -6,11 +6,14 @@ import {
   Group,
   HemisphereLight,
   IcosahedronGeometry,
+  Line,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
+  Points,
   Scene,
   SphereGeometry,
+  Texture,
   TorusKnotGeometry,
   Vector3,
   WebGLRenderer,
@@ -88,6 +91,7 @@ export function stage3d(canvas: HTMLCanvasElement): Stage3d {
       return edgeColour(renderer.domElement); // same task, so the drawing buffer is still there
     },
     show(model) {
+      if (!turntable.children.includes(primitives)) disposeTree(turntable); // the last dropped model
       turntable.clear();
       if (!model) {
         turntable.add(primitives);
@@ -102,6 +106,19 @@ export function stage3d(canvas: HTMLCanvasElement): Stage3d {
       turntable.add(holder);
     },
   };
+}
+
+/** Frees the GPU side of everything under `root`: geometries, materials and their textures. */
+function disposeTree(root: Object3D) {
+  root.traverse((o) => {
+    if (!(o instanceof Mesh || o instanceof Line || o instanceof Points)) return;
+    o.geometry.dispose();
+    for (const m of [o.material].flat()) {
+      // A material's texture slots vary by type, so every property is checked.
+      for (const v of Object.values(m) as unknown[]) if (v instanceof Texture) v.dispose();
+      m.dispose();
+    }
+  });
 }
 
 /** Parses a dropped `.glb`, or a `.gltf` with its data embedded. */
