@@ -6,19 +6,23 @@ interface Props {
   grain?: boolean;
   edgeBelow?: Tone;
   id?: string;
+  /** The element: a `footer` makes the band the page's contentinfo landmark. */
+  as?: "section" | "footer";
 }
-const { tone, grain, edgeBelow, id } = Astro.props;
+const { tone, grain, edgeBelow, id, as: Tag = "section" } = Astro.props;
+// Light and navy bands are speckled with cobalt; on the others navy shows up.
+const speck = tone === "lavender" ? "#2440D0 0.18" : tone === "navy" ? "#2440D0 0.25" : "#0A0D1F 0.25";
 ---
 
-<section
+<Tag
   id={id}
   class={`band band-${tone}`}
   data-edged={edgeBelow ? "" : undefined}
-  data-grain={grain ? `${hex[tone]} ${tone === "lavender" ? "#2440D0 0.18" : "#0A0D1F 0.25"}` : undefined}
+  data-grain={grain ? `${hex[tone]} ${speck}` : undefined}
 >
   <slot />
   {edgeBelow && <div class="band-edge" aria-hidden="true" data-edge={`${hex[tone]} ${hex[edgeBelow]}`} />}
-</section>
+</Tag>
 
 <script>
   import { dissolveCanvas } from "../lib/dissolve";

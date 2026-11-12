@@ -1,0 +1,85 @@
+---
+import pkg from "../../../package.json";
+import Band from "../components/Band.astro";
+import Keycap from "../components/Keycap.astro";
+import PaintedTitle from "../components/PaintedTitle.astro";
+
+const links = [
+  { label: "GitHub ↗", href: "https://github.com/praffiii/asciipaint" },
+  { label: "npm ↗", href: "https://www.npmjs.com/package/asciipaint" },
+  { label: "MIT licence", href: "https://github.com/praffiii/asciipaint/blob/main/LICENSE" },
+];
+---
+
+<Band tone="navy" grain as="footer">
+  <div class="wrap">
+    <div class="title">
+      <PaintedTitle text="asciipaint" palette="title" band="navy" as="p" />
+    </div>
+    <div class="keys">
+      <Keycap href="/docs/" tone="violet">Read the docs →</Keycap>
+      <nav class="links" aria-label="Project">
+        {links.map((l) => <Keycap href={l.href} size="sm">{l.label}</Keycap>)}
+      </nav>
+    </div>
+    <div class="meta">
+      <p>ASCIIPAINT {pkg.version}</p>
+      <p>EVERY PICTURE ON THIS PAGE IS PAINTED LIVE BY THE LIBRARY</p>
+    </div>
+  </div>
+</Band>
+
+<style>
+  .wrap {
+    max-width: 1312px;
+    margin: 0 auto;
+  }
+  .title {
+    margin-bottom: var(--space-5);
+  }
+  .title :global(.painted-text) {
+    font-size: clamp(56px, 17.4vw, 231px);
+    letter-spacing: -0.02em;
+  }
+  .keys {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .links :global(.keycap) {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    font: 500 11px/1.5 var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .meta p {
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .keys {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .meta {
+      flex-direction: column;
+    }
+  }
+</style>

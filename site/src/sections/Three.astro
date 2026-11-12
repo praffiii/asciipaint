@@ -1,0 +1,159 @@
+---
+import Band from "../components/Band.astro";
+import Chip from "../components/Chip.astro";
+import CodeCard from "../components/CodeCard.astro";
+import PaintedTitle from "../components/PaintedTitle.astro";
+
+const code = `import { asciipaintThree } from "asciipaint/three";
+
+const pass = asciipaintThree(renderer);
+pass.render(scene, camera);`;
+---
+
+<Band tone="violet-deep" grain edgeBelow="navy" id="three">
+  <div class="wrap">
+    <Chip label="04 — THREE.JS" tone="lavender" />
+    <div class="title">
+      <PaintedTitle text="three.js" palette="light" band="violet-deep" />
+    </div>
+    <div class="cols">
+      <div class="stage" data-three-stage>
+        <canvas role="img" aria-label="A three.js scene of a torus knot, a sphere and a gem, painted live"></canvas>
+        <p class="tag"><code>pass.render(scene, camera)</code></p>
+      </div>
+      <div class="copy">
+        <p class="sub">Swap renderer.render for pass.render. Same scene, same camera, painted in the same frame.</p>
+        <CodeCard file="scene.ts" code={code} />
+        <p class="note">Graded with ACES Filmic and output as sRGB, so lit scenes keep their highlights.</p>
+      </div>
+    </div>
+  </div>
+</Band>
+
+<script>
+  import { autoRender } from "asciipaint";
+  import { glyphFont } from "../lib/glyph-font";
+  import { loadScene } from "../lib/playground/sources";
+  import { canPaint } from "../lib/still";
+
+  // three.js (~150 kB gzip) loads only when the band is within 800 px, through the same module
+  // promise as the playground's 3D source. Without WebGL2 the slab stays black and nothing loads.
+  const stage = document.querySelector<HTMLElement>("[data-three-stage]");
+  const canvas = stage?.querySelector("canvas");
+
+  async function start(stage: HTMLElement, canvas: HTMLCanvasElement) {
+    const three = await loadScene();
+    const scene = three.stage3d(canvas);
+    const paint = three.asciipaintThree(scene.renderer, { font: glyphFont(), background: "#0A0D1F" });
+    autoRender(
+      paint,
+      (now) => {
+        scene.frame(now, paint);
+        stage.dataset.painting = "";
+      },
+      { onContextLost: () => delete stage.dataset.painting },
+    );
+  }
+
+  if (stage && canvas && canPaint()) {
+    const near = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        near.disconnect();
+        start(stage, canvas).catch((e: unknown) => console.warn("asciipaint couldn't start the three.js scene; its slab stays black.", e));
+      },
+      { rootMargin: "800px" },
+    );
+    near.observe(stage);
+  }
+</script>
+
+<style>
+  .wrap {
+    max-width: 1312px;
+    margin: 0 auto;
+  }
+  .title {
+    margin: var(--space-5) 0 var(--space-4);
+  }
+  .title :global(.painted-text) {
+    font-size: clamp(64px, 21.9vw, 251px);
+    letter-spacing: -0.02em;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: minmax(0, 720px) minmax(0, 1fr);
+    gap: var(--space-5) 56px;
+    align-items: start;
+  }
+
+  /* The scene: a black slab on a violet edge, tagged with the one call that paints it. */
+  .stage {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--black);
+    box-shadow: var(--slab) var(--slab) 0 var(--violet);
+  }
+  .stage canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .tag {
+    position: absolute;
+    left: 14px;
+    top: 14px;
+    margin: 0;
+    padding: 6px 10px;
+    background: var(--lavender);
+    color: var(--navy);
+    font: 500 12px/1 var(--font-mono);
+    pointer-events: none;
+  }
+  .tag code {
+    font: inherit;
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    --card-edge: var(--lilac);
+  }
+  .copy :global(.card) {
+    border-color: var(--lavender);
+  }
+  .sub {
+    margin: 0;
+    font: 400 var(--body-lg) / 1.55 var(--font-body);
+  }
+  .note {
+    margin: 0;
+    font: 400 var(--body-md) / 1.55 var(--font-body);
+  }
+
+  @media (max-width: 1099px) {
+    .cols {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .copy {
+      max-width: 640px;
+    }
+  }
+  @media (max-width: 767px) {
+    .title {
+      margin: var(--space-3) 0 var(--space-3);
+    }
+    .stage {
+      box-shadow: 6px 6px 0 var(--violet);
+    }
+    .tag {
+      left: 8px;
+      top: 8px;
+    }
+    .sub {
+      font-size: var(--body-md);
+    }
+  }
+</style>

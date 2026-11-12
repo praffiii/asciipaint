@@ -3,7 +3,7 @@ import "asciipaint/element";
 let webgl2: boolean | undefined;
 
 /** Whether `<ascii-img>` can paint at all. The probe's context is released straight away. */
-function canPaint(): boolean {
+export function canPaint(): boolean {
   if (webgl2 === undefined) {
     const gl = document.createElement("canvas").getContext("webgl2");
     gl?.getExtension("WEBGL_lose_context")?.loseContext();
