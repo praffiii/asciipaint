@@ -32,6 +32,8 @@
     "./package.json": "./package.json"
   },
   "scripts": {
+    "demo:dev": "vp dev demo",
+    "demo:build": "vp build demo --outDir dist",
     "size": "bun scripts/size.ts",
     "release:check": "vp check && vp test && vp pack && bun run size"
   },
