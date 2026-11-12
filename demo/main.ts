@@ -1,7 +1,6 @@
 import { asciipaint, autoRender, type LiveOptions } from "../src/index";
 import { DEFAULTS } from "../src/options";
-// A named import: package.json marks only dist/element.js as side-effectful, so a bare import is dropped.
-import { AsciiImg } from "../src/element";
+import "../src/element";
 import { LOGOS, pngUrl, svgUrl } from "./logos";
 import type { Stage3d } from "./scene";
 import { edgeColour, motion, sunsetImage } from "./sources";
@@ -75,7 +74,6 @@ function install() {
 // ---- Logo wall ---------------------------------------------------------------------------------
 
 async function logoWall() {
-  if (!AsciiImg) return;
   el("tag-live", HTMLElement).setAttribute("src", svgUrl(LOGOS[0]!));
   const marks = await Promise.all(
     LOGOS.map(async (logo) => [

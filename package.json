@@ -23,7 +23,8 @@
   ],
   "type": "module",
   "sideEffects": [
-    "./dist/element.js"
+    "./dist/element.js",
+    "./src/element.ts"
   ],
   "exports": {
     ".": "./dist/index.js",

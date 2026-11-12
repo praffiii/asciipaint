@@ -79,6 +79,21 @@ it("takes the page's background by default", async () => {
   expect(pixel(el, 1, 1)).toEqual([0x12, 0x34, 0x56]);
 });
 
+it("takes the page's background when told a transparent one", async () => {
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  const el = mount(
+    `<div style="background:#123456"><ascii-img src="${transparentPng}" width="48" height="34" background="transparent"></ascii-img></div>`,
+  ).firstElementChild!;
+  await painted(el);
+  expect(pixel(el, 1, 1)).toEqual([0x12, 0x34, 0x56]);
+});
+
+it("fires error when its image fails to load", async () => {
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+  const el = mount(`<ascii-img src="/missing.png" width="48" height="34"></ascii-img>`);
+  await new Promise((r) => el.addEventListener("error", r, { once: true }));
+});
+
 it("reads a modern CSS background and skips a transparent one", async () => {
   const el = mount(
     `<div style="background:oklch(0.3 0.1 250)"><div style="background:oklch(0.5 0.1 250 / 0)">` +

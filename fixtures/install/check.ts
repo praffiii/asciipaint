@@ -11,7 +11,7 @@ import {
   type Size,
 } from "asciipaint";
 import { asciipaintThree, type ThreePaint } from "asciipaint/three";
-import { AsciiImg } from "asciipaint/element";
+import "asciipaint/element";
 
 declare const canvas: HTMLCanvasElement;
 declare const image: HTMLImageElement;
@@ -44,5 +44,5 @@ threePaint.resize();
 void threePaint.compile();
 threePaint.dispose();
 
-const element: typeof HTMLElement | undefined = AsciiImg;
+const element: CustomElementConstructor | undefined = customElements.get("ascii-img");
 void element;

@@ -3,13 +3,11 @@ import { cssToRgba } from "./color";
 import { DEFAULTS, validate, type Color } from "./options";
 import { asciipaint, type Paint } from "./paint";
 
-/** `<ascii-img>`'s constructor; `undefined` on the server, where there is no `HTMLElement`. */
-export let AsciiImg: typeof HTMLElement | undefined;
-
 // One hidden painter (one WebGL context) paints every element in turn; each copies the result out.
 let shared: { paint: Paint; key: string } | null = null;
 let queue = Promise.resolve();
 let fonts: Promise<void> | undefined;
+let warnedLoad = false;
 
 // The atlas is drawn when the painter is made, so the first paint waits for its font.
 const fontsReady = () =>
@@ -133,6 +131,14 @@ function define(): typeof HTMLElement {
           if (this.#loading !== img) return;
           this.#img = null; // broken or no src: show nothing
           this.#ctx.clearRect(0, 0, this.#canvas.width, this.#canvas.height);
+          if (src === null) return; // no src is no error, as with <img>
+          if (!warnedLoad) {
+            warnedLoad = true;
+            console.warn(
+              `<ascii-img src="${src}"> failed to load. An image from another origin needs CORS headers (Access-Control-Allow-Origin).`,
+            );
+          }
+          this.dispatchEvent(new Event("error"));
         },
       );
     }
@@ -213,7 +219,7 @@ function define(): typeof HTMLElement {
 }
 
 // Last, so the module state above exists when `define` upgrades elements already in the page.
-if (typeof customElements !== "undefined") {
-  AsciiImg = define();
-  if (!customElements.get("ascii-img")) customElements.define("ascii-img", AsciiImg);
+// No customElements on the server: importing there does nothing.
+if (typeof customElements !== "undefined" && !customElements.get("ascii-img")) {
+  customElements.define("ascii-img", define());
 }
