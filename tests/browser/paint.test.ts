@@ -166,6 +166,23 @@ it("rebuilds the atlas when devicePixelRatio changes", () => {
   expect(readAll(p).some((c) => c[0] === 255)).toBe(true);
 });
 
+it("repaints the last still when resized", () => {
+  const p = make(48, 34, { edgeFade: 0, dpr: 2 });
+  p.draw(solid("#fff", 8, 8));
+  p.canvas.style.width = "60px"; // a new size clears the drawing buffer
+  p.resize();
+  expect(readAll(p).some((c) => c[0] === 255)).toBe(true);
+});
+
+it("rejects a transparent background", () => {
+  const c = document.createElement("canvas");
+  expect(() => asciipaint(c, { background: "transparent" })).toThrow(RangeError);
+  const p = make(48, 34, {});
+  for (const background of ["transparent", "rgba(255, 0, 0, 0)", "#f000"]) {
+    expect(() => p.set({ background })).toThrow(/opaque/);
+  }
+});
+
 it("rejects bad live options without changing state", () => {
   const p = make(48, 34, {});
   expect(() => p.set({ edgeFade: 2 })).toThrow(RangeError);

@@ -7,6 +7,7 @@ it("parses hex and rgb", () => {
   expect(parseColor("rgba(255, 0, 0, 0.5)")).toEqual([1, 0, 0]);
   expect(parseColor("rgb(0 255 0)")).toEqual([0, 1, 0]);
   expect(parseColor("banana")).toBeNull();
+  expect(parseColor("rgba(255, 0, 0, 0)")).toBeNull(); // left to the browser, which reports alpha 0
 });
 
 it("passes tuples through and rejects out-of-range ones", () => {

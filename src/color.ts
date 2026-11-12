@@ -14,7 +14,8 @@ export function parseColor(css: string): Rgb | null {
   const args = FUNC.exec(s)?.[1];
   if (args === undefined) return null;
   const parts = args.split(/[\s,/]+/).filter(Boolean);
-  if (parts.length < 3 || parts.length > 4) return null;
+  // Alpha 0 is left to the browser too, so toRgb sees it and refuses it.
+  if (parts.length < 3 || parts.length > 4 || parseFloat(parts[3]!) === 0) return null;
   const [r, g, b] = parts.slice(0, 3).map(Number);
   if (![r, g, b].every((v) => v !== undefined && v >= 0 && v <= 255)) return null;
   return [r! / 255, g! / 255, b! / 255];
@@ -45,7 +46,7 @@ export function toRgb(c: Color): Rgb {
     const fast = parseColor(c);
     if (fast) return fast;
     const px = cssToRgba(c);
-    if (!px) throw new RangeError(`color: cannot parse "${c}"`);
+    if (!px?.[3]) throw new RangeError(`background: "${c}" must be an opaque CSS colour`);
     return [px[0] / 255, px[1] / 255, px[2] / 255];
   }
   if (c.length !== 3 || !c.every((v) => v >= 0 && v <= 1)) {

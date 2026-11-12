@@ -31,10 +31,11 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
   let last: SourceTexture | null = null;
   let sample: Size = { width: 0, height: 0 };
   const scratch = document.createElement("canvas");
-  // A still drawn before the web font loaded repaints once in the real font.
-  void engine.atlasReady.then(() => {
+  const again = () => {
     if (last) engine.run(last, null);
-  });
+  };
+  // A still drawn before the web font loaded repaints once in the real font.
+  void engine.atlasReady.then(again);
 
   const resize = (size?: Size) => {
     const dpr = o.dpr ?? Math.min(devicePixelRatio, 3);
@@ -44,6 +45,7 @@ export function asciipaint(canvas: HTMLCanvasElement, options: Options = {}): Pa
     const { cols, rows } = gridFor(css, o.cell, 0);
     sample = { width: 2 * cols, height: 2 * rows };
     engine.resize(css, dpr);
+    again(); // a new size clears the canvas
   };
   resize();
 

@@ -7,7 +7,9 @@ export interface AtlasLayout {
 /** Empty slots before the first glyph: the hero draws its glyphs 3 cells in, which fixes their sub-pixel phase. */
 export const LEAD = 3;
 
-const LEADING_TOKENS = /^((?:(?:normal|italic|oblique|bold|bolder|lighter|small-caps|\d{3})\s+)*)/;
+/** Style and weight tokens, then any size (and `/line-height`) already in the font. */
+const LEADING_TOKENS =
+  /^((?:(?:normal|italic|oblique|bold|bolder|lighter|small-caps|\d{3})\s+)*)(?:[\d.]+[a-z%]*(?:\/\S+)?\s+)?/i;
 
 export function atlasLayout(
   ramp: readonly string[],
@@ -22,9 +24,9 @@ export function atlasLayout(
   };
 }
 
+/** `font` at `px`: the size goes after style and weight, replacing any size it had. */
 export function fontAt(font: string, px: number): string {
-  const lead = LEADING_TOKENS.exec(font)?.[1] ?? "";
-  return `${lead}${px}px ${font.slice(lead.length)}`;
+  return font.replace(LEADING_TOKENS, `$1${px}px `);
 }
 
 /** The glyphs side by side, white on clear, one cell each at device resolution. */

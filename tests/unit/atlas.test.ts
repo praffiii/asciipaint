@@ -14,3 +14,8 @@ it("puts the size after style/weight tokens", () => {
   expect(fontAt("italic bold Inter", 10)).toBe("italic bold 10px Inter");
   expect(fontAt("monospace", 10)).toBe("10px monospace");
 });
+
+it("replaces a size already in the font", () => {
+  expect(fontAt('600 16px/1.2 "Geist Mono"', 4.4)).toBe('600 4.4px "Geist Mono"');
+  expect(fontAt("bold 12.5pt monospace", 10)).toBe("bold 10px monospace");
+});
