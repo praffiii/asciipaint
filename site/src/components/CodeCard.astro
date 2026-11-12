@@ -1,6 +1,7 @@
 ---
 import { Code } from "astro:components";
 import type { ComponentProps } from "astro/types";
+import shikiDayJson from "../../shiki-day.json";
 import shikiNightJson from "../../shiki-night.json";
 import { uid } from "../lib/uid";
 import Keycap from "./Keycap.astro";
@@ -18,7 +19,7 @@ interface Props {
   live?: boolean;
 }
 const { file, note, code, lang = "ts", tone = "dark", live = false } = Astro.props;
-const shikiNight: CodeProps["theme"] = { ...shikiNightJson, type: "dark" };
+const theme: CodeProps["theme"] = tone === "dark" ? { ...shikiNightJson, type: "dark" } : { ...shikiDayJson, type: "light" };
 const name = `code-${file.replace(/\W+/g, "-")}`;
 // A live card's id is fixed for the client code that fills it; the rest are numbered, as a page can repeat a file name.
 const id = live ? name : uid(name);
@@ -36,7 +37,7 @@ const id = live ? name : uid(name);
     ) : live ? (
       <pre class="card-live" tabindex="0"><code id={id}>{code}</code></pre>
     ) : (
-      <Code id={id} code={code} lang={lang} theme={shikiNight} />
+      <Code id={id} code={code} lang={lang} theme={theme} />
     )
   }
 </figure>
@@ -56,11 +57,14 @@ const id = live ? name : uid(name);
     color: var(--lavender);
     min-width: 0;
   }
+  /* Light: a black file tab on top of a lavender slab, the copy key inside its top right corner. */
   .card-light {
-    background: var(--lavender);
+    --head: 28px;
+    position: relative;
+    border: 0;
+    box-shadow: none;
+    background: none;
     color: var(--navy);
-    border-color: var(--black);
-    --card-edge: var(--black);
     --focus: var(--cobalt);
   }
   .card-head {
@@ -73,7 +77,23 @@ const id = live ? name : uid(name);
     letter-spacing: 0.04em;
   }
   .card-light .card-head {
-    background: var(--lilac);
+    width: fit-content;
+    max-width: 100%;
+    min-height: var(--head);
+    padding-block: 0;
+    background: var(--black);
+    color: var(--lavender);
+    --keycap-edge: var(--cobalt);
+  }
+  .card-light .card-head :global(.keycap) {
+    position: absolute;
+    top: calc(var(--head) + var(--space-3));
+    right: var(--space-3);
+  }
+  .card-light :global(pre) {
+    border: 1.5px solid var(--black);
+    box-shadow: var(--slab) var(--slab) 0 var(--cobalt);
+    background: var(--lavender) !important;
   }
   .card-note {
     flex: 1;
@@ -81,7 +101,7 @@ const id = live ? name : uid(name);
     color: var(--muted);
   }
   .card-light .card-note {
-    color: var(--muted-light);
+    color: var(--blue-light);
   }
   .card-file {
     flex: none;
@@ -106,8 +126,5 @@ const id = live ? name : uid(name);
   }
   .card :global(pre code) {
     font: inherit;
-  }
-  .card-light :global(pre span) {
-    color: var(--violet-ink) !important;
   }
 </style>

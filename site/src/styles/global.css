@@ -146,7 +146,6 @@ pre {
   --band-ink: var(--navy);
   --keycap-edge: var(--black);
   --focus: var(--cobalt);
-  --slab-edge: var(--violet);
 }
 .band-edge {
   position: absolute;

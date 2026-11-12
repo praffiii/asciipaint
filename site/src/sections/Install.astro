@@ -25,40 +25,42 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
       <Chip label="01 — INSTALL" tone="black" />
       <h2>Install in one line, <em>paint in three.</em></h2>
       <p class="sub">One WebGL2 pass on the GPU. About 6 kB.</p>
-      <div class="tabs" role="tablist" aria-label="Package manager">
-        {
-          managers.map((name, i) => (
-            <Keycap
-              size="sm"
-              tone="dark"
-              role="tab"
-              id={`tab-${name}`}
-              data-manager={name}
-              aria-selected={String(i === 0)}
-              aria-controls="install-panel"
-              tabindex={i === 0 ? 0 : -1}
-            >
-              {name}
-            </Keycap>
-          ))
-        }
+      <div class="cmd-card slab">
+        <div class="tabs" role="tablist" aria-label="Package manager">
+          {
+            managers.map((name, i) => (
+              <Keycap
+                size="sm"
+                tone="dark"
+                role="tab"
+                id={`tab-${name}`}
+                data-manager={name}
+                aria-selected={String(i === 0)}
+                aria-controls="install-panel"
+                tabindex={i === 0 ? 0 : -1}
+              >
+                {name}
+              </Keycap>
+            ))
+          }
+        </div>
+        <div class="cmd" id="install-panel" role="tabpanel" aria-labelledby="tab-npm">
+          <code id="install-command"><span class="prompt">$</span> <span id="install-cmd">{MANAGERS.npm}</span><span class="caret" aria-hidden="true"></span></code>
+          <Keycap size="sm" data-copy="install-cmd" aria-label="Copy install command">[ copy ]</Keycap>
+        </div>
       </div>
-      <div class="cmd slab" id="install-panel" role="tabpanel" aria-labelledby="tab-npm">
-        <code id="install-command">$ <span id="install-cmd">{MANAGERS.npm}</span><span class="caret" aria-hidden="true"></span></code>
-        <Keycap tone="violet" size="sm" data-copy="install-cmd" aria-label="Copy install command">[ copy ]</Keycap>
-      </div>
-      <CodeCard file="index.html" note="OR STRAIGHT FROM A CDN" code={cdn} lang="html" tone="dark" />
+      <CodeCard file="index.html" note="OR STRAIGHT FROM A CDN" code={cdn} lang="html" tone="light" />
     </div>
 
     <div class="how">
-      <p class="how-title chip chip-black">HOW IT PAINTS — ONE PASS ON THE GPU</p>
+      <p class="how-title chip">HOW IT PAINTS — ONE PASS ON THE GPU</p>
       <div class="stack" id="stack">
         <span class="link link-l" aria-hidden="true"></span>
         <span class="link link-r" aria-hidden="true"></span>
         {
           layers.map((l) => (
             <div class={`step step-${l.layer}`}>
-              <p class="step-label"><b>{l.n} {l.title}</b><span>{l.text}</span></p>
+              <p class="step-label"><b><i>{l.n}</i> {l.title}</b><span>{l.text}</span></p>
               <div class="layer" aria-hidden="true">
                 {l.layer === "glyphs" ? <div data-layer={l.layer} class="fill" /> : <canvas data-layer={l.layer} class="fill" />}
               </div>
@@ -91,7 +93,8 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     gap: var(--space-4);
     min-width: 0;
   }
-  .copy > :global(.card) {
+  .copy > :global(.card),
+  .cmd-card {
     align-self: stretch;
   }
   h2 {
@@ -101,14 +104,25 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
   }
   h2 em {
     display: block;
+    color: var(--cobalt);
   }
   .sub {
     margin: 0;
     text-wrap: balance;
     font-size: var(--body-lg);
+    color: var(--muted-light);
+  }
+  /* The tabs and the command share one lavender slab. */
+  .cmd-card {
+    --keycap-edge: var(--cobalt);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-3) var(--space-4);
+    border: 1.5px solid var(--black);
+    background: var(--lavender);
   }
   .tabs {
-    --keycap-edge: var(--cobalt);
     display: flex;
     gap: var(--space-3);
   }
@@ -124,12 +138,11 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-    background: var(--navy);
-    color: var(--lavender);
-    border: 1.5px solid var(--cobalt);
-    --focus: var(--blue-light);
-    font: 500 18px/1.2 var(--font-mono);
+    color: var(--navy);
+    font: 500 20px/1.2 var(--font-mono);
+  }
+  .prompt {
+    color: var(--muted-light);
   }
   .cmd code {
     font: inherit;
@@ -156,11 +169,13 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
   }
   .how-title {
     margin: 0 0 var(--space-4);
+    border: 1.5px solid var(--black);
+    background: none;
+    color: var(--navy);
   }
   .facts {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
     gap: var(--space-3);
     margin: var(--space-4) 0 0;
     padding: 0;
@@ -199,15 +214,20 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     padding: var(--space-2) var(--space-3);
     transform: translateY(-50%);
     border: 1.5px solid var(--navy);
+    box-shadow: var(--keycap) var(--keycap) 0 var(--cobalt);
     background: var(--lavender);
     font: 400 14px/1.35 var(--font-body);
-    color: var(--navy);
+    color: var(--muted-light);
   }
   .step-label b {
     display: block;
     margin-bottom: 4px;
     font: 500 12px/1 var(--font-mono);
     letter-spacing: 0.04em;
+    color: var(--navy);
+  }
+  .step-label i {
+    font-style: normal;
     color: var(--violet-ink);
   }
   .step-label::after {
@@ -216,7 +236,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     left: 100%;
     top: 50%;
     width: var(--space-4);
-    border-top: 1.5px dashed var(--navy);
+    border-top: 1.5px solid var(--navy);
   }
   .layer {
     position: absolute;
@@ -225,7 +245,8 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     height: var(--side);
     transform: rotateX(60deg) rotateZ(-45deg);
     border: 1.5px solid var(--navy);
-    box-shadow: 8px 8px 0 var(--cobalt);
+    /* (-14, 14) in the layer's own space is straight down on screen: a black extrusion under the diamond. */
+    box-shadow: -14px 14px 0 var(--black);
     background: #02030a;
   }
   .fill {
@@ -277,8 +298,11 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     .cmd {
       font-size: 16px;
     }
+    .sub {
+      font-size: var(--body-md);
+    }
     .how-title {
-      background: none;
+      border: 0;
       color: var(--navy);
       padding: 0;
     }
@@ -305,6 +329,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
       width: auto;
       padding: 0;
       border: 0;
+      box-shadow: none;
       background: none;
       transform: none;
     }
@@ -314,7 +339,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
     .step-label b {
       color: var(--navy);
     }
-    .step-label span {
+    .step-label > span {
       position: absolute;
       width: 1px;
       height: 1px;
@@ -331,7 +356,7 @@ const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
       box-shadow: 4px 4px 0 var(--cobalt);
     }
     .facts {
-      justify-content: flex-start;
+      display: none; /* the phone frame leaves them out */
     }
   }
 </style>
