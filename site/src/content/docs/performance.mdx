@@ -1,0 +1,62 @@
+---
+title: Performance & autoRender
+description: autoRender() paints at about 30 fps, and only while the canvas is on screen. Cell size, pixel ratio and dispose() set the rest of the cost.
+---
+
+## autoRender
+
+`autoRender(paint, frame)` calls `frame` at about 30 fps: roughly every 33 ms, timed on `requestAnimationFrame`. It runs only while the canvas is on screen and the tab is visible, and stops scheduling frames otherwise. When the canvas resizes it calls `paint.resize()` and paints a frame.
+
+```ts file="loop.ts"
+import { asciipaint, autoRender } from "asciipaint";
+
+const canvas = document.querySelector("canvas")!;
+const video = document.querySelector("video")!;
+const paint = asciipaint(canvas);
+const loop = autoRender(paint, () => paint.draw(video), {
+  onContextLost: () => {
+    canvas.hidden = true;
+    video.controls = true; // show the plain video instead
+  },
+});
+```
+
+## Reduced motion
+
+Under `prefers-reduced-motion: reduce` there is no loop. A frame is painted only when you call `loop.requestFrame()`, when the canvas resizes or comes on screen, when the tab becomes visible again, or when the motion setting changes. So request a frame whenever your source changes:
+
+```ts file="loop.ts"
+video.addEventListener("seeked", () => loop.requestFrame());
+```
+
+Outside reduced motion, `requestFrame()` just makes sure the loop is running.
+
+## Context loss
+
+When the canvas loses its WebGL context, `autoRender` stops the loop and calls `onContextLost`. Show a fallback there. Calling `asciipaint()` on a canvas whose context is already lost throws `asciipaint: the WebGL2 context is lost`.
+
+## stop and dispose
+
+- `loop.stop()` cancels the next frame and removes the loop's observers and listeners.
+- `paint.dispose()` frees the paint's GPU programs, shaders, textures and framebuffer. The canvas stays where it is.
+
+```ts file="cleanup.ts"
+loop.stop();
+paint.dispose();
+```
+
+## Cell size and pixel ratio
+
+The work grows with the number of cells: the canvas's CSS width over the cell width, times its height over the cell height. A 960 × 540 canvas has 400 × 158 = 63,200 cells at the default `cell: [2.4, 3.4]`, and 137 × 54 = 7,398 at `[7, 10]`. Bigger cells read as coarser type and cost less.
+
+The canvas is drawn at its CSS size times `dpr`, which defaults to `devicePixelRatio` capped at 3. A lower `dpr` draws fewer pixels:
+
+```ts file="cheap.ts"
+const paint = asciipaint(canvas, { cell: [4, 6], dpr: 1 });
+```
+
+`cell` and `dpr` are fixed when the paint is made; to change them, `dispose()` the paint and make a new one.
+
+## Many pictures
+
+Each `asciipaint()` takes a WebGL context, and browsers keep only a limited number alive at once. For many still images, use [`<ascii-img>`](/docs/ascii-img/): every element shares one context.

@@ -1,0 +1,66 @@
+---
+title: Quick start
+description: Paint a video as coloured glyphs in a dozen lines, with asciipaint() and autoRender().
+---
+
+## The page
+
+The canvas needs a CSS size: `asciipaint()` measures it when it starts, and `autoRender()` measures it again whenever it resizes.
+
+```html file="index.html"
+<canvas id="art" style="width: 640px; height: 360px"></canvas>
+<video id="clip" src="/clip.mp4" muted loop autoplay playsinline></video>
+<script type="module" src="/main.ts"></script>
+```
+
+## Paint it
+
+```ts file="main.ts"
+import { asciipaint, autoRender } from "asciipaint";
+
+const canvas = document.querySelector<HTMLCanvasElement>("#art")!;
+const video = document.querySelector<HTMLVideoElement>("#clip")!;
+
+const paint = asciipaint(canvas, { cell: [2.4, 3.4], ramp: "-=+*#%@" });
+paint.set({ background: "#F4EEDF", sparkle: true, edgeFade: 0.076 }); // live, no rebuild
+
+// ~30 fps, pauses off screen and in a hidden tab, honours reduced motion
+const loop = autoRender(paint, () => paint.draw(video), {
+  onContextLost: () => (canvas.hidden = true),
+});
+video.addEventListener("seeked", () => loop.requestFrame()); // the only frame source under reduced motion
+```
+
+## What each call does
+
+- `asciipaint(canvas, options)` takes a WebGL2 context on the canvas and builds the glyph atlas from the [options](/docs/options/). `cell`, `ramp`, `font` and `dpr` are fixed for the life of the paint.
+- `paint.set()` changes `background`, `sparkle` and `edgeFade` without a rebuild.
+- `paint.draw(source)` paints one frame. It skips a video that has no frame yet and an image that hasn't loaded.
+- `autoRender(paint, frame)` calls `frame` at about 30 fps while the canvas is on screen and the tab is visible, and resizes the paint when the canvas resizes. Under reduced motion it paints only on request; see [Performance & autoRender](/docs/performance/).
+
+## A still picture
+
+For an image, draw once it has decoded. `resize()` repaints the last frame at the new size, so a still needs no loop.
+
+```ts file="still.ts"
+import { asciipaint } from "asciipaint";
+
+const canvas = document.querySelector("canvas")!;
+const paint = asciipaint(canvas);
+const img = new Image();
+img.src = "/photo.jpg";
+await img.decode();
+paint.draw(img);
+new ResizeObserver(() => paint.resize()).observe(canvas);
+```
+
+A still drawn before the web font loads repaints itself once, in the real font.
+
+## Clean up
+
+```ts file="main.ts"
+loop.stop();
+paint.dispose();
+```
+
+Next, paint images with no code at all through [`<ascii-img>`](/docs/ascii-img/).

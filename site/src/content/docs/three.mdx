@@ -1,0 +1,60 @@
+---
+title: three.js
+description: asciipaintThree() paints a three.js scene as glyphs, on the renderer's own canvas and WebGL context. Swap renderer.render for paint.render.
+---
+
+## Set up
+
+`three` is an optional peer dependency (`>=0.170`); install it next to asciipaint. Then make the paint from your renderer and call its `render` where you called `renderer.render`:
+
+```ts file="scene.ts"
+import { BoxGeometry, DirectionalLight, Mesh, MeshStandardMaterial, PerspectiveCamera, Scene, WebGLRenderer } from "three";
+import { autoRender } from "asciipaint";
+import { asciipaintThree } from "asciipaint/three";
+
+const canvas = document.querySelector("canvas")!;
+const renderer = new WebGLRenderer({ canvas });
+const scene = new Scene();
+const camera = new PerspectiveCamera(50, 1, 0.1, 100);
+camera.position.z = 3;
+const cube = new Mesh(new BoxGeometry(), new MeshStandardMaterial({ color: "#7C5CF2" }));
+scene.add(cube, new DirectionalLight("#ffffff", 3));
+
+const pass = asciipaintThree(renderer, { background: "#0A0D1F" });
+await pass.compile(); // optional: compile the shaders up front, without blocking
+
+autoRender(pass, (now) => {
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
+  cube.rotation.set(now / 1600, now / 1000, 0);
+  pass.render(scene, camera); // replaces renderer.render(scene, camera)
+});
+```
+
+`autoRender` works with it as with `asciipaint()`: it calls `pass.resize()`, which sizes the renderer to its canvas's CSS size, whenever the canvas resizes.
+
+## render and compile
+
+- `render(scene, camera)` renders the scene into a half-float target, two samples per cell each way, then paints it as glyphs on the renderer's canvas. It draws nothing while the renderer has no size.
+- `compile()` compiles the shaders and resolves when they are ready. It's optional; without it the first `render` compiles them. It waits on parallel compilation where the browser has it, so it doesn't block the page.
+- `set()` changes `background`, `edgeFade` and `sparkle` live, as on [`asciipaint()`](/docs/asciipaint/).
+- `dispose()` frees the target and the paint's GPU programs. The renderer stays yours.
+
+See [`asciipaintThree()`](/docs/asciipaint-three/) for the full reference.
+
+## ACES Filmic and sRGB
+
+The pass always tone-maps with ACES Filmic at `renderer.toneMappingExposure` and outputs sRGB, whatever `renderer.toneMapping` and `outputColorSpace` say, so lit scenes keep their highlights. Brighten or darken the painting with the exposure:
+
+```ts file="scene.ts"
+import { ACESFilmicToneMapping } from "three";
+
+renderer.toneMappingExposure = 1.4;
+renderer.toneMapping = ACESFilmicToneMapping; // only if a raw renderer.render should match the painting
+```
+
+The scene's alpha is ignored: every cell is covered.
+
+## One context
+
+The pass paints on the renderer's own canvas and WebGL2 context, so it adds no context of its own. It follows the renderer's pixel ratio, which is why it has no `dpr` option, and it resets three.js's GL state after each render.

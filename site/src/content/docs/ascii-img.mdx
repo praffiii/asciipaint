@@ -1,0 +1,69 @@
+---
+title: "<ascii-img>"
+description: One tag that paints an image as glyphs. Import it once, then use it like <img>; every element on the page shares one WebGL context.
+---
+
+## Use it
+
+Importing `asciipaint/element` registers the element. Then write it like an `<img>`:
+
+```html file="index.html"
+<script type="module">
+  import "asciipaint/element";
+</script>
+<ascii-img src="/logos/claude.svg" alt="Claude" width="120" height="120"></ascii-img>
+```
+
+It paints once the image has decoded and the element is at least one cell wide and tall, and paints again when its size changes. The first paint waits for the default font, 600 Geist Mono, to load; the element has no font attribute.
+
+## Attributes
+
+Changing any of them but `alt` repaints. An invalid value logs a warning once and the default is used instead.
+
+- `src`: the image. It loads with `crossOrigin = "anonymous"`, so an image from another origin needs CORS headers (`Access-Control-Allow-Origin`). Removing `src` clears the element.
+- `alt`: becomes the element's `aria-label`. The element also gets `role="img"` unless it already has a role.
+- `width` and `height`: CSS px. As with `<img>`, give one and the other follows the image's aspect ratio; give neither and it takes the image's natural size, or 150 × 150 when the image has none.
+- `background`: the paper. By default it is the first `background-color` up the ancestor chain that isn't fully transparent (stepping out of a shadow root to its host), or white if there is none. The same colour is used when the value isn't an opaque colour.
+- `edge-fade`: the dithered edge dissolve, from 0 to 0.5. It defaults to 0 here, a hard edge, unlike `asciipaint()`.
+- `cell`: two sizes in CSS px, width then height, separated by a space. Default `"2.4 3.4"`.
+- `ramp`: glyphs from dark to bright, two or more. Default `"-=+*#%@"`.
+
+```html file="logo.html"
+<ascii-img
+  src="/logo.png" alt="Logo" width="160"
+  cell="4 6" ramp=" .:oO@" edge-fade="0.1" background="#0A0D1F"
+></ascii-img>
+```
+
+## Events
+
+- `paint` fires after each paint.
+- `error` fires when the image fails to load or decode, like `<img>`. The first failure on the page also logs a hint about CORS. Removing `src` is not an error.
+
+Neither event bubbles, so listen on the element itself:
+
+```ts file="events.ts"
+const art = document.querySelector("ascii-img")!;
+art.addEventListener("paint", () => art.classList.add("painted"));
+art.addEventListener("error", () => (art.hidden = true));
+```
+
+`error` is only about the image. The element needs WebGL2 to paint, and it does not fire `error` when WebGL2 is missing. If you need a fallback, check for WebGL2 before you register the element:
+
+```ts file="support.ts"
+const probe = document.createElement("canvas").getContext("webgl2");
+probe?.getExtension("WEBGL_lose_context")?.loseContext(); // hand the context back
+if (probe) await import("asciipaint/element");
+else {
+  // No WebGL2: show each element's alt text instead.
+  for (const el of document.querySelectorAll("ascii-img")) {
+    el.replaceWith(el.getAttribute("alt") ?? "");
+  }
+}
+```
+
+## One shared context
+
+Every `<ascii-img>` on the page is painted by one hidden painter on one WebGL context. The elements take turns: each paint is queued, drawn, and copied into the element's own 2D canvas. A whole wall of them costs one GPU setup, where a canvas each would cost a context each.
+
+Elements with a different `cell` or `ramp` rebuild the painter on the same canvas, so it stays one context. The rebuild has a cost, though, so a page whose elements share one `cell` and `ramp` paints fastest.

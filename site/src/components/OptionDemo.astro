@@ -1,0 +1,243 @@
+---
+import { OPTIONS } from "../data/options";
+import CodeCard from "./CodeCard.astro";
+import SpecKeys from "./SpecKeys.astro";
+
+// The options reference of frame 44:33: the code card, a card with a live demo for each option that has one, then a plain table.
+const code = `const paint = asciipaint(canvas, {
+  cell: [2.4, 3.4],
+  background: "#000000",
+});
+
+paint.set({ sparkle: true }); // live, no rebuild`;
+const cards = OPTIONS.filter((row) => row.demo);
+const rows = OPTIONS.filter((row) => !row.demo);
+---
+
+<div class="options">
+  <CodeCard file="options.ts" code={code} />
+  {
+    cards.map((row) => (
+      <section class="card">
+        <div class="about">
+          <div class="name">
+            <h2 id={row.name}>{row.name}</h2>
+            {row.live && <span class="live">Live</span>}
+          </div>
+          <SpecKeys type={row.type} value={row.default} />
+          <p>{row.text}</p>
+        </div>
+        <figure class="demo">
+          <div class="still" data-demo={row.name} />
+          <figcaption>{row.demo?.caption}</figcaption>
+        </figure>
+      </section>
+    ))
+  }
+  <div class="table">
+    {
+      rows.map((row) => (
+        <section class="row">
+          <div class="name">
+            <h2 id={row.name}>{row.name}</h2>
+            {row.live && <span class="live">Live</span>}
+          </div>
+          <dl class="facts">
+            <dt>Type</dt>
+            <dd class="type">{row.type}</dd>
+            <dt>Default</dt>
+            <dd class="default">{row.default}</dd>
+          </dl>
+          <p>{row.text}</p>
+        </section>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  import { OPTIONS } from "../data/options";
+  import { liquid } from "../lib/liquid";
+  import { paintStill } from "../lib/still";
+
+  const frames = new Map<string, HTMLCanvasElement>();
+
+  /**
+   * The stage liquid at t = 5, rendered once per size and shared by every demo of that size. It is drawn at a third
+   * of the size: the liquid is smooth, so the glyphs lose nothing, and the shader costs a ninth (it is slow on a CPU
+   * WebGL fallback). Copied out of the shared painter so its next frame can't touch it.
+   */
+  function stage(w: number, h: number): HTMLCanvasElement {
+    const width = Math.max(1, Math.round(w / 3));
+    const height = Math.max(1, Math.round(h / 3));
+    const key = `${width}x${height}`;
+    let canvas = frames.get(key);
+    if (!canvas) {
+      canvas = Object.assign(document.createElement("canvas"), { width, height });
+      const frame = liquid()?.frame(5, width, height, "stage");
+      if (frame) canvas.getContext("2d")?.drawImage(frame, 0, 0);
+      frames.set(key, canvas);
+    }
+    return canvas;
+  }
+
+  // Each demo is one <ascii-img> on the shared context, painted from the one liquid painter when it scrolls into view.
+  document.querySelectorAll<HTMLElement>("[data-demo]").forEach((host) => {
+    const demo = OPTIONS.find((row) => row.name === host.dataset.demo)?.demo;
+    if (demo) paintStill(host, stage, demo.attrs);
+  });
+</script>
+
+<style>
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin: var(--space-4) var(--slab) var(--space-5) 0;
+  }
+  .options > :global(figure.card) {
+    margin: 0 0 var(--space-2);
+  }
+  .card,
+  .table {
+    background: var(--lavender);
+    border: 1.5px solid var(--black);
+    box-shadow: var(--slab) var(--slab) 0 var(--cobalt);
+  }
+  .card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: var(--space-4);
+    padding: 20px;
+  }
+  .name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .options h2 {
+    margin: 0;
+    font: 400 22px/1.2 var(--font-mono);
+    letter-spacing: 0;
+    color: var(--black);
+    scroll-margin-top: var(--space-4);
+  }
+  .live {
+    padding: 3px 6px;
+    background: var(--violet);
+    color: var(--black);
+    font: 500 10px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .about {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .about .name {
+    margin-bottom: 4px;
+  }
+  .options p {
+    margin: 4px 0 0;
+    font: 400 var(--body-md) / 1.55 var(--font-body);
+  }
+
+  /* The demo: a black stage on a cobalt edge, its caption on the paint. */
+  .demo {
+    position: relative;
+    align-self: start;
+    margin: 0;
+    aspect-ratio: 270 / 196;
+    background: var(--black);
+    border: 1.5px solid var(--black);
+    box-shadow: 6px 6px 0 var(--cobalt);
+  }
+  .still {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .still :global(ascii-img) {
+    display: block;
+  }
+  .demo figcaption {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 5px 8px;
+    background: var(--black);
+    border: 1px solid var(--muted);
+    color: var(--lavender);
+    font: 500 11px/1 var(--font-mono);
+    white-space: pre;
+  }
+
+  /* The table: one row per option, without a demo. */
+  .row {
+    display: grid;
+    grid-template-columns: 150px 100px 150px minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    padding: 20px;
+  }
+  .row + .row {
+    border-top: 1.5px solid var(--black);
+  }
+  .facts {
+    display: contents;
+  }
+  .facts dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .facts dd {
+    margin: 0;
+    font: 400 13px/1.4 var(--font-mono);
+    overflow-wrap: anywhere;
+  }
+  .type {
+    color: var(--muted-light);
+  }
+  .default {
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .row p {
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .options {
+      gap: var(--space-4);
+    }
+    .card {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .row {
+      grid-template-columns: auto auto minmax(0, 1fr);
+      gap: 6px 10px;
+      padding: var(--space-3) 20px;
+    }
+    .row h2 {
+      font-size: 18px;
+    }
+    .facts dd {
+      font-size: 11px;
+    }
+    .type::after {
+      content: "  ·";
+      color: var(--muted-light);
+      white-space: pre;
+    }
+    .row p {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

@@ -1,0 +1,52 @@
+---
+title: autoRender()
+description: Runs your frame function at about 30 fps while the canvas is on screen and the tab is visible, and keeps the paint sized to its canvas.
+---
+
+## Signature
+
+```ts file="auto-render.d.ts"
+import { autoRender, type Loop } from "asciipaint";
+
+function autoRender(
+  paint: { readonly canvas: HTMLCanvasElement; resize(): void },
+  frame: (now: number) => void,
+  options?: { onContextLost?: () => void },
+): Loop;
+```
+
+## Parameters
+
+- `paint`: anything with a `canvas` and a `resize()`, so a paint from [`asciipaint()`](/docs/asciipaint/) or from [`asciipaintThree()`](/docs/asciipaint-three/).
+- `frame(now)`: draws one frame. `now` is the `requestAnimationFrame` timestamp in ms. It runs about once every 33 ms, and only while the canvas is on screen and the tab is visible.
+- `options.onContextLost`: called when the canvas loses its WebGL context, after the loop has stopped.
+
+## Returns
+
+A `Loop`:
+
+```ts file="loop.d.ts"
+interface Loop {
+  requestFrame(): void;
+  stop(): void;
+}
+```
+
+- `requestFrame()`: schedules a frame. Under reduced motion it is the only way to get one besides a resize, the canvas coming on screen, the tab becoming visible and a change of the motion setting.
+- `stop()`: cancels the next frame and disconnects the loop's resize and on-screen observers and removes its listeners. A stopped loop doesn't start again; call `autoRender()` anew.
+
+```ts file="main.ts"
+const loop = autoRender(paint, () => paint.draw(video), { onContextLost: () => showFallback() });
+loop.requestFrame(); // the only frame source under reduced motion
+loop.stop();
+```
+
+## Behaviour
+
+- The canvas is watched for size: on a resize, `paint.resize()` runs and a frame is scheduled.
+- Frames stop while the canvas is off screen or the tab is hidden, and resume when it's back.
+- Under `prefers-reduced-motion: reduce` there is no loop; see [Performance & autoRender](/docs/performance/).
+
+## Errors
+
+`autoRender()` throws nothing itself. It doesn't catch errors from `frame`: one thrown there surfaces as an uncaught error, and no further frame is scheduled until something asks for one, such as `requestFrame()` or a resize.

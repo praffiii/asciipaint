@@ -1,0 +1,10 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import CodeCard from "./CodeCard.astro";
+
+/** A highlighted MDX code block, as Shiki hands it over: its language, and a file label when the fence names one. */
+type Props = HTMLAttributes<"pre"> & { "data-language"?: string; "data-file"?: string };
+const { "data-file": file, "data-language": lang, ...pre } = Astro.props;
+---
+
+<CodeCard file={file ?? lang ?? "code"}><pre {...pre}><slot /></pre></CodeCard>

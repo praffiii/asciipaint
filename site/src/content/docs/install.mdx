@@ -1,30 +1,66 @@
 ---
 title: Install
-description: Add asciipaint from your package manager, or import it straight from a CDN. It has no dependencies.
+description: Add asciipaint with your package manager, or import it straight from a CDN. It has no runtime dependencies and needs WebGL2.
 ---
 
 ## Package manager
 
-```sh
+Pick your manager; all four install the same package.
+
+```sh file="npm"
 npm i asciipaint
 ```
 
-pnpm, yarn and bun work the same way: `pnpm add asciipaint`, `yarn add asciipaint` or `bun add asciipaint`.
+```sh file="pnpm"
+pnpm add asciipaint
+```
+
+```sh file="yarn"
+yarn add asciipaint
+```
+
+```sh file="bun"
+bun add asciipaint
+```
+
+In Deno, import it from npm: `import { asciipaint } from "npm:asciipaint"`.
 
 ## From a CDN
 
-No bundler? Import it as a module:
+No bundler? Import it as a module from esm.sh:
 
-```html
+```html file="index.html"
 <script type="module">
   import { asciipaint } from "https://esm.sh/asciipaint";
 </script>
 ```
 
-## three.js
+`cdn.jsdelivr.net/npm/asciipaint` and `unpkg.com/asciipaint` serve it too.
 
-`three` is an optional peer dependency (`>=0.170`), needed only for `asciipaint/three`.
+## Entry points
+
+- `asciipaint`: [`asciipaint()`](/docs/asciipaint/) and [`autoRender()`](/docs/auto-render/), for any image, video or canvas.
+- `asciipaint/element`: registers the [`<ascii-img>`](/docs/ascii-img/) element when imported.
+- `asciipaint/three`: [`asciipaintThree()`](/docs/asciipaint-three/), for a three.js scene. `three` is an optional peer dependency (`>=0.170`), needed only here, plus `@types/three` in TypeScript.
+
+## WebGL2
+
+asciipaint paints on the GPU and needs WebGL2, which every current evergreen browser has. Without it, `asciipaint()` throws `asciipaint needs WebGL2`, so wrap it if you want a fallback:
+
+```ts file="main.ts"
+import { asciipaint } from "asciipaint";
+
+const canvas = document.querySelector("canvas")!;
+try {
+  const paint = asciipaint(canvas);
+  // draw with paint…
+} catch {
+  canvas.hidden = true; // no WebGL2: show your plain picture instead
+}
+```
+
+It runs in the browser only. Importing it on the server doesn't crash and does nothing, so call it from client-side code, for example `useEffect` or an Astro island.
 
 ## The font
 
-The default font, Geist Mono, is not bundled. Load it yourself, for example from Google Fonts, or the glyphs fall back to `ui-monospace`.
+The default font, Geist Mono at weight 600, is not bundled. Load it yourself, for example from Google Fonts, or the glyphs fall back to `ui-monospace`.

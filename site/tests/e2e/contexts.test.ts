@@ -37,3 +37,22 @@ test("scrolling the whole landing page makes at most 6 WebGL2 contexts", async (
     await site.close();
   }
 });
+
+test("scrolling the whole options page, every demo painted, makes at most 3 WebGL2 contexts", async () => {
+  const site = await open("/docs/options/", { init: countContexts });
+  const { page, errors } = site;
+  try {
+    const demos = page.locator("[data-demo]");
+    expect(await demos.count()).toBe(4);
+    for (let i = 0; i < 4; i++) await demos.nth(i).scrollIntoViewIfNeeded();
+    await page.locator("[data-demo] ascii-img").nth(3).waitFor({ state: "attached", timeout: 15000 });
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(1000);
+    const count = await page.evaluate(() => window.__contexts.size);
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThanOrEqual(3);
+    expect(errors).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});

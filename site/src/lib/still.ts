@@ -12,7 +12,7 @@ export function canPaint(): boolean {
   return webgl2;
 }
 
-interface StillAttrs {
+export interface StillAttrs {
   cell?: string;
   ramp?: string;
   background?: string;

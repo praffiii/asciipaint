@@ -1,0 +1,82 @@
+---
+title: Images & video
+description: draw() takes any image, video or canvas. Sources from another origin need CORS, and a background matched to the source's edges hides the fade.
+---
+
+## Sources
+
+`paint.draw(source)` takes an image, a video, a canvas, an `ImageBitmap` or a `VideoFrame`. The source is cover-fitted: it fills the canvas, keeps its aspect ratio and crops the overflow. A source that isn't ready is skipped without an error: an image still loading, or a video with no current frame.
+
+## An image
+
+```ts file="image.ts"
+import { asciipaint } from "asciipaint";
+
+const canvas = document.querySelector("canvas")!;
+const paint = asciipaint(canvas);
+const img = new Image();
+img.src = "/photo.jpg";
+await img.decode();
+paint.draw(img);
+new ResizeObserver(() => paint.resize()).observe(canvas); // repaints the last frame at the new size
+```
+
+Images smaller than the cell grid, and SVGs, are rasterised at the grid's sample size first, so small icons stay crisp.
+
+## A video
+
+A video changes every frame, so let [`autoRender()`](/docs/auto-render/) draw it:
+
+```ts file="video.ts"
+import { asciipaint, autoRender } from "asciipaint";
+
+const video = document.querySelector("video")!;
+const paint = asciipaint(document.querySelector("canvas")!);
+const loop = autoRender(paint, () => paint.draw(video));
+video.addEventListener("seeked", () => loop.requestFrame()); // under reduced motion, frames come only on request
+```
+
+## Images from another origin (CORS)
+
+WebGL can't read pixels from another origin unless the server allows it. Images and videos from another origin need CORS headers (`Access-Control-Allow-Origin`), and an `<img>` you pass needs `crossOrigin = "anonymous"`, set before `src`:
+
+```ts file="cors.ts"
+const img = new Image();
+img.crossOrigin = "anonymous";
+img.src = "https://images.example.com/photo.jpg";
+await img.decode();
+paint.draw(img);
+```
+
+`<ascii-img>` sets `crossOrigin` for you; the server still has to send the header.
+
+## Match the background to the edges
+
+The edge fade dissolves the picture into `background`, which is cream by default. On a dark source the cream speckles, so set `background` to the colour at your source's edges. It changes live through `set()`:
+
+```ts file="edge.ts"
+/** The mean colour of a source's outermost pixels, as #rrggbb. */
+function edgeColour(source: CanvasImageSource): string {
+  const n = 32;
+  const ctx = Object.assign(document.createElement("canvas"), { width: n, height: n }).getContext("2d")!;
+  ctx.drawImage(source, 0, 0, n, n);
+  const px = ctx.getImageData(0, 0, n, n).data;
+  let r = 0, g = 0, b = 0, count = 0;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (x && y && x < n - 1 && y < n - 1) continue; // only the outermost ring
+      const i = (y * n + x) * 4;
+      r += px[i]!;
+      g += px[i + 1]!;
+      b += px[i + 2]!;
+      count++;
+    }
+  }
+  const hex = (v: number) => Math.round(v / count).toString(16).padStart(2, "0");
+  return `#${hex(r)}${hex(g)}${hex(b)}`;
+}
+
+paint.set({ background: edgeColour(img) });
+```
+
+Or set `edgeFade: 0` for a hard edge, and nothing dissolves.

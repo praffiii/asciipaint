@@ -2,6 +2,7 @@
 import { Code } from "astro:components";
 import type { ComponentProps } from "astro/types";
 import shikiNightJson from "../../shiki-night.json";
+import { uid } from "../lib/uid";
 import Keycap from "./Keycap.astro";
 
 type CodeProps = ComponentProps<typeof Code>;
@@ -9,7 +10,8 @@ type CodeProps = ComponentProps<typeof Code>;
 interface Props {
   file: string;
   note?: string;
-  code: string;
+  /** The code to highlight; without it the card wraps its slot, a block already highlighted (MDX). */
+  code?: string;
   lang?: CodeProps["lang"];
   tone?: "dark" | "light";
   /** Renders `code` as plain text in `<pre><code id="code-<file>">`, for client code to replace. */
@@ -17,7 +19,9 @@ interface Props {
 }
 const { file, note, code, lang = "ts", tone = "dark", live = false } = Astro.props;
 const shikiNight: CodeProps["theme"] = { ...shikiNightJson, type: "dark" };
-const id = `code-${file.replace(/\W+/g, "-")}`;
+const name = `code-${file.replace(/\W+/g, "-")}`;
+// A live card's id is fixed for the client code that fills it; the rest are numbered, as a page can repeat a file name.
+const id = live ? name : uid(name);
 ---
 
 <figure class={`card card-${tone}`}>
@@ -27,7 +31,9 @@ const id = `code-${file.replace(/\W+/g, "-")}`;
     <Keycap tone={tone === "dark" ? "violet" : "light"} size="sm" data-copy={id}>[ copy ]</Keycap>
   </figcaption>
   {
-    live ? (
+    code === undefined ? (
+      <div id={id}><slot /></div>
+    ) : live ? (
       <pre class="card-live" tabindex="0"><code id={id}>{code}</code></pre>
     ) : (
       <Code id={id} code={code} lang={lang} theme={shikiNight} />

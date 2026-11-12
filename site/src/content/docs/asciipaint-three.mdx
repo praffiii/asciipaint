@@ -1,0 +1,56 @@
+---
+title: asciipaintThree()
+description: Makes a pass that paints a three.js scene as glyphs on the renderer's own canvas and context.
+---
+
+## Signature
+
+```ts file="three.d.ts"
+import { asciipaintThree, type ThreePaint } from "asciipaint/three";
+
+function asciipaintThree(renderer: WebGLRenderer, options?: Omit<Options, "dpr">): ThreePaint;
+```
+
+`three` (`>=0.170`) is an optional peer dependency, needed only for `asciipaint/three`.
+
+## Parameters
+
+- `renderer`: your three.js `WebGLRenderer`. The pass paints on its canvas and its WebGL2 context, and makes no context of its own.
+- `options`: every [option](/docs/options/) but `dpr`. The pass follows `renderer.getPixelRatio()` instead.
+
+## Returns
+
+A `ThreePaint`:
+
+```ts file="three-paint.d.ts"
+interface ThreePaint {
+  readonly canvas: HTMLCanvasElement; // renderer.domElement
+  render(scene: Object3D, camera: Camera): void;
+  set(o: LiveOptions): void;
+  resize(): void;
+  compile(): Promise<void>;
+  dispose(): void;
+}
+```
+
+- `render(scene, camera)`: renders `scene` into a half-float target, two samples per cell each way, then paints it as glyphs on the renderer's canvas. Use it in place of `renderer.render(scene, camera)`. It draws nothing while the renderer has no size.
+- `set(live)`: changes `background`, `edgeFade` and `sparkle` without a rebuild.
+- `resize()`: sizes the renderer to its canvas's CSS size. [`autoRender()`](/docs/auto-render/) calls it when the canvas resizes.
+- `compile()`: compiles the shaders up front without blocking; optional.
+- `dispose()`: frees the target and the pass's GPU programs. The renderer stays yours.
+
+```ts file="scene.ts"
+const pass = asciipaintThree(renderer, options);
+pass.render(scene, camera); // replaces renderer.render(scene, camera)
+await pass.compile(); // optional: compile the shaders up front, without blocking
+```
+
+## Colour
+
+It always tone-maps with ACES Filmic at `renderer.toneMappingExposure` and outputs sRGB, whatever `renderer.toneMapping` and `outputColorSpace` say. Set `renderer.toneMapping = ACESFilmicToneMapping` if you want the raw render to match. The scene's alpha is ignored: every cell is covered. See [three.js](/docs/three/) for a full scene.
+
+## Errors
+
+- `RangeError` from `asciipaintThree()` for an option out of range, as with [`asciipaint()`](/docs/asciipaint/): a bad `cell`, a `ramp` of fewer than 2 glyphs, an `edgeFade` outside 0–0.5, or a `background` that isn't an opaque colour.
+- `RangeError` from `set()` for a bad `background` or `edgeFade`.
+- `Error: asciipaint: shader link failed` from `compile()` or the first `render()` if the shaders don't link.

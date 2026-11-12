@@ -282,14 +282,9 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     background: color-mix(in srgb, var(--lilac) 40%, transparent);
     font-size: 0.9em;
   }
-  article :global(pre) {
-    margin: var(--space-3) 0 var(--space-4);
-    padding: var(--space-3);
-    overflow-x: auto;
-    border: 1.5px solid var(--black);
-    box-shadow: var(--slab) var(--slab) 0 var(--cobalt);
-    font: 400 14px/1.6 var(--font-mono);
-    --focus: var(--cobalt);
+  /* Every code block is a code card (MDX blocks come through CodePre). */
+  article :global(figure.card) {
+    margin: var(--space-3) var(--slab) var(--space-5) 0;
   }
 
   /* Previous and next */

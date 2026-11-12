@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
+import CodePre from "../../components/CodePre.astro";
 import Docs from "../../layouts/Docs.astro";
 
 export async function getStaticPaths() {
@@ -12,5 +13,5 @@ const { Content } = await render(entry);
 ---
 
 <Docs slug={entry.id} title={entry.data.title} description={entry.data.description} source={entry.filePath ?? `src/content/docs/${entry.id}.mdx`}>
-  <Content />
+  <Content components={{ pre: CodePre }} />
 </Docs>

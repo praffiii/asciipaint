@@ -1,0 +1,147 @@
+---
+interface Props {
+  type: string;
+  value: string;
+}
+const { type, value } = Astro.props;
+
+type Kind = "word" | "literal" | "punct" | "plain";
+/** Type words, then literals (quoted strings, numbers, booleans), then punctuation; anything else is plain. */
+const TOKEN = /(\b(?:number|string|boolean)\b)|("[^"]*"|\d+(?:\.\d+)?|\b(?:true|false)\b)|([[\](),|–])/g;
+
+function tokens(code: string): { text: string; kind: Kind }[] {
+  const out: { text: string; kind: Kind }[] = [];
+  let at = 0;
+  for (const m of code.matchAll(TOKEN)) {
+    if (m.index > at) out.push({ text: code.slice(at, m.index), kind: "plain" });
+    out.push({ text: m[0], kind: m[1] ? "word" : m[2] ? "literal" : "punct" });
+    at = m.index + m[0].length;
+  }
+  if (at < code.length) out.push({ text: code.slice(at), kind: "plain" });
+  return out;
+}
+
+// The default's preview follows from its shape: a colour, a cell size, a fade depth or a glyph ramp.
+const colour = /^"(#[\dA-F]{6})"$/i.exec(value)?.[1];
+const cell = /^\[([\d.]+), ([\d.]+)\]$/.exec(value)?.slice(1).map(Number);
+const fade = /^0\.\d+$/.test(value) ? Number(value) : undefined;
+const ramp = !colour && /^".+"$/.test(value) ? Array.from(value.slice(1, -1)) : undefined;
+---
+
+<dl class="spec">
+  <div class="key key-type">
+    <dt><span aria-hidden="true">◆ </span>Type</dt>
+    <dd><code>{tokens(type).map((t) => <span class={t.kind}>{t.text}</span>)}</code></dd>
+  </div>
+  <div class="key key-default">
+    <dt><span aria-hidden="true">◆ </span>Default</dt>
+    <dd>
+      {
+        ramp ? (
+          <code>
+            <span class="punct">"</span>
+            {ramp.map((g, i) => (
+              <span style={`color: color-mix(in srgb, #fff ${Math.round((100 * i) / (ramp.length - 1))}%, var(--muted))`}>{g}</span>
+            ))}
+            <span class="punct">"</span>
+          </code>
+        ) : (
+          <code>{tokens(value).map((t) => <span class={t.kind}>{t.text}</span>)}</code>
+        )
+      }
+      {colour && <span class="swatch" style={`background: ${colour}`} aria-hidden="true" />}
+      {
+        cell && (
+          <span class="cells" aria-hidden="true">
+            {[0, 1, 2].map(() => <span style={`width: ${cell[0]! * 2.5}px; height: ${cell[1]! * 2.5}px`} />)}
+          </span>
+        )
+      }
+      {fade !== undefined && <span class="fade" style={`--fade: ${(fade / 0.5) * 100}%`} aria-hidden="true" />}
+    </dd>
+  </div>
+</dl>
+
+<style>
+  .spec {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin: 0;
+  }
+  .key {
+    display: flex;
+    max-width: 100%;
+    border: 1.5px solid var(--black);
+    box-shadow: var(--keycap) var(--keycap) 0 var(--keycap-edge);
+    font: 400 13px/1 var(--font-mono);
+  }
+  dt {
+    flex: none;
+    width: 84px;
+    padding: 9px 10px;
+    font: 500 10px/14px var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .key-type dt {
+    background: var(--cobalt);
+    color: var(--lavender);
+  }
+  .key-default dt {
+    background: var(--violet);
+    color: var(--black);
+  }
+  dd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 9px 12px;
+    background: var(--black);
+    color: var(--lavender);
+  }
+  dd code {
+    padding: 0;
+    background: none;
+    font: inherit;
+    letter-spacing: 0.02em;
+    white-space: pre;
+  }
+  .word {
+    color: var(--blue-light);
+  }
+  .literal {
+    color: var(--lilac);
+  }
+  .punct {
+    color: var(--muted);
+  }
+  .swatch {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--lavender);
+  }
+  .cells {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .cells span:nth-child(1) {
+    background: var(--violet);
+  }
+  .cells span:nth-child(2) {
+    background: var(--blue-light);
+  }
+  .cells span:nth-child(3) {
+    background: var(--lilac);
+  }
+  .fade {
+    width: 28px;
+    height: 10px;
+    background: linear-gradient(90deg, var(--black), var(--violet) var(--fade), var(--lilac));
+    border: 1px solid var(--violet);
+  }
+</style>
