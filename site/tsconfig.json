@@ -1,0 +1,13 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "src", "tests"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "asciipaint": ["../src/index.ts"],
+      "asciipaint/three": ["../src/three.ts"],
+      "asciipaint/element": ["../src/element.ts"]
+    }
+  }
+}

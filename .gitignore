@@ -6,3 +6,5 @@ parity/
 .vitest/
 docs/
 .playwright-mcp/
+site/dist/
+site/.astro/

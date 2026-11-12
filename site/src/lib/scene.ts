@@ -20,10 +20,10 @@ import {
   type Object3D,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import type { ThreePaint } from "../src/three";
-import { edgeColour } from "./sources";
+import type { ThreePaint } from "asciipaint/three";
+import { edgeColour } from "./edge-colour";
 
-export { asciipaintThree } from "../src/three";
+export { asciipaintThree } from "asciipaint/three";
 
 export interface Stage3d {
   readonly renderer: WebGLRenderer;
@@ -43,7 +43,7 @@ export function stage3d(canvas: HTMLCanvasElement): Stage3d {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 
   const scene = new Scene();
-  scene.background = new Color("#6F7FA8");
+  scene.background = new Color("#0A0D1F");
   scene.add(new HemisphereLight("#FFF4E0", "#3A2E4A", 1.4));
   const sun = new DirectionalLight("#FFFFFF", 3);
   sun.position.set(3, 4, 5);
@@ -55,11 +55,11 @@ export function stage3d(canvas: HTMLCanvasElement): Stage3d {
 
   const material = (color: string) => new MeshStandardMaterial({ color, roughness: 0.45 });
   const primitives = new Group();
-  const knot = new Mesh(new TorusKnotGeometry(0.75, 0.26, 160, 24), material("#E8A93A"));
-  const ball = new Mesh(new SphereGeometry(0.6, 48, 32), material("#E0482F"));
-  const gem = new Mesh(new IcosahedronGeometry(0.62), material("#1F8A85"));
-  ball.position.set(-1.9, -0.3, 0.2);
-  gem.position.set(1.9, 0.25, -0.2);
+  const knot = new Mesh(new TorusKnotGeometry(0.75, 0.26, 160, 24), material("#7C5CF2"));
+  const ball = new Mesh(new SphereGeometry(0.6, 48, 32), material("#ECE8FF"));
+  const gem = new Mesh(new IcosahedronGeometry(0.62), material("#2440D0"));
+  ball.position.set(-1.7, -0.2, 0.6);
+  gem.position.set(1.7, 0.3, -0.3);
   primitives.add(knot, ball, gem);
 
   const turntable = new Group();

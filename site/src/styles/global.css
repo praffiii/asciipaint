@@ -1,0 +1,52 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  background: var(--black);
+  color: var(--lavender);
+  font-family: var(--font-body);
+  font-size: var(--body-md);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--black);
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+}
+code,
+kbd,
+pre {
+  font-family: var(--font-mono);
+}
+:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 3px;
+}
+.skip {
+  position: absolute;
+  left: var(--gutter);
+  top: -100px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--lavender);
+  color: var(--navy);
+  z-index: 10;
+}
+.skip:focus {
+  top: var(--space-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

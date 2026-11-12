@@ -1,0 +1,13 @@
+{
+  "name": "asciipaint-night",
+  "type": "dark",
+  "colors": { "editor.background": "#0A0D1F", "editor.foreground": "#ECE8FF" },
+  "tokenColors": [
+    { "settings": { "foreground": "#ECE8FF" } },
+    { "scope": ["keyword", "storage", "keyword.control", "entity.name.tag"], "settings": { "foreground": "#8FA3FF" } },
+    { "scope": ["string", "string.quoted", "punctuation.definition.string"], "settings": { "foreground": "#B9A8FF" } },
+    { "scope": ["constant.numeric", "constant.language"], "settings": { "foreground": "#B9A8FF" } },
+    { "scope": ["comment", "punctuation.definition.comment"], "settings": { "foreground": "#8C8FB8" } },
+    { "scope": ["punctuation", "meta.brace", "keyword.operator"], "settings": { "foreground": "#8C8FB8" } }
+  ]
+}

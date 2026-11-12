@@ -1,0 +1,29 @@
+---
+import { Font } from "astro:assets";
+import "../styles/tokens.css";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description = "Paint any image, video, canvas or three.js scene as coloured ASCII glyphs on WebGL2." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <Font cssVariable="--font-display" preload={[{ weight: 900, style: "normal" }]} />
+    <Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-geist-mono" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

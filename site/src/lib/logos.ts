@@ -1,11 +1,11 @@
 // Twelve original marks, each shipped twice: a viewBox-only SVG and a transparent PNG.
 
-interface Part {
+export interface Part {
   d: string;
   fill: string;
   evenodd?: boolean;
 }
-interface Logo {
+export interface Logo {
   name: string;
   parts: Part[];
 }
@@ -115,6 +115,25 @@ export const LOGOS: Logo[] = [
     ],
   },
 ];
+
+const NIGHT: Record<string, string> = {
+  "#3A4BA8": "#2440D0",
+  "#E0482F": "#7C5CF2",
+  "#E8A93A": "#ECE8FF",
+  "#8A3B78": "#5B3FD0",
+  "#1F8A85": "#3A6BFF",
+  "#6FA8DC": "#8FA3FF",
+  "#2F4858": "#1A2C9A",
+  "#2B2448": "#3B2A8A",
+  "#6C9A3B": "#2F4BE0",
+  "#DCE8B0": "#ECE8FF",
+  "#FFD27A": "#B9A8FF",
+};
+
+/** The mark recoloured to the site's night palette; colours outside the map (white) are kept. */
+export function night(logo: Logo): Logo {
+  return { ...logo, parts: logo.parts.map((p) => ({ ...p, fill: NIGHT[p.fill] ?? p.fill })) };
+}
 
 /** The mark as a viewBox-only SVG data URL: no width or height, like most icon exports. */
 export function svgUrl(logo: Logo): string {

@@ -33,17 +33,21 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "demo:dev": "vp dev demo",
-    "demo:build": "vp build demo --outDir dist",
+    "site:dev": "astro dev --root site",
+    "site:build": "astro build --root site",
+    "site:check": "astro check --root site",
+    "site:test": "bun run site:build && vp test --project site-e2e",
     "size": "bun scripts/size.ts",
-    "release:check": "vp check && vp test && vp pack && bun run size"
+    "release:check": "vp check && vp test --project='!site-e2e' && vp pack && bun run size"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.5",
+    "@astrojs/mdx": "8.1.5",
     "@types/bun": "^1.4.4",
     "@types/pngjs": "^6.0.5",
     "@types/three": "^0.187.0",
     "@vitest/browser-playwright": "5.1.0",
+    "astro": "7.4.11",
     "pixelmatch": "^8.0.0",
     "playwright": "^1.65.0",
     "pngjs": "^7.0.0",
