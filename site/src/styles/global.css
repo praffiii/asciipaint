@@ -82,7 +82,7 @@ pre {
 .keycap:active,
 .keycap[aria-pressed="true"] {
   transform: translate(var(--keycap), var(--keycap));
-  box-shadow: 0 0 0 var(--keycap-edge, var(--cobalt)); /* collapsed, still a hard edge */
+  box-shadow: none;
 }
 .keycap[data-state="copied"] {
   background: var(--lilac);

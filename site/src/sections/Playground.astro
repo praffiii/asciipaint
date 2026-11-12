@@ -435,6 +435,7 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
   }
   .keys {
     display: flex;
+    flex-wrap: wrap; /* a long ramp makes rows, never a sideways scroll */
     gap: 6px;
   }
   .keys :global(.glyph) {

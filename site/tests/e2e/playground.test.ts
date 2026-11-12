@@ -6,8 +6,8 @@ import { open, preserve, type Opened } from "./harness";
 const SNIPPET = "#code-your-settings-ts";
 
 /** `/playground/` once its first source has painted a frame; `init` runs before the page's scripts. */
-async function playground(init = ""): Promise<Opened> {
-  const site = await open("/playground/", { init: preserve + init });
+async function playground(init = "", width?: number): Promise<Opened> {
+  const site = await open("/playground/", { init: preserve + init, width });
   try {
     await site.page.locator('[data-playground][data-painting="liquid"]').waitFor({ state: "attached" });
     return site;
@@ -100,6 +100,23 @@ test("EDIT turns the ramp into a text field that refuses a single glyph", async 
     await field.fill("a");
     expect(await field.getAttribute("aria-invalid")).toBe("true");
     expect(await message(page)).toBe("The ramp needs at least 2 glyphs, dark to bright.");
+    expect(errors).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});
+
+test("a long ramp wraps its keys at phone width instead of scrolling the page sideways", async () => {
+  const site = await playground("", 390);
+  const { page, errors } = site;
+  try {
+    const bourke = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'";
+    expect(Array.from(bourke)).toHaveLength(68);
+    await page.getByRole("button", { name: "EDIT" }).click();
+    await page.getByRole("textbox", { name: "Ramp, dark to bright" }).fill(bourke);
+    await page.keyboard.press("Enter");
+    expect(await page.locator("[data-glyph]").count()).toBe(68);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(errors).toEqual([]);
   } finally {
     await site.close();
