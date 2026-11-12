@@ -1,5 +1,6 @@
 ---
-const items = ["IMAGES", "VIDEO", "CANVAS", "THREE.JS", "<ASCII-IMG>", "~6 KB", "ZERO DEPENDENCIES", "WEBGL2"];
+const base = ["IMAGES", "VIDEO", "CANVAS", "THREE.JS", "<ASCII-IMG>", "~6 KB", "ZERO DEPENDENCIES", "WEBGL2"];
+const items = [...base, ...base]; // one run must be wider than the viewport for a seamless loop
 ---
 
 <div class="ticker">
@@ -26,6 +27,7 @@ const items = ["IMAGES", "VIDEO", "CANVAS", "THREE.JS", "<ASCII-IMG>", "~6 KB", 
     display: flex;
     margin: 0;
     padding: 14px 0;
+    min-width: 100vw;
   }
   .ticker-run span::after {
     content: "*";

@@ -1,4 +1,6 @@
 const CELL = [2.4, 3.4] as const;
+/** The share of rows, from the bottom, that is fully the lower colour so no seam shows. */
+const SOLID = 0.92;
 
 /** A small seeded generator, so a mask is the same on every load. */
 function rng(seed: number): () => number {
@@ -21,7 +23,7 @@ export function dissolveMask(cols: number, rows: number, seed: number): Uint8Arr
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       const t = y / rows + Math.sin(x * 0.012 * 2.4) * 0.12 + Math.sin(x * 0.041 * 2.4 + 1) * 0.05;
-      const p = clamp((t - 0.15) / 0.75, 0, 1) ** 1.6;
+      const p = y / rows >= SOLID ? 1 : clamp((t - 0.15) / 0.75, 0, 1) ** 1.6;
       mask[y * cols + x] = next() < p ? 1 : 0;
     }
   }

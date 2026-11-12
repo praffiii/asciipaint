@@ -1,18 +1,22 @@
 ---
 import { Code } from "astro:components";
-import shikiNight from "../../shiki-night.json";
+import type { ComponentProps } from "astro/types";
+import shikiNightJson from "../../shiki-night.json";
 import Keycap from "./Keycap.astro";
+
+type CodeProps = ComponentProps<typeof Code>;
 
 interface Props {
   file: string;
   note?: string;
   code: string;
-  lang?: string;
+  lang?: CodeProps["lang"];
   tone?: "dark" | "light";
   /** Renders an empty `<pre><code id="code-<file>">` that client code fills. */
   live?: boolean;
 }
 const { file, note, code, lang = "ts", tone = "dark", live = false } = Astro.props;
+const shikiNight: CodeProps["theme"] = { ...shikiNightJson, type: "dark" };
 const id = `code-${file.replace(/\W+/g, "-")}`;
 ---
 
@@ -26,7 +30,7 @@ const id = `code-${file.replace(/\W+/g, "-")}`;
     live ? (
       <pre class="card-live" tabindex="0"><code id={id} /></pre>
     ) : (
-      <Code id={id} code={code} lang={lang as never} theme={shikiNight as never} />
+      <Code id={id} code={code} lang={lang} theme={shikiNight} />
     )
   }
 </figure>
@@ -39,6 +43,7 @@ const id = `code-${file.replace(/\W+/g, "-")}`;
 <style>
   .card {
     margin: 0;
+    --focus: var(--blue-light);
     border: 1.5px solid var(--cobalt);
     box-shadow: var(--slab) var(--slab) 0 var(--card-edge, var(--cobalt));
     background: var(--navy);
@@ -50,6 +55,7 @@ const id = `code-${file.replace(/\W+/g, "-")}`;
     color: var(--navy);
     border-color: var(--black);
     --card-edge: var(--black);
+    --focus: var(--cobalt);
   }
   .card-head {
     display: flex;
