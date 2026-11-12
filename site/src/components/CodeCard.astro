@@ -28,7 +28,7 @@ const id = live ? name : uid(name);
   <figcaption class="card-head">
     <span class="card-file">{file}</span>
     {note && <span class="card-note">{note}</span>}
-    <Keycap tone={tone === "dark" ? "violet" : "light"} size="sm" data-copy={id}>[ copy ]</Keycap>
+    <Keycap size="sm" data-copy={id}>[ copy ]</Keycap>
   </figcaption>
   {
     code === undefined ? (
@@ -88,6 +88,13 @@ const id = live ? name : uid(name);
   }
   .card-head :global(.keycap) {
     margin-left: auto;
+  }
+  /* The copy key: a dark keycap, outlined in lavender on a dark card. */
+  .card-dark .card-head {
+    --keycap-edge: var(--cobalt);
+  }
+  .card-dark .card-head :global(.keycap) {
+    border-color: var(--lavender);
   }
   .card :global(pre) {
     margin: 0;
