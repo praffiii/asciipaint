@@ -1,6 +1,6 @@
 ---
 title: Transparency & SVG
-description: An SVG with only a viewBox paints crisp, transparent pixels show the paper, and the paper itself must be opaque.
+description: An SVG with only a viewBox paints crisp, transparent pixels show the paper, and the paper itself is always opaque.
 ---
 
 ## SVG with only a viewBox
@@ -29,14 +29,15 @@ Sources keep their alpha. Where a pixel is transparent the cell shows `backgroun
 
 `<ascii-img>` takes its paper from the page: the first `background-color` up the ancestor chain that isn't fully transparent, or white. So a transparent logo sits on your page without a box around it.
 
-## The paper must be opaque
+## The paper is always opaque
 
-The painting is opaque: every cell is covered, so the page never shows through it. `background` is an opaque CSS colour or `[r, g, b]` with each channel from 0 to 1. A transparent colour throws a `RangeError`, whether you pass it to `asciipaint()`, to `asciipaintThree()` or to `set()`:
+The painting is opaque: every cell is covered, so the page never shows through it. `background` is a CSS colour or `[r, g, b]` with each channel from 0 to 1. A colour that is invalid or fully transparent throws a `RangeError`, whether you pass it to `asciipaint()`, to `asciipaintThree()` or to `set()`. A partly transparent colour is accepted and painted without its alpha:
 
 ```ts file="paper.ts"
 paint.set({ background: "#0A0D1F" }); // fine
 paint.set({ background: [0.04, 0.05, 0.12] }); // fine: r, g, b from 0 to 1
+paint.set({ background: "rgba(10, 13, 31, 0.5)" }); // accepted, painted as rgb(10, 13, 31)
 paint.set({ background: "transparent" }); // RangeError: background: "transparent" must be an opaque CSS colour
 ```
 
-To make the art look cut out, match `background` to the colour behind the canvas. On `<ascii-img>`, a `background` attribute that isn't an opaque colour logs a warning and the page colour is used instead.
+To make the art look cut out, match `background` to the colour behind the canvas. On `<ascii-img>`, a `background` attribute that is invalid or fully transparent logs a warning and the page colour is used instead; a partly transparent one is used without its alpha.

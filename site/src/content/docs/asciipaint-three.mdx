@@ -51,6 +51,6 @@ It always tone-maps with ACES Filmic at `renderer.toneMappingExposure` and outpu
 
 ## Errors
 
-- `RangeError` from `asciipaintThree()` for an option out of range, as with [`asciipaint()`](/docs/asciipaint/): a bad `cell`, a `ramp` of fewer than 2 glyphs, an `edgeFade` outside 0–0.5, or a `background` that isn't an opaque colour.
+- `RangeError` from `asciipaintThree()` for an option out of range, as with [`asciipaint()`](/docs/asciipaint/): a bad `cell`, a `ramp` of fewer than 2 glyphs, an `edgeFade` outside 0–0.5, or a `background` that isn't a valid colour or is fully transparent.
 - `RangeError` from `set()` for a bad `background` or `edgeFade`.
 - `Error: asciipaint: shader link failed` from `compile()` or the first `render()` if the shaders don't link.

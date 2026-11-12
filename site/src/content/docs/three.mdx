@@ -36,7 +36,7 @@ autoRender(pass, (now) => {
 ## render and compile
 
 - `render(scene, camera)` renders the scene into a half-float target, two samples per cell each way, then paints it as glyphs on the renderer's canvas. It draws nothing while the renderer has no size.
-- `compile()` compiles the shaders and resolves when they are ready. It's optional; without it the first `render` compiles them. It waits on parallel compilation where the browser has it, so it doesn't block the page.
+- `compile()` resolves once the shaders, which start compiling when the pass is made, have compiled and linked. It waits on parallel compilation where the browser has it, so it doesn't block the page. It's optional; without it the first `render` waits for them and links them.
 - `set()` changes `background`, `edgeFade` and `sparkle` live, as on [`asciipaint()`](/docs/asciipaint/).
 - `dispose()` frees the target and the paint's GPU programs. The renderer stays yours.
 

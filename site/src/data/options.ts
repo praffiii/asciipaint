@@ -35,7 +35,7 @@ export const OPTIONS: readonly OptionRow[] = [
     type: "string | [r, g, b]",
     default: '"#F4EEDF"',
     live: true,
-    text: "The paper behind the art. It must be opaque: a transparent colour throws a RangeError. Match it to your page and the edges disappear.",
+    text: "The paper behind the art. It is always opaque: a fully transparent colour throws a RangeError. Match it to your page and the edges disappear.",
     demo: { attrs: { background: "#1A2C9A" }, caption: 'background: "#1A2C9A"' },
   },
   {
@@ -65,6 +65,6 @@ export const OPTIONS: readonly OptionRow[] = [
     type: "number",
     default: "devicePixelRatio",
     live: false,
-    text: "Device pixel ratio, capped at 3.",
+    text: "Device pixel ratio. The default is capped at 3 and read again on every resize().",
   },
 ];

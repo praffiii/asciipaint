@@ -33,7 +33,7 @@ interface Paint {
 - `canvas`: the canvas you passed.
 - `draw(source)`: paints one frame of an image, video, canvas, `ImageBitmap` or `VideoFrame`, cover-fitted to the canvas. A source that isn't ready yet is skipped: an image still loading, or a video with no current frame.
 - `set(live)`: changes `background`, `edgeFade` and `sparkle` without a rebuild. The change shows on the next `draw()` or `resize()`.
-- `resize(css?)`: measures the canvas's CSS size, or with `css` sets it, then repaints the last frame. [`autoRender()`](/docs/auto-render/) calls it for you.
+- `resize(css?)`: measures the canvas's CSS size, or with `css` sizes it (CSS px, for example an off-DOM canvas), then repaints the last frame. [`autoRender()`](/docs/auto-render/) calls it for you.
 - `dispose()`: frees the paint's GPU programs, shaders, textures and framebuffer.
 
 ```ts file="main.ts"
@@ -50,6 +50,6 @@ paint.dispose();
 
 - `Error: asciipaint needs WebGL2` when the canvas can't give it a WebGL2 context.
 - `Error: asciipaint: the WebGL2 context is lost` when the canvas's context is already lost.
-- `RangeError` for an option out of range: a `cell` size that isn't finite and above 0, a `ramp` of fewer than 2 glyphs, an `edgeFade` outside 0–0.5, a `dpr` that isn't finite and above 0, or a `background` that isn't an opaque colour (or an `[r, g, b]` outside 0–1).
+- `RangeError` for an option out of range: a `cell` size that isn't finite and above 0, a `ramp` of fewer than 2 glyphs, an `edgeFade` outside 0–0.5, a `dpr` that isn't finite and above 0, or a `background` that isn't a valid colour or is fully transparent (or an `[r, g, b]` outside 0–1). A partly transparent colour is accepted and its alpha ignored.
 
 `set()` throws the same `RangeError`s for `background` and `edgeFade`. The first `draw()` links the shaders and throws `asciipaint: shader link failed` with the GPU's log if they don't link.

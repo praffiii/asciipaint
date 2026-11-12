@@ -4,6 +4,7 @@ import { open } from "./harness";
 declare global {
   interface Window {
     __contexts: Set<WebGL2RenderingContext>;
+    __demos: Set<Element>;
   }
 }
 
@@ -38,14 +39,22 @@ test("scrolling the whole landing page makes at most 6 WebGL2 contexts", async (
   }
 });
 
+/** Collects every `<ascii-img>` inside an option demo that fires `paint`; the event doesn't bubble, so it's caught going down. */
+const countDemos = `{
+  window.__demos = new Set();
+  document.addEventListener("paint", (e) => {
+    if (e.target instanceof Element && e.target.closest("[data-demo]")) window.__demos.add(e.target);
+  }, { capture: true });
+}`;
+
 test("scrolling the whole options page, every demo painted, makes at most 3 WebGL2 contexts", async () => {
-  const site = await open("/docs/options/", { init: countContexts });
+  const site = await open("/docs/options/", { init: countContexts + countDemos });
   const { page, errors } = site;
   try {
     const demos = page.locator("[data-demo]");
     expect(await demos.count()).toBe(4);
     for (let i = 0; i < 4; i++) await demos.nth(i).scrollIntoViewIfNeeded();
-    await page.locator("[data-demo] ascii-img").nth(3).waitFor({ state: "attached", timeout: 15000 });
+    await page.waitForFunction(() => window.__demos.size === 4, null, { timeout: 15000 });
     await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(1000);
     const count = await page.evaluate(() => window.__contexts.size);

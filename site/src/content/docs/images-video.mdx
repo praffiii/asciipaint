@@ -21,7 +21,7 @@ paint.draw(img);
 new ResizeObserver(() => paint.resize()).observe(canvas); // repaints the last frame at the new size
 ```
 
-Images smaller than the cell grid, and SVGs, are rasterised at the grid's sample size first, so small icons stay crisp.
+Images smaller than the sample grid (two samples per cell each way), and SVGs, are rasterised at the sample size first, so small icons stay crisp.
 
 ## A video
 

@@ -55,7 +55,7 @@ The canvas is drawn at its CSS size times `dpr`, which defaults to `devicePixelR
 const paint = asciipaint(canvas, { cell: [4, 6], dpr: 1 });
 ```
 
-`cell` and `dpr` are fixed when the paint is made; to change them, `dispose()` the paint and make a new one.
+`cell`, and a `dpr` you pass, are fixed when the paint is made; to change them, `dispose()` the paint and make a new one. The default `dpr` is read again on every `resize()`.
 
 ## Many pictures
 

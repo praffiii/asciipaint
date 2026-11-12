@@ -33,7 +33,7 @@ video.addEventListener("seeked", () => loop.requestFrame()); // the only frame s
 
 ## What each call does
 
-- `asciipaint(canvas, options)` takes a WebGL2 context on the canvas and builds the glyph atlas from the [options](/docs/options/). `cell`, `ramp`, `font` and `dpr` are fixed for the life of the paint.
+- `asciipaint(canvas, options)` takes a WebGL2 context on the canvas and builds the glyph atlas from the [options](/docs/options/). `cell`, `ramp` and `font` are fixed for the life of the paint, and so is `dpr` if you pass it. The default `dpr` is read again on every resize.
 - `paint.set()` changes `background`, `sparkle` and `edgeFade` without a rebuild.
 - `paint.draw(source)` paints one frame. It skips a video that has no frame yet and an image that hasn't loaded.
 - `autoRender(paint, frame)` calls `frame` at about 30 fps while the canvas is on screen and the tab is visible, and resizes the paint when the canvas resizes. Under reduced motion it paints only on request; see [Performance & autoRender](/docs/performance/).

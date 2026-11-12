@@ -23,7 +23,7 @@ Changing any of them but `alt` repaints. An invalid value logs a warning once an
 - `src`: the image. It loads with `crossOrigin = "anonymous"`, so an image from another origin needs CORS headers (`Access-Control-Allow-Origin`). Removing `src` clears the element.
 - `alt`: becomes the element's `aria-label`. The element also gets `role="img"` unless it already has a role.
 - `width` and `height`: CSS px. As with `<img>`, give one and the other follows the image's aspect ratio; give neither and it takes the image's natural size, or 150 × 150 when the image has none.
-- `background`: the paper. By default it is the first `background-color` up the ancestor chain that isn't fully transparent (stepping out of a shadow root to its host), or white if there is none. The same colour is used when the value isn't an opaque colour.
+- `background`: the paper. By default it is the first `background-color` up the ancestor chain that isn't fully transparent (stepping out of a shadow root to its host), or white if there is none. The same colour is used when the value isn't a valid colour or is fully transparent; a partly transparent colour is used with its alpha ignored.
 - `edge-fade`: the dithered edge dissolve, from 0 to 0.5. It defaults to 0 here, a hard edge, unlike `asciipaint()`.
 - `cell`: two sizes in CSS px, width then height, separated by a space. Default `"2.4 3.4"`.
 - `ramp`: glyphs from dark to bright, two or more. Default `"-=+*#%@"`.
