@@ -18,6 +18,9 @@
     "type": "git",
     "url": "git+https://github.com/praffiii/asciipaint.git"
   },
+  "workspaces": [
+    "site"
+  ],
   "files": [
     "dist"
   ],

@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test } from "vite-plus/test";
 import { open } from "./harness";
 
 test.each([1440, 390])("the landing page renders cleanly at %i px", async (width) => {

@@ -1,4 +1,4 @@
-import { afterEach, expect, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vite-plus/test";
 import { glyphFont } from "../../src/lib/glyph-font";
 
 const stub = (value: string) => {
