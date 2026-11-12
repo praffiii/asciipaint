@@ -2,15 +2,23 @@ export type Rgb = readonly [r: number, g: number, b: number]; // sRGB, 0–1
 export type Color = string | Rgb;
 
 export interface Options {
+  /** CSS px per glyph cell, `[width, height]`. Default `[2.4, 3.4]`. */
   cell?: readonly [number, number];
+  /** Glyphs from dark to bright, 2 or more. Default `"-=+*#%@"`. */
   ramp?: string;
+  /** A loaded monospace font: weight and family; any size is ignored. Default Geist Mono 600. */
   font?: string;
+  /** The opaque paper behind the art: a CSS colour or `[r, g, b]` in 0–1. Default `"#F4EEDF"`. */
   background?: Color;
+  /** Dithered edge dissolve depth as a fraction of the width, 0–0.5; 0 is a hard edge. */
   edgeFade?: number;
+  /** Bright isolated points become `*` / `+` in their own colour, with a glow. Default `false`. */
   sparkle?: boolean;
+  /** Device pixel ratio. Default `devicePixelRatio`, capped at 3. */
   dpr?: number;
 }
 
+/** The options `set()` changes without rebuilding the paint. */
 export type LiveOptions = Pick<Options, "background" | "edgeFade" | "sparkle">;
 
 export interface Resolved {

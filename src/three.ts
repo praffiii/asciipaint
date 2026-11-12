@@ -21,7 +21,12 @@ interface TextureProperties {
   __webglTexture: WebGLTexture;
 }
 
-/** Paints a three.js scene as glyphs, on the renderer's own WebGL2 context. */
+/**
+ * Paints a three.js scene as glyphs, on the renderer's own WebGL2 context. It always tone-maps with
+ * ACES Filmic at `renderer.toneMappingExposure` and outputs sRGB, whatever `renderer.toneMapping`
+ * and `outputColorSpace` say; set `renderer.toneMapping = ACESFilmicToneMapping` if you want the raw
+ * render to match. The scene's alpha is ignored: every cell is fully covered.
+ */
 export function asciipaintThree(
   renderer: WebGLRenderer,
   options: Omit<Options, "dpr"> = {},

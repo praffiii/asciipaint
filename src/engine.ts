@@ -23,8 +23,11 @@ export interface Engine {
 }
 
 /**
- * The two GPU passes on any WebGL2 context. Every GL state change happens inside `run()`, which
- * sets all the state it relies on, so the engine can share a context (three.js) safely.
+ * The two GPU passes on any WebGL2 context. Every GL state change happens inside `run()`. It binds
+ * its own program, VAO, textures, framebuffer and viewport, and resets the state a host like
+ * three.js commonly leaves set (blend, depth, stencil, scissor, cull, colour mask, samplers, and
+ * unpack flip / premultiply before its upload). The rest it assumes is at its default: no
+ * RASTERIZER_DISCARD, no PIXEL_UNPACK_BUFFER bound, zero UNPACK_ROW_LENGTH and UNPACK_SKIP_*.
  */
 export function createEngine(gl: WebGL2RenderingContext, o: Resolved): Engine {
   let edgeFade = o.edgeFade;

@@ -18,7 +18,9 @@ No bundler? Load it from a CDN:
 import { asciipaint } from "https://esm.sh/asciipaint"; // or cdn.jsdelivr.net/npm/asciipaint, unpkg.com/asciipaint
 ```
 
-`three` is an optional peer dependency (`>=0.170`), needed only for `asciipaint/three`.
+`three` is an optional peer dependency (`>=0.170`), needed only for `asciipaint/three` (plus `@types/three` in TypeScript).
+
+The default font, Geist Mono, is not bundled: load it yourself (for example from Google Fonts), or the glyphs fall back to `ui-monospace`.
 
 ## Use
 
@@ -31,7 +33,7 @@ The one-line path, an image as an element:
 <ascii-img src="/logos/claude.svg" alt="Claude" width="120" height="120"></ascii-img>
 ```
 
-Attributes: `src`, `alt`, `width`, `height`, `background`, `edge-fade`, `cell` (`"2.4 3.4"`), `ramp`. Changing one repaints. `edge-fade` defaults to 0 and `background` to the first non-transparent `background-color` up the ancestor chain (white if none). Every element shares one WebGL context.
+Attributes: `src`, `alt`, `width`, `height`, `background`, `edge-fade`, `cell` (`"2.4 3.4"`), `ramp`. Changing one repaints. `edge-fade` defaults to 0 and `background` to the first non-transparent `background-color` up the ancestor chain (white if none), which is also used when `background` isn't an opaque colour. Every element shares one WebGL context. Like `<img>`, it fires `error` when its image fails to load; it fires `paint` after each paint.
 
 Any image, video or canvas:
 
@@ -57,7 +59,10 @@ import { asciipaintThree } from "asciipaint/three";
 
 const paint = asciipaintThree(renderer, options);
 paint.render(scene, camera); // replaces renderer.render(scene, camera)
+await paint.compile(); // optional: compile the shaders up front, without blocking
 ```
+
+It always tone-maps with ACES Filmic at `renderer.toneMappingExposure` and outputs sRGB, whatever `renderer.toneMapping` and `outputColorSpace` say; set `renderer.toneMapping = ACESFilmicToneMapping` if you want the raw render to match. The scene's alpha is ignored: every cell is covered.
 
 Tip: set `background` to the colour at your source's edges. On a dark source the default cream edge fade speckles.
 
@@ -67,8 +72,8 @@ Tip: set `background` to the colour at your source's edges. On a dark source the
 | ------------ | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `cell`       | `[2.4, 3.4]`                                         | CSS px per glyph cell, `[width, height]`                                               |
 | `ramp`       | `"-=+*#%@"`                                          | Glyphs from dark to bright, 2 or more, spread across the full brightness range         |
-| `font`       | `'600 "Geist Mono", ui-monospace, Menlo, monospace'` | Any loaded monospace font                                                              |
-| `background` | `"#F4EEDF"`                                          | The paper the art sits on: a CSS colour or `[r, g, b]` in 0-1. Live via `set`          |
+| `font`       | `'600 "Geist Mono", ui-monospace, Menlo, monospace'` | Any loaded monospace font: weight and family; any size is ignored                      |
+| `background` | `"#F4EEDF"`                                          | The paper the art sits on: an opaque CSS colour or `[r, g, b]` in 0-1. Live via `set`  |
 | `edgeFade`   | `60 / 790` (about 0.076)                             | Dithered dissolve depth as a fraction of the width; 0 is a hard edge. Live via `set`   |
 | `sparkle`    | `false`                                              | Bright isolated points become `*` / `+` in their own colour, with glow. Live via `set` |
 | `dpr`        | device pixel ratio, capped at 3                      | Not available on `asciipaintThree`, which follows the renderer                         |
@@ -78,6 +83,7 @@ The source is cover-fitted to the canvas: it fills the canvas, keeps its aspect 
 ## Limits
 
 - It paints pixels. It cannot render arbitrary HTML or CSS components; draw them to a canvas first.
+- Images and videos from another origin need CORS headers (`Access-Control-Allow-Origin`), and an `<img>` you pass needs `crossOrigin = "anonymous"`; WebGL can't read them otherwise.
 - WebGL2 is required (every current evergreen browser). `asciipaint` throws if the context is unavailable.
 - Browser only. Importing it on the server does not crash and does nothing, but call it from client-side code (for example `useEffect`, or an Astro island).
 
