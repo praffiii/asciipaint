@@ -30,7 +30,9 @@ test("without WebGL2 the page still reads, the hero shows a still gradient and n
     );
     expect(await page.locator("h1").isVisible()).toBe(true);
     const titles = page.locator(".painted-title .painted-text");
-    for (let i = 0; i < (await titles.count()); i++) {
+    const count = await titles.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < count; i++) {
       expect(await titles.nth(i).evaluate((el) => getComputedStyle(el).color)).not.toBe("rgba(0, 0, 0, 0)");
     }
     await page.evaluate(() => new Promise((done) => setTimeout(done, 500)));

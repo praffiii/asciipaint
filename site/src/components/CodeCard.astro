@@ -12,7 +12,7 @@ interface Props {
   code: string;
   lang?: CodeProps["lang"];
   tone?: "dark" | "light";
-  /** Renders an empty `<pre><code id="code-<file>">` that client code fills. */
+  /** Renders `code` as plain text in `<pre><code id="code-<file>">`, for client code to replace. */
   live?: boolean;
 }
 const { file, note, code, lang = "ts", tone = "dark", live = false } = Astro.props;
@@ -28,7 +28,7 @@ const id = `code-${file.replace(/\W+/g, "-")}`;
   </figcaption>
   {
     live ? (
-      <pre class="card-live" tabindex="0"><code id={id} /></pre>
+      <pre class="card-live" tabindex="0"><code id={id}>{code}</code></pre>
     ) : (
       <Code id={id} code={code} lang={lang} theme={shikiNight} />
     )
