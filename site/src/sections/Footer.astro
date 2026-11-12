@@ -47,13 +47,16 @@ const links = [
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
+    --keycap-edge: var(--violet-deep);
   }
   .links {
+    --keycap-edge: var(--line);
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
   }
   .links :global(.keycap) {
+    background: var(--ink-2);
     padding: 10px 18px;
     font-size: 13px;
   }
