@@ -1,5 +1,7 @@
 # asciipaint
 
+Site and docs: https://asciipaint.pages.dev
+
 Paint any image, video, canvas or three.js scene as fine, coloured ASCII glyphs on WebGL2. From a distance it reads as a painting; up close it is text.
 
 <!-- TODO: demo screenshot -->
