@@ -117,6 +117,7 @@ pre {
 }
 .chip-violet {
   --chip-dot: var(--lavender);
+  box-shadow: none;
   background: var(--violet);
   color: var(--black);
 }

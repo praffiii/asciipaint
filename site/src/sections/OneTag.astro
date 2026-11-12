@@ -75,7 +75,14 @@ const stickers = LOGOS.map((logo, i) => {
           const art = sticker.querySelector("[data-art]");
           if (!logo || !art) return;
           const mark = night(logo);
-          const src = sticker.dataset.kind === "png" ? await pngUrl(mark) : svgUrl(mark);
+          let src = svgUrl(mark);
+          if (sticker.dataset.kind === "png") {
+            try {
+              src = await pngUrl(mark);
+            } catch (error) {
+              console.warn(`${logo.name}: its PNG couldn't be made, so the SVG is shown instead.`, error);
+            }
+          }
           const el = canPaint() ? document.createElement("ascii-img") : new Image();
           el.setAttribute("alt", `${logo.name} logo`);
           el.setAttribute("background", "#0A0D1F");

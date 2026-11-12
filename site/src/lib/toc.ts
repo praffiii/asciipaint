@@ -130,7 +130,8 @@ export function toc(root: HTMLElement): void {
   let raf = 0;
   let last = 0;
   const frame = (t: number) => {
-    phase += 0.0006 * (last ? t - last : 0);
+    // Capped, so the wave doesn't jump after the tab was hidden.
+    phase += 0.0006 * (last ? Math.min(t - last, 50) : 0);
     last = t;
     draw();
     raf = requestAnimationFrame(frame);

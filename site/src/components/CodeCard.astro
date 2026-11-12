@@ -86,11 +86,13 @@ const id = live ? name : uid(name);
     --keycap-edge: var(--cobalt);
   }
   .card-light .card-head :global(.keycap) {
+    border-color: var(--black);
     position: absolute;
     top: calc(var(--head) + var(--space-3));
     right: var(--space-3);
   }
-  .card-light :global(pre) {
+  /* Two classes, so it outranks the transparent `.card pre` below and the grain stays out of the slab. */
+  .card.card-light :global(pre) {
     border: 1.5px solid var(--black);
     box-shadow: var(--slab) var(--slab) 0 var(--cobalt);
     background: var(--lavender) !important;

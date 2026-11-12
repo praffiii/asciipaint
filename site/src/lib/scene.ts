@@ -7,6 +7,7 @@ import {
   HemisphereLight,
   IcosahedronGeometry,
   Line,
+  LoadingManager,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
@@ -121,9 +122,14 @@ function disposeTree(root: Object3D) {
   });
 }
 
-/** Parses a dropped `.glb`, or a `.gltf` with its data embedded. */
+/**
+ * Parses a dropped `.glb`, or a `.gltf` with its data embedded. The file stays local: any URI it names
+ * other than `data:` or `blob:` loads as empty instead of being fetched.
+ */
 export function parseGltf(data: ArrayBuffer): Promise<Object3D> {
+  const local = new LoadingManager();
+  local.setURLModifier((url) => (/^(data|blob):/.test(url) ? url : "data:,"));
   return new Promise((done, fail) => {
-    new GLTFLoader().parse(data, "", (gltf) => done(gltf.scene), fail);
+    new GLTFLoader(local).parse(data, "", (gltf) => done(gltf.scene), fail);
   });
 }

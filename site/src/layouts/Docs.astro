@@ -102,6 +102,13 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
   if (menu && open) {
     open.addEventListener("click", () => menu.showModal());
     menu.addEventListener("close", () => open.focus());
+    // A followed link closes it, and so does coming back to this page from the back-forward cache.
+    menu.addEventListener("click", (e) => {
+      if (e.target instanceof Element && e.target.closest("a")) menu.close();
+    });
+    addEventListener("pageshow", (e) => {
+      if (e.persisted) menu.close();
+    });
   }
 </script>
 

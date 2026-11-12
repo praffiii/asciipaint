@@ -38,6 +38,7 @@ export function tilt(el: HTMLElement, maxDeg = 4): () => void {
   };
 
   const onMove = (e: PointerEvent) => {
+    if (!visible) return; // off screen: no layout read on every move
     const r = el.getBoundingClientRect();
     const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
     const clamp = (v: number) => Math.max(-1, Math.min(1, v));
