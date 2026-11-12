@@ -9,7 +9,8 @@ const code = `const paint = asciipaint(canvas, {
   background: "#000000",
 });
 
-paint.set({ sparkle: true }); // live, no rebuild`;
+// live, no rebuild
+paint.set({ sparkle: true });`;
 const cards = OPTIONS.filter((row) => row.demo);
 const rows = OPTIONS.filter((row) => !row.demo);
 ---

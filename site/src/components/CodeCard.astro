@@ -127,4 +127,11 @@ const id = live ? name : uid(name);
   .card :global(pre code) {
     font: inherit;
   }
+  /* Phone code is 13 px, as in the phone frames, so their lines fit the card. */
+  @media (max-width: 639px) {
+    .card :global(pre) {
+      padding-inline: 12px;
+      font-size: 13px;
+    }
+  }
 </style>
