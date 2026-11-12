@@ -4,6 +4,9 @@ interface Props {
   tone?: "dark" | "violet" | "light";
   pressed?: boolean;
   size?: "sm" | "md";
+  role?: "tab";
+  id?: string;
+  tabindex?: number;
 }
 const { href, tone = "dark", pressed, size = "md", ...rest } = Astro.props;
 const cls = `keycap keycap-${tone} keycap-${size}`;

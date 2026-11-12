@@ -1,22 +1,14 @@
 ---
-import Band from "../components/Band.astro";
-import CodeCard from "../components/CodeCard.astro";
 import Ticker from "../components/Ticker.astro";
 import Base from "../layouts/Base.astro";
 import Hero from "../sections/Hero.astro";
-
-const cdn = `<script type="module">
-  import { asciipaint }
-    from "https://esm.sh/asciipaint";
-</script>`;
+import Install from "../sections/Install.astro";
 ---
 
 <Base title="asciipaint">
   <main id="main">
     <Hero />
     <Ticker />
-    <Band tone="lavender" grain edgeBelow="cobalt">
-      <CodeCard file="index.html" note="OR STRAIGHT FROM A CDN" code={cdn} lang="html" tone="dark" />
-    </Band>
+    <Install />
   </main>
 </Base>

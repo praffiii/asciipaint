@@ -1,0 +1,335 @@
+---
+import Band from "../components/Band.astro";
+import Chip from "../components/Chip.astro";
+import CodeCard from "../components/CodeCard.astro";
+import Keycap from "../components/Keycap.astro";
+import { MANAGERS } from "../lib/install";
+
+const cdn = `<script type="module">
+  import { asciipaint }
+    from "https://esm.sh/asciipaint";
+</script>`;
+
+const managers = Object.keys(MANAGERS) as (keyof typeof MANAGERS)[];
+const layers = [
+  { n: "01", title: "YOUR PICTURE", text: "Any image, video, canvas or three.js frame.", layer: "picture" },
+  { n: "02", title: "CELLS", text: "The frame splits into 2.4 × 3.4 px cells. Each takes its average colour.", layer: "cells" },
+  { n: "03", title: "GLYPHS", text: "Brightness picks a glyph from the ramp. The colour tints it.", layer: "glyphs" },
+] as const;
+const facts = ["CELL 2.4 × 3.4 PX", "RAMP -=+*#%@", "~6 KB"];
+---
+
+<Band tone="lavender" grain edgeBelow="cobalt" id="install">
+  <div class="wrap">
+    <div class="copy">
+      <Chip label="01 — INSTALL" />
+      <h2>Install in one line, <em>paint in three.</em></h2>
+      <p class="sub">One WebGL2 pass on the GPU. About 6 kB.</p>
+      <div class="tabs" role="tablist" aria-label="Package manager">
+        {
+          managers.map((name, i) => (
+            <Keycap
+              size="sm"
+              tone="light"
+              role="tab"
+              id={`tab-${name}`}
+              data-manager={name}
+              aria-selected={String(i === 0)}
+              aria-controls="install-panel"
+              tabindex={i === 0 ? 0 : -1}
+            >
+              {name}
+            </Keycap>
+          ))
+        }
+      </div>
+      <div class="cmd slab" id="install-panel" role="tabpanel" aria-labelledby="tab-npm">
+        <code id="install-command">$ <span id="install-cmd">{MANAGERS.npm}</span><span class="caret" aria-hidden="true"></span></code>
+        <Keycap tone="violet" size="sm" data-copy="install-cmd" aria-label="Copy install command">[ copy ]</Keycap>
+      </div>
+      <CodeCard file="index.html" note="OR STRAIGHT FROM A CDN" code={cdn} lang="html" tone="dark" />
+    </div>
+
+    <div class="how">
+      <p class="how-title"><Chip label="HOW IT PAINTS — ONE PASS ON THE GPU" tone="black" /></p>
+      <div class="stack" id="stack">
+        <span class="link link-l" aria-hidden="true"></span>
+        <span class="link link-r" aria-hidden="true"></span>
+        {
+          layers.map((l) => (
+            <div class={`step step-${l.layer}`}>
+              <p class="step-label"><b>{l.n} {l.title}</b><span>{l.text}</span></p>
+              <div class="layer" aria-hidden="true">
+                {l.layer === "glyphs" ? <div data-layer={l.layer} class="fill" /> : <canvas data-layer={l.layer} class="fill" />}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <ul class="facts">{facts.map((f) => <li><Chip label={f} tone="black" /></li>)}</ul>
+    </div>
+  </div>
+</Band>
+
+<script>
+  import { install } from "../lib/install";
+  install(document);
+</script>
+
+<style>
+  .wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 565px) minmax(0, 1fr);
+    gap: var(--space-5) var(--space-6);
+    max-width: 1312px;
+    margin: 0 auto;
+  }
+  .copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+  .copy > :global(.card) {
+    align-self: stretch;
+  }
+  h2 {
+    font-size: var(--display-lg);
+    line-height: 1;
+    letter-spacing: -0.015em;
+  }
+  h2 em {
+    display: block;
+  }
+  .sub {
+    margin: 0;
+    text-wrap: balance;
+    font-size: var(--body-lg);
+  }
+  .tabs {
+    display: flex;
+    gap: var(--space-3);
+  }
+  .tabs :global(.keycap[aria-selected="true"]) {
+    background: var(--violet);
+    color: var(--black);
+    transform: translate(var(--keycap), var(--keycap));
+    box-shadow: 0 0 0 var(--keycap-edge); /* the pressed look, still a hard edge */
+  }
+  .cmd {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+    background: var(--navy);
+    color: var(--lavender);
+    border: 1.5px solid var(--cobalt);
+    --focus: var(--blue-light);
+    font: 500 18px/1.2 var(--font-mono);
+  }
+  .cmd code {
+    font: inherit;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .caret {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.1em;
+    margin-left: 6px;
+    vertical-align: text-bottom;
+    background: var(--violet);
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .how {
+    min-width: 0;
+  }
+  .how-title {
+    margin: 0 0 var(--space-4);
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Skewed stack: three diamonds, 150 px apart, labelled on the left. */
+  .stack {
+    --side: 300px;
+    --pitch: 150px;
+    position: relative;
+    perspective: 1400px;
+    margin-top: -70px; /* the skew leaves the top of each layer box empty */
+    width: 100%;
+    max-width: 640px;
+    height: calc(var(--pitch) * 2 + var(--side) * 0.8);
+  }
+  .step {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--pitch) * var(--i));
+    height: var(--side);
+  }
+  .step-picture { --i: 0; }
+  .step-cells { --i: 1; }
+  .step-glyphs { --i: 2; }
+  .step-label {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 50%;
+    width: 190px;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    transform: translateY(-50%);
+    border: 1.5px solid var(--navy);
+    background: var(--lavender);
+    font: 400 14px/1.35 var(--font-body);
+    color: var(--navy);
+  }
+  .step-label b {
+    display: block;
+    margin-bottom: 4px;
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.04em;
+    color: var(--violet-ink);
+  }
+  .step-label::after {
+    content: "";
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    width: var(--space-4);
+    border-top: 1.5px dashed var(--navy);
+  }
+  .layer {
+    position: absolute;
+    left: calc(190px + (100% - 190px) / 2 - var(--side) / 2);
+    width: var(--side);
+    height: var(--side);
+    transform: rotateX(60deg) rotateZ(-45deg);
+    border: 1.5px solid var(--navy);
+    box-shadow: 8px 8px 0 var(--cobalt);
+    background: #02030a;
+  }
+  .fill {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .layer :global(ascii-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .link {
+    position: absolute;
+    top: calc(var(--side) / 2);
+    height: calc(var(--pitch) * 2);
+    border-left: 1.5px dashed var(--navy);
+  }
+  .link-l { left: calc(190px + (100% - 190px) / 2 - var(--side) * 0.7071); }
+  .link-r { left: calc(190px + (100% - 190px) / 2 + var(--side) * 0.7071); }
+
+  @media (max-width: 1099px) {
+    .wrap {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .copy {
+      max-width: 565px;
+    }
+    .stack {
+      margin: -70px auto 0;
+    }
+  }
+
+  /* Phone: no skew, three squares in a row, titles underneath. */
+  @media (max-width: 767px) {
+    h2 {
+      font-size: var(--display-md);
+      letter-spacing: -0.01em;
+    }
+    .tabs {
+      align-self: stretch;
+    }
+    .tabs :global(.keycap) {
+      flex: 1;
+      text-align: center;
+    }
+    .cmd {
+      font-size: 16px;
+    }
+    .how-title :global(.chip) {
+      background: none;
+      color: var(--navy);
+      padding: 0;
+    }
+    .stack {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+      height: auto;
+      margin-top: 0;
+      perspective: none;
+    }
+    .link {
+      display: none;
+    }
+    .step {
+      position: static;
+      height: auto;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: var(--space-2);
+    }
+    .step-label {
+      position: static;
+      width: auto;
+      padding: 0;
+      border: 0;
+      background: none;
+      transform: none;
+    }
+    .step-label::after {
+      display: none;
+    }
+    .step-label b {
+      color: var(--navy);
+    }
+    .step-label span {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .layer {
+      position: relative;
+      left: auto;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1;
+      transform: none;
+      box-shadow: 4px 4px 0 var(--cobalt);
+    }
+    .facts {
+      justify-content: flex-start;
+    }
+  }
+</style>

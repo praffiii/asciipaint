@@ -5,11 +5,13 @@ interface Props {
   tone: Tone;
   grain?: boolean;
   edgeBelow?: Tone;
+  id?: string;
 }
-const { tone, grain, edgeBelow } = Astro.props;
+const { tone, grain, edgeBelow, id } = Astro.props;
 ---
 
 <section
+  id={id}
   class={`band band-${tone}`}
   data-edged={edgeBelow ? "" : undefined}
   data-grain={grain ? `${hex[tone]} ${tone === "lavender" ? "#2440D0 0.18" : "#0A0D1F 0.25"}` : undefined}
