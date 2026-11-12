@@ -21,9 +21,9 @@ it("reads every source's size", () => {
       videoHeight: 360,
       width: 0,
       height: 0,
-    } as unknown as HTMLVideoElement),
+    } as HTMLVideoElement),
   ).toEqual({ width: 640, height: 360 });
-  expect(sourceSize({ displayWidth: 320, displayHeight: 240 } as unknown as VideoFrame)).toEqual({
+  expect(sourceSize({ displayWidth: 320, displayHeight: 240 } as VideoFrame)).toEqual({
     width: 320,
     height: 240,
   });
@@ -33,7 +33,7 @@ it("reads every source's size", () => {
       naturalHeight: 600,
       width: 10,
       height: 10,
-    } as unknown as HTMLImageElement),
+    } as HTMLImageElement),
   ).toEqual({ width: 800, height: 600 });
   expect(sourceSize({ width: 50, height: 40 } as HTMLCanvasElement)).toEqual({
     width: 50,

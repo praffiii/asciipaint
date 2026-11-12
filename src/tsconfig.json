@@ -1,0 +1,5 @@
+{
+  // The library alone: no Node or Bun globals, which tests and scripts pull in through their types.
+  "extends": "../tsconfig.json",
+  "include": ["."]
+}

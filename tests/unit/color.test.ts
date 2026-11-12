@@ -13,5 +13,6 @@ it("parses hex and rgb", () => {
 it("passes tuples through and rejects out-of-range ones", () => {
   expect(toRgb([0.5, 0, 1])).toEqual([0.5, 0, 1]);
   expect(() => toRgb([2, 0, 0])).toThrow(RangeError);
-  expect(() => toRgb([0, 0] as unknown as [number, number, number])).toThrow(RangeError);
+  // @ts-expect-error a 2-tuple isn't an Rgb; the runtime check is for untyped callers
+  expect(() => toRgb([0, 0])).toThrow(RangeError);
 });

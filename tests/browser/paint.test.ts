@@ -285,13 +285,9 @@ it("rasterises a viewBox-only SVG without a refused WebGL upload", async () => {
   );
   const p = make(48, 34, { edgeFade: 0, dpr: 2, background: [1, 0, 0] });
   const gl = p.canvas.getContext("webgl2")!;
-  const uploads: unknown[] = [];
-  const texImage2D = gl.texImage2D.bind(gl) as (...a: unknown[]) => void;
-  gl.texImage2D = ((...a: unknown[]) => {
-    uploads.push(a.at(-1));
-    texImage2D(...a);
-  }) as typeof gl.texImage2D;
+  const texImage2D = vi.spyOn(gl, "texImage2D");
   p.draw(img);
+  const uploads = texImage2D.mock.calls.map((a) => a.at(-1));
   expect(uploads.length).toBeGreaterThan(0);
   expect(uploads).not.toContain(img);
   expect(gl.getError()).toBe(gl.NO_ERROR);
