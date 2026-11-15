@@ -119,16 +119,3 @@ test("at 390 px the whole landing has no sideways scroll", async () => {
     await site.close();
   }
 });
-
-test("under reduced motion the ticker stands still", async () => {
-  const site = await open("/", { reducedMotion: true });
-  const { page } = site;
-  try {
-    const running = await page
-      .locator(".ticker-track")
-      .evaluate((el) => el.getAnimations().filter((a) => a.playState === "running").length);
-    expect(running).toBe(0);
-  } finally {
-    await site.close();
-  }
-});

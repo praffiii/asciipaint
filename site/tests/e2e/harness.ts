@@ -57,10 +57,10 @@ export interface Opened {
   close(): Promise<void>;
 }
 
-/** Opens `path` of the built site in headless Chromium; `init` is a script run before the page's own. */
+/** Opens `path` of the built site in headless Chromium; `init` is a script run before the page's own, and requests matching the `block` glob are aborted from the start. */
 export async function open(
   path: string,
-  opts: { width?: number; reducedMotion?: boolean; init?: string } = {},
+  opts: { width?: number; reducedMotion?: boolean; init?: string; block?: string } = {},
 ): Promise<Opened> {
   const site = await serve();
   const browser = await chromium
@@ -85,6 +85,7 @@ export async function open(
       if (m.type() === "error") errors.push(m.text());
     });
     if (opts.init) await page.addInitScript(opts.init);
+    if (opts.block) await page.route(opts.block, (route) => route.abort());
     await page.goto(site.url + path, { waitUntil: "load" });
     return { page, errors, close };
   } catch (error) {

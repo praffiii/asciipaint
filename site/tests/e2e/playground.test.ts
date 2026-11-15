@@ -142,7 +142,8 @@ test("a dropped picture is painted without a single network request", async () =
   const { page, errors } = site;
   try {
     const requests: string[] = [];
-    page.on("request", (r) => requests.push(r.url()));
+    // A blob: URL is local (the page's own painted stills use them), so it is not a network request.
+    page.on("request", (r) => r.url().startsWith("blob:") || requests.push(r.url()));
     await drop(page, "dot.png", pngDataUrl());
     await page.locator('[data-playground][data-painting="file"]').waitFor({ state: "attached" });
     expect(requests).toEqual([]);
@@ -160,7 +161,8 @@ test("a wrong or broken file is refused and the liquid keeps painting", async ()
   const { page, errors } = site;
   try {
     const requests: string[] = [];
-    page.on("request", (r) => requests.push(r.url()));
+    // A blob: URL is local (the page's own painted stills use them), so it is not a network request.
+    page.on("request", (r) => r.url().startsWith("blob:") || requests.push(r.url()));
     await drop(page, "notes.txt", `data:text/plain;base64,${btoa("hello")}`);
     await page.locator("[data-message]").filter({ hasText: "Drop an image, a .glb or a .gltf." }).waitFor();
     await drop(page, "broken.png", `data:image/png;base64,${btoa("not a png")}`);
@@ -234,10 +236,10 @@ test("Tab runs sources, slider, ramp keys, EDIT, swatches, sparkle, then copy", 
 });
 
 test("when the playground's code can't load, its message line says so and nothing throws", async () => {
-  const site = await open("/");
+  // Blocked before the page loads: the playground starts loading as soon as it is near the viewport.
+  const site = await open("/", { block: "**/playground.*.js" });
   const { page, errors } = site;
   try {
-    await page.route("**/playground.*.js", (route) => route.abort());
     await page.locator("#playground").scrollIntoViewIfNeeded();
     await page
       .locator("[data-message]")

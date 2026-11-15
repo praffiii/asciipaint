@@ -25,7 +25,7 @@ const live = (page: Page) => page.evaluate(() => [...window.__contexts].filter((
 
 /** Scrolls `/` from the hero to the footer, then waits until every live part has painted. */
 async function scrollLanding(page: Page) {
-  for (const band of [".hero", ".ticker", "#install", "#playground", "#one-tag", "#three", "footer"]) {
+  for (const band of [".hero", "#install", "#playground", "#one-tag", "#three", "footer"]) {
     await page.locator(band).first().scrollIntoViewIfNeeded();
     await page.waitForTimeout(1000);
   }

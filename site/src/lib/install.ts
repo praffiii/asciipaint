@@ -1,7 +1,6 @@
-import { cellCanvas } from "./layers";
+import { asciipaint, autoRender } from "asciipaint";
 import { wireCopy } from "./copy";
 import { liquid } from "./liquid";
-import { paintStill } from "./still";
 
 export const MANAGERS = {
   npm: "npm i asciipaint",
@@ -14,11 +13,11 @@ type Manager = keyof typeof MANAGERS;
 
 const isManager = (name: string | undefined): name is Manager => !!name && name in MANAGERS;
 
-/** The manager tabs (WAI-ARIA tabs, roving tabindex) and the three-layer stack. */
+/** The manager tabs (WAI-ARIA tabs, roving tabindex) and the live result of the three lines. */
 export function install(root: ParentNode): void {
   wireCopy(root);
   wireTabs(root);
-  wireStack(root);
+  wireDemo(root);
 }
 
 function wireTabs(root: ParentNode): void {
@@ -58,34 +57,28 @@ function wireTabs(root: ParentNode): void {
   });
 }
 
-const CELL = [8, 11] as const;
-
-/** One liquid frame at t = 18 becomes the picture, its cells and its glyphs, once the stack is in view. */
-function wireStack(root: ParentNode): void {
-  const stack = root.querySelector<HTMLElement>("#stack");
-  const picture = stack?.querySelector<HTMLCanvasElement>('[data-layer="picture"]');
-  const cells = stack?.querySelector<HTMLCanvasElement>('[data-layer="cells"]');
-  const glyphs = stack?.querySelector<HTMLElement>('[data-layer="glyphs"]');
-  if (!stack || !picture || !cells || !glyphs) return;
-
-  const visible = new IntersectionObserver((entries) => {
-    if (!entries.some((e) => e.isIntersecting)) return;
-    visible.disconnect();
-    const painter = liquid();
-    if (!painter) return; // the layers stay as empty slabs; the labels still say it all
-    const scale = Math.min(devicePixelRatio, 2);
-    // Layout size: the layers are skewed, so their bounding boxes are not their sizes.
-    picture.width = Math.round(picture.offsetWidth * scale);
-    picture.height = Math.round(picture.offsetHeight * scale);
-    picture.getContext("2d")?.drawImage(painter.frame(18, picture.width, picture.height, "night"), 0, 0);
-
-    const flat = cellCanvas(picture, [CELL[0] * scale, CELL[1] * scale]);
-    cells.width = flat.width;
-    cells.height = flat.height;
-    cells.getContext("2d")?.drawImage(flat, 0, 0);
-
-    glyphs.addEventListener("paint", () => (glyphs.dataset.painted = ""), { capture: true, once: true });
-    paintStill(glyphs, () => picture, { cell: CELL.join(" "), background: "#02030A" }, true);
-  });
-  visible.observe(stack);
+/** The three lines beside it, run for real: `asciipaint(canvas)` with every default, drawing the liquid. */
+function wireDemo(root: ParentNode): void {
+  const canvas = root.querySelector<HTMLCanvasElement>("[data-install-demo]");
+  const figure = canvas?.closest("figure");
+  if (!canvas || !figure) return;
+  const hide = () => (figure.dataset.fallback = "");
+  if (!liquid()) return void hide();
+  try {
+    const paint = asciipaint(canvas);
+    const dpr = Math.min(devicePixelRatio, 2);
+    autoRender(
+      paint,
+      (now) => {
+        const w = Math.round(canvas.clientWidth * dpr);
+        const h = Math.round(canvas.clientHeight * dpr);
+        const frame = w && h ? liquid()?.frame(now / 1000, w, h, "night") : undefined;
+        if (frame) paint.draw(frame);
+      },
+      { onContextLost: hide },
+    );
+  } catch (error) {
+    console.warn("asciipaint couldn't start the install demo.", error);
+    hide();
+  }
 }
