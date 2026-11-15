@@ -180,6 +180,13 @@ export function playground(root: HTMLElement): void {
     renderSnippet();
   };
 
+  /** A picked value (source, paper, sparkle) lands out of a short blur instead of snapping; dragged ones stay instant. */
+  const settle = () => {
+    for (const canvas of [flat, solid]) {
+      canvas.animate([{ opacity: 0.5, filter: "blur(3px)" }, { opacity: 1, filter: "blur(0)" }], { duration: 180, easing: "ease-out" });
+    }
+  };
+
   function setBackground(hex: string) {
     settings.background = hex;
     for (const s of swatches) s.setAttribute("aria-pressed", String(s.dataset.swatch === hex));
@@ -229,6 +236,7 @@ export function playground(root: HTMLElement): void {
     }
     setBackground(edge ?? DEFAULT_SETTINGS.background);
     start();
+    settle();
     renderSnippet();
   }
 
@@ -344,6 +352,7 @@ export function playground(root: HTMLElement): void {
       if (!hex) return;
       setBackground(hex);
       live({ background: hex });
+      settle();
     });
   }
   for (const toggle of sparkles) {
@@ -351,6 +360,7 @@ export function playground(root: HTMLElement): void {
       settings.sparkle = toggle.dataset.sparkle === "on";
       for (const t of sparkles) t.setAttribute("aria-pressed", String(t === toggle));
       live({ sparkle: settings.sparkle });
+      settle();
     });
   }
 
