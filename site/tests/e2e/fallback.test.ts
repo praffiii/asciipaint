@@ -9,15 +9,10 @@ const denyWebGL2 = (when: string) => `{
   };
 }`;
 
-/** The painted slab shows the lens unclipped, and nothing claims to be live. */
+/** The hero says it isn't painting, and its readout claims nothing. */
 async function expectFallback({ page }: Opened, mode: "gradient" | "source") {
   await page.locator(`.hero[data-fallback="${mode}"]`).waitFor({ state: "attached" });
-  expect(await page.locator("[data-hero-painted]").isVisible()).toBe(false);
-  const lens = page.locator("[data-lens]");
-  expect(await lens.isVisible()).toBe(true);
-  expect(await lens.evaluate((el) => getComputedStyle(el).clipPath)).toBe("none");
-  expect(await page.locator("[data-readout]").innerText()).toMatch(/^02 PAINTED · \d+ × \d+ CELLS$/);
-  expect(await page.locator(".hud").isVisible()).toBe(false);
+  expect(await page.locator("[data-readout]").isVisible()).toBe(false);
 }
 
 test("without WebGL2 the page still reads, the hero shows a still gradient and nothing throws", async () => {
@@ -25,7 +20,7 @@ test("without WebGL2 the page still reads, the hero shows a still gradient and n
   const { page, errors } = site;
   try {
     await expectFallback(site, "gradient");
-    expect(await page.locator("[data-lens]").evaluate((el) => getComputedStyle(el).backgroundImage)).toContain(
+    expect(await page.locator("[data-field]").evaluate((el) => getComputedStyle(el).backgroundImage)).toContain(
       "linear-gradient",
     );
     expect(await page.locator("h1").isVisible()).toBe(true);
@@ -42,17 +37,17 @@ test("without WebGL2 the page still reads, the hero shows a still gradient and n
   }
 });
 
-test("when only the hero's painting fails, its slab shows the live unpainted source", async () => {
-  const site = await open("/", { init: denyWebGL2('this.hasAttribute("data-hero-painted")') });
+test("when only the hero's painting fails, it shows the live unpainted source", async () => {
+  const site = await open("/", { init: denyWebGL2('this.hasAttribute("data-hero-level")') });
   const { page, errors } = site;
   try {
     await expectFallback(site, "source");
-    // The lens copies the liquid source, so it holds real pixels rather than a CSS backdrop.
+    // The field copies the liquid source, so it holds real pixels rather than a CSS backdrop.
     await page.waitForFunction(() => {
-      const lens = document.querySelector<HTMLCanvasElement>("[data-lens]");
-      const ctx = lens?.getContext("2d");
-      if (!lens?.width || !ctx) return false;
-      const px = ctx.getImageData(lens.width / 2, lens.height / 2, 1, 1).data;
+      const view = document.querySelector<HTMLCanvasElement>("[data-hero-painted]");
+      const ctx = view?.getContext("2d");
+      if (!view?.width || !ctx) return false;
+      const px = ctx.getImageData(view.width / 2, view.height / 2, 1, 1).data;
       return (px[0] ?? 0) + (px[1] ?? 0) + (px[2] ?? 0) > 0;
     });
     expect(errors).toEqual([]);

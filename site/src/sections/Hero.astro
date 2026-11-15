@@ -4,36 +4,24 @@ import Keycap from "../components/Keycap.astro";
 ---
 
 <section class="hero" aria-labelledby="hero-title">
-  <div class="pitch">
-    <p class="facts">
-      ~6 KB <span class="sep">·</span> <span class="wide">ZERO DEPENDENCIES</span><span class="narrow">ZERO DEPS</span> <span class="sep">·</span> WEBGL2
-    </p>
-    <h1 id="hero-title">Paint <span class="line">anything as</span> <span class="line"><em>coloured</em> ASCII.</span></h1>
+  <div class="field" data-field aria-hidden="true">
+    <canvas data-hero-painted></canvas>
+    <p class="readout" data-readout><span class="dot"></span><span class="wide">CELLS </span>24 × 36 → 3 × 4.5<span class="live"> · <span data-resolved>0%</span> RESOLVED · LIVE</span></p>
+  </div>
+  <div class="strip">
+    <div class="say">
+      <h1 id="hero-title">Paint anything as coloured ASCII.</h1>
+      <p class="facts">
+        ~6 KB <span class="sep">·</span> <span class="wide">ZERO DEPENDENCIES</span><span class="narrow">ZERO DEPS</span> <span class="sep">·</span> WEBGL2
+      </p>
+    </div>
     <p class="sub">
-      Any image, video, canvas or three.js scene, painted in fine coloured glyphs. One WebGL2 pass, about 6 kB.
+      Any image, video, canvas or three.js scene, painted in coloured glyphs. Move across the picture above to resolve it.
     </p>
     <div class="keys">
       <Keycap data-copy="hero-npm" aria-label="Copy npm i asciipaint">$ <span id="hero-npm">npm i asciipaint</span> <span aria-hidden="true" data-copied="✓">⧉</span></Keycap>
       <Keycap href="#playground" tone="violet"><span class="wide">Try your picture</span><span class="narrow">Try it</span> ↓</Keycap>
     </div>
-  </div>
-
-  <div class="stage" aria-hidden="true">
-    <div class="slabs" data-tilt>
-      <div class="slab slab-original"><canvas data-source></canvas></div>
-      <div class="slab slab-painted" data-lens-slab>
-        <canvas data-hero-painted></canvas>
-        <canvas class="lens" data-lens></canvas>
-      </div>
-    </div>
-    <svg class="leads" viewBox="0 0 1440 900" preserveAspectRatio="none">
-      <path d="M790 125 900 186M740 846 880 712" />
-      <circle cx="900" cy="186" r="3.5" />
-      <circle cx="880" cy="712" r="3.5" />
-    </svg>
-    <p class="label label-01"><span class="n">01</span> THE ORIGINAL</p>
-    <p class="label label-02" data-readout><span class="n">02</span> PAINTED<span class="wide"> · <span data-cells>316 × 138</span> CELLS</span><span class="live"> · LIVE</span></p>
-    <p class="hud"><span class="dot"></span>LIVE · 30 FPS · DRAG TO TILT</p>
   </div>
 </section>
 
@@ -47,79 +35,112 @@ import Keycap from "../components/Keycap.astro";
 </script>
 
 <style>
-  /* One unit: a px of the 1440 px desktop frame (or the 390 px phone frame), scaled to the viewport. */
+  /* The painting fills the first screen; the pitch is one quiet strip under it. */
   .hero {
-    --u: calc(100cqw / 1440);
-    --sw: 760;
-    --sh: 470;
-    --edge: 16;
-    container-type: inline-size;
-    position: relative;
     display: grid;
-    overflow: hidden;
-    background:
-      radial-gradient(circle at 1.5px 1.5px, var(--line) 1.2px, transparent 1.6px) 0 0 / 24px 24px,
-      var(--black);
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100svh;
+    min-height: 600px;
+    background: var(--black);
   }
-  .hero > * {
-    grid-area: 1 / 1;
-    min-width: 0;
+  .field {
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: crosshair;
+  }
+  .field canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 400ms;
+  }
+  .hero[data-live] .field canvas,
+  .hero[data-fallback="source"] .field canvas {
+    opacity: 1;
+  }
+  .hero[data-fallback="gradient"] .field {
+    background: linear-gradient(125deg, #0e1a5c, #2440d0 40%, #7c5cf2 70%, #3b1e9a);
+  }
+  .readout {
+    position: absolute;
+    left: max(16px, 2.2vw);
+    bottom: 20px;
+    margin: 0;
+    padding: 7px 10px;
+    background: var(--black);
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: var(--lavender);
+  }
+  .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 8px;
+    background: var(--violet);
+  }
+  /* Not painting: no claim about cells. Holding one frame under reduced motion: no claim of LIVE. */
+  .hero[data-fallback] .readout {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live {
+      display: none;
+    }
   }
 
-  .hero :global(.keycap) {
-    padding: 8px 14px;
-    font: 500 13px/16px var(--font-mono);
+  .strip {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-5);
+    padding: 26px max(16px, 2.2vw);
+    border-top: 1px solid var(--line);
   }
-  .pitch {
-    position: relative;
-    z-index: 2;
-    align-self: start;
-    max-width: calc(580px + max(16px, calc(64 * var(--u))));
-    margin-top: max(110px, calc(266 * var(--u)));
-    padding: 0 0 var(--space-5) max(16px, calc(64 * var(--u)));
+  .say {
+    display: grid;
+    gap: 10px;
+  }
+  h1 {
+    font-size: 30px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: var(--lavender);
   }
   .facts {
     margin: 0;
     font: 500 11px/13px var(--font-mono);
     letter-spacing: 0.06em;
-    color: var(--violet);
+    color: var(--lilac);
   }
   .sep {
     margin: 0 6px;
   }
-  h1 {
-    margin-top: 22px;
-    font-size: var(--display-xl);
-    line-height: 1.04;
-    letter-spacing: -0.02em;
-    color: var(--lavender);
-  }
-  h1 em {
-    color: var(--violet);
-  }
-  /* The frame's three lines: Paint / anything as / coloured ASCII. */
-  .line {
-    white-space: nowrap;
-  }
   .sub {
-    max-width: 400px;
-    margin: 22px 0 0;
-    font: 400 16px/25px var(--font-body);
+    max-width: 52ch;
+    margin: 0;
+    font: 400 15px/23px var(--font-body);
     color: var(--muted);
   }
   .keys {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 22px;
+    gap: 14px;
+  }
+  .hero :global(.keycap) {
+    padding: 8px 14px;
+    font: 500 13px/16px var(--font-mono);
   }
   .narrow {
     display: none;
   }
 
-  /* Load: the pitch comes in line by line, then the stage, then its labels. The slabs rise as one,
-     on the stage: an opacity of their own would pull each out of the 3D stack they share, and the
-     original would sit over the painted one, lens and all, until it finished. */
+  /* Load: the strip comes in piece by piece under the painting, which fades in when it first draws. */
   @keyframes rise {
     from {
       opacity: 0;
@@ -134,8 +155,7 @@ import Keycap from "../components/Keycap.astro";
   @media (prefers-reduced-motion: no-preference) {
     .facts,
     .sub,
-    .keys,
-    .stage {
+    .keys {
       animation: rise 500ms var(--ease-out) backwards;
     }
     h1 {
@@ -147,13 +167,7 @@ import Keycap from "../components/Keycap.astro";
     .keys {
       animation-delay: 180ms;
     }
-    .stage {
-      animation-duration: 600ms;
-      animation-delay: 220ms;
-    }
-    .leads,
-    .label,
-    .hud {
+    .readout {
       animation: appear 400ms ease 650ms backwards;
     }
   }
@@ -173,210 +187,35 @@ import Keycap from "../components/Keycap.astro";
     -webkit-text-fill-color: var(--violet);
   }
 
-  .stage {
-    position: relative;
-    height: calc(900 * var(--u));
-    background: radial-gradient(
-      calc(490 * var(--u)) calc(260 * var(--u)) at calc(1010 * var(--u)) calc(530 * var(--u)),
-      rgb(36 64 208 / 0.4),
-      transparent
-    );
-  }
-  .slabs {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-  }
-  .slab {
-    position: absolute;
-    left: calc(var(--x) * var(--u));
-    top: calc(var(--y) * var(--u));
-    width: calc(var(--sw) * var(--u));
-    height: calc(var(--sh) * var(--u));
-    transform-origin: 0 0;
-    transform: matrix(0.98, 0.18, -0.46, 0.89, 0, 0);
-    background: var(--navy);
-    outline: 1px solid rgb(236 232 255 / 0.7);
-    /* The edge is 16 px straight down on screen: the pose's inverse of (0, 16) in the slab's own space. */
-    box-shadow:
-      calc(var(--edge) * 0.4817 * var(--u)) calc(var(--edge) * 1.0262 * var(--u)) 0 var(--cobalt),
-      0 0 120px rgb(36 64 208 / 0.35);
-  }
-  .slab-original {
-    --x: 640;
-    --y: 130;
-  }
-  .slab-painted {
-    --x: 730;
-    --y: 260;
-    touch-action: pan-y;
-  }
-  .slab canvas {
-    position: absolute;
-    inset: 0;
-    display: block;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  [data-hero-painted] {
-    opacity: 0;
-    transition: opacity 400ms;
-  }
-  .hero[data-live] [data-hero-painted] {
-    opacity: 1;
-  }
-  .lens {
-    clip-path: circle(0 at 50% 50%);
-  }
-  /* Not painting live: no painted canvas and no claim of LIVE. */
-  .hero[data-fallback] [data-hero-painted],
-  .hero[data-fallback] .live,
-  .hero[data-fallback] .hud {
-    display: none;
-  }
-  /* Under reduced motion the hero holds one frame and the slabs don't tilt, so it claims neither. */
-  @media (prefers-reduced-motion: reduce) {
-    .live,
-    .hud {
+  @media (max-width: 1280px) {
+    .strip {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .sub {
       display: none;
     }
   }
-  .hero[data-fallback] .lens {
-    clip-path: none !important;
-  }
-  .hero[data-fallback="gradient"] .slab canvas {
-    background: linear-gradient(125deg, #0e1a5c, #2440d0 40%, #7c5cf2 70%, #3b1e9a);
-  }
-
-  .leads {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-  }
-  .leads path {
-    fill: none;
-    stroke: var(--lavender);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-  }
-  .leads circle {
-    fill: var(--lavender);
-  }
-  .label,
-  .hud {
-    position: absolute;
-    margin: 0;
-    font: 500 11px/13px var(--font-mono);
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    color: var(--lavender);
-  }
-  .label {
-    padding: 7px 10px;
-    background: var(--black);
-    border: 1px solid var(--lavender);
-    box-shadow: 3px 3px 0 var(--cobalt);
-  }
-  .label .n {
-    color: var(--violet);
-  }
-  .label-01 {
-    left: calc(760 * var(--u));
-    top: calc(96 * var(--u));
-  }
-  .label-02 {
-    left: calc(700 * var(--u));
-    top: calc(846 * var(--u));
-  }
-  .hud {
-    right: max(16px, calc(32 * var(--u)));
-    top: calc(856 * var(--u));
-    padding: 6px 10px 6px 25px;
-    background: var(--navy);
-  }
-  .dot {
-    position: absolute;
-    left: 10px;
-    top: 9px;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--violet);
-  }
-
   @media (max-width: 640px) {
-    .hero {
-      --u: calc(100cqw / 390);
-      --sw: 301;
-      --sh: 186;
-      --edge: 10;
+    .strip {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+      padding: 20px 16px 24px;
+    }
+    h1 {
+      font-size: 26px;
+      white-space: normal;
+    }
+    .sub {
       display: block;
     }
-    .leads,
-    .hud,
     .wide {
       display: none;
     }
     .narrow {
       display: inline;
     }
-    .line {
-      white-space: normal;
-    }
-    .pitch {
-      /* The banner lies over the hero: its 16 px inset and 34 px keys, then the frame's 43 px. */
-      margin-top: 93px;
-      padding: 0 16px;
-    }
-    h1 {
-      margin-top: 16px;
-      font-size: 44px;
-      line-height: 1.03;
-      letter-spacing: -0.015em;
-    }
-    .sub {
-      max-width: 340px;
-      margin-top: 16px;
-    }
-    .keys {
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .stage {
-      height: calc(356 * var(--u));
-      margin-top: calc(47 * var(--u));
-      background: radial-gradient(
-        calc(210 * var(--u)) calc(150 * var(--u)) at calc(200 * var(--u)) calc(176 * var(--u)),
-        rgb(36 64 208 / 0.4),
-        transparent
-      );
-    }
-    .slab {
-      box-shadow:
-        calc(var(--edge) * 0.4817 * var(--u)) calc(var(--edge) * 1.0262 * var(--u)) 0 var(--cobalt),
-        0 0 60px rgb(36 64 208 / 0.35);
-    }
-    .slab-original {
-      --x: 84;
-      --y: 24;
-    }
-    .slab-painted {
-      --x: 104;
-      --y: 86;
-    }
-    .label {
-      padding: 5px 8px;
-    }
-    .label-01 {
-      left: calc(220 * var(--u));
-      top: 0;
-    }
-    .label-02 {
-      left: 16px;
-      top: calc(318 * var(--u));
+    .readout {
+      bottom: 12px;
     }
   }
 </style>
