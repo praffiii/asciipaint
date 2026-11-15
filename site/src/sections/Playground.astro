@@ -1,172 +1,153 @@
 ---
-import Band from "../components/Band.astro";
-import Chip from "../components/Chip.astro";
-import CodeCard from "../components/CodeCard.astro";
-import Keycap from "../components/Keycap.astro";
-import PaintedTitle from "../components/PaintedTitle.astro";
 import { CELL_RANGE, DEFAULT_SETTINGS as d, SWATCHES } from "../lib/playground/settings";
 import { snippet } from "../lib/playground/snippet";
 
 interface Props {
-  /** The full-screen shell: the stage fills the viewport beside the console, and the whole page takes drops. */
+  /** The full-screen shell: the stage fills the viewport above the controls, and the whole page takes drops. */
   full?: boolean;
 }
 const { full = false } = Astro.props;
 
 const sources = [
-  { kind: "liquid", label: "Liquid paint", glyph: "" },
-  { kind: "three", label: "3D scene", glyph: "◆" },
-  { kind: "camera", label: "Camera", glyph: "◉" },
-  { kind: "file", label: "Your picture", glyph: "+" },
+  { kind: "liquid", label: "Liquid paint" },
+  { kind: "three", label: "3D scene" },
+  { kind: "camera", label: "Camera" },
+  { kind: "file", label: "Your picture" },
 ] as const;
 const swatchNames = ["Black", "Navy", "Lavender", "Deep blue", "Violet"];
 const fill = (100 * (d.cell[0] - CELL_RANGE.min)) / (CELL_RANGE.max - CELL_RANGE.min);
 const sub = "Drop your own picture onto the stage. It is painted on your machine and never uploaded.";
 ---
 
-<Band tone="cobalt" grain edgeBelow={full ? undefined : "lavender"} id="playground">
+<section class="pgs" id="playground" aria-labelledby="pg-title">
   <div class:list={["pg", { "pg-full": full }]} data-playground={full ? "full" : "inline"}>
-    {
-      full ? (
-        <header class="head head-full">
-          <Keycap href="/">asciipaint</Keycap>
-          <h1>Playground</h1>
+    <header class="head">
+      {
+        full ? (
+          <p class="label"><a href="/">← asciipaint</a></p>
+          <div class="say"><h1 id="pg-title">Playground</h1><p class="sub">{sub}</p></div>
+        ) : (
+          <h2 class="label" id="pg-title"><i>03</i> PLAYGROUND</h2>
           <p class="sub">{sub}</p>
-        </header>
-      ) : (
-        <header class="head">
-          <Chip label="02 — PLAYGROUND" />
-          <div class="title">
-            <PaintedTitle text="Try it." palette="light" band="cobalt" />
-          </div>
-          <p class="sub">{sub}</p>
-        </header>
-      )
-    }
+        )
+      }
+    </header>
 
-    <div class="main">
-      <div class="stage" data-stage>
-        <canvas data-stage-flat role="img" aria-label="The painted stage"></canvas>
-        <canvas data-stage-solid role="img" aria-label="The painted 3D scene" hidden></canvas>
-        <p class="stage-hud stage-hud-live" aria-hidden="true"><span class="dot"></span>LIVE · 30 FPS</p>
-        <p class="stage-hud stage-hud-cells" data-cells>— × — CELLS</p>
-        <div class="drop">
-          <span aria-hidden="true">↓</span>
-          <span>DROP A PICTURE<span class="wide"> ANYWHERE</span></span>
-          <span aria-hidden="true">·</span>
-          <Keycap size="sm" data-browse aria-label="Browse for a picture">[ BROWSE ]</Keycap>
-          <input type="file" accept="image/*,.glb,.gltf" data-file aria-label="Your picture" hidden />
-        </div>
-      </div>
-
-      <div class="console">
-        <div role="group" aria-labelledby="pg-source">
-          <p class="label" id="pg-source">SOURCE</p>
-          <div class="tiles">
-            {
-              sources.map((s) => (
-                <button
-                  type="button"
-                  class="keycap keycap-dark tile"
-                  data-source={s.kind}
-                  aria-pressed={s.kind === "liquid" ? "true" : "false"}
-                >
-                  <span class:list={["thumb", { dashed: s.kind === "camera" || s.kind === "file" }]} aria-hidden="true">
-                    {s.kind === "liquid" ? <span class="thumb-fill" data-thumb-liquid /> : <span class="thumb-glyph">{s.glyph}</span>}
-                    {s.kind === "three" && <canvas class="thumb-fill thumb-three" data-thumb-three />}
-                  </span>
-                  <span class="tile-label">{s.label}</span>
-                </button>
-              ))
-            }
-          </div>
-        </div>
-
-        <div class="cell">
-          <label class="label" for="pg-cell">CELL SIZE</label>
-          <output class="value" for="pg-cell" data-cell-out>{d.cell[0]} × {d.cell[1]} PX</output>
-          <input
-            id="pg-cell"
-            type="range"
-            min={CELL_RANGE.min}
-            max={CELL_RANGE.max}
-            step={CELL_RANGE.step}
-            value={d.cell[0]}
-            aria-valuetext={`${d.cell[0]} × ${d.cell[1]} px`}
-            style={`--fill: ${fill}%`}
-            data-cell
-          />
-          <span class="ticks" aria-hidden="true"></span>
-        </div>
-
-        <div class="ramp">
-          <p class="label" id="pg-ramp">RAMP <span aria-hidden="true">·</span> DARK → BRIGHT</p>
-          <div class="keys" role="group" aria-labelledby="pg-ramp" data-ramp-keys>
-            {
-              Array.from(d.ramp, (glyph, i) => (
-                <button type="button" class="keycap keycap-dark keycap-sm glyph" data-glyph={i}>
-                  {glyph}
-                </button>
-              ))
-            }
-          </div>
-          <input
-            class="ramp-input"
-            type="text"
-            value={d.ramp}
-            aria-label="Ramp, dark to bright"
-            aria-describedby="pg-message"
-            aria-invalid="false"
-            spellcheck="false"
-            autocomplete="off"
-            data-ramp-input
-            hidden
-          />
-          <button type="button" class="edit" data-edit>EDIT</button>
-        </div>
-
-        <div class="row">
-          <div role="group" aria-labelledby="pg-background">
-            <p class="label" id="pg-background">BACKGROUND</p>
-            <div class="swatches">
-              {
-                SWATCHES.map((hex, i) => (
-                  <button
-                    type="button"
-                    class="keycap swatch"
-                    style={`--swatch: ${hex}`}
-                    aria-label={`${swatchNames[i]} ${hex}`}
-                    aria-pressed={hex === d.background ? "true" : "false"}
-                    data-swatch={hex}
-                  />
-                ))
-              }
-            </div>
-          </div>
-          <div role="group" aria-labelledby="pg-sparkle">
-            <p class="label" id="pg-sparkle">SPARKLE</p>
-            <div class="pair">
-              <button type="button" class="keycap keycap-dark keycap-sm toggle" aria-pressed={d.sparkle ? "true" : "false"} data-sparkle="on">ON</button>
-              <button type="button" class="keycap keycap-dark keycap-sm toggle" aria-pressed={!d.sparkle ? "true" : "false"} data-sparkle="off">OFF</button>
-            </div>
-          </div>
-        </div>
-
-        <p class="message" id="pg-message" role="status" data-message></p>
+    <div class="stage" data-stage>
+      <canvas data-stage-flat role="img" aria-label="The painted stage"></canvas>
+      <canvas data-stage-solid role="img" aria-label="The painted 3D scene" hidden></canvas>
+      <p class="stage-hud stage-hud-live" aria-hidden="true"><span class="dot"></span>LIVE · 30 FPS</p>
+      <p class="stage-hud stage-hud-cells" data-cells>— × — CELLS</p>
+      <div class="drop">
+        <span aria-hidden="true">↓</span>
+        <span>DROP A PICTURE<span class="wide"> ANYWHERE</span></span>
+        <span aria-hidden="true">·</span>
+        <button type="button" class="link" data-browse aria-label="Browse for a picture">BROWSE</button>
+        <input type="file" accept="image/*,.glb,.gltf" data-file aria-label="Your picture" hidden />
       </div>
     </div>
+
+    <div class="console">
+      <div role="group" aria-labelledby="pg-source">
+        <p class="label" id="pg-source">SOURCE</p>
+        <div class="choices">
+          {
+            sources.map((s) => (
+              <button type="button" class="choice" data-source={s.kind} aria-pressed={s.kind === "liquid" ? "true" : "false"}>
+                {s.label}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="cell">
+        <label class="label" for="pg-cell">CELL SIZE</label>
+        <output class="value" for="pg-cell" data-cell-out>{d.cell[0]} × {d.cell[1]} PX</output>
+        <input
+          id="pg-cell"
+          type="range"
+          min={CELL_RANGE.min}
+          max={CELL_RANGE.max}
+          step={CELL_RANGE.step}
+          value={d.cell[0]}
+          aria-valuetext={`${d.cell[0]} × ${d.cell[1]} px`}
+          style={`--fill: ${fill}%`}
+          data-cell
+        />
+      </div>
+
+      <div class="ramp">
+        <p class="label" id="pg-ramp">RAMP <span aria-hidden="true">·</span> DARK → BRIGHT</p>
+        <div class="keys" role="group" aria-labelledby="pg-ramp" data-ramp-keys>
+          {
+            Array.from(d.ramp, (glyph, i) => (
+              <button type="button" class="glyph" data-glyph={i}>
+                {glyph}
+              </button>
+            ))
+          }
+        </div>
+        <input
+          class="ramp-input"
+          type="text"
+          value={d.ramp}
+          aria-label="Ramp, dark to bright"
+          aria-describedby="pg-message"
+          aria-invalid="false"
+          spellcheck="false"
+          autocomplete="off"
+          data-ramp-input
+          hidden
+        />
+        <button type="button" class="link edit" data-edit>EDIT</button>
+      </div>
+
+      <div role="group" aria-labelledby="pg-background">
+        <p class="label" id="pg-background">BACKGROUND</p>
+        <div class="swatches">
+          {
+            SWATCHES.map((hex, i) => (
+              <button
+                type="button"
+                class="swatch"
+                style={`--swatch: ${hex}`}
+                aria-label={`${swatchNames[i]} ${hex}`}
+                aria-pressed={hex === d.background ? "true" : "false"}
+                data-swatch={hex}
+              />
+            ))
+          }
+        </div>
+      </div>
+
+      <div role="group" aria-labelledby="pg-sparkle">
+        <p class="label" id="pg-sparkle">SPARKLE</p>
+        <div class="choices">
+          <button type="button" class="choice" aria-pressed={d.sparkle ? "true" : "false"} data-sparkle="on">ON</button>
+          <button type="button" class="choice" aria-pressed={!d.sparkle ? "true" : "false"} data-sparkle="off">OFF</button>
+        </div>
+      </div>
+    </div>
+    <p class="message" id="pg-message" role="status" data-message></p>
 
     <div class="snippet">
-      <CodeCard file="your-settings.ts" note="updates as you drag" code={snippet(d, "liquid", false)} live />
+      <div class="about">
+        <p class="label">YOUR SETTINGS<span class="card-note">updates as you drag</span></p>
+        <button type="button" class="link" data-copy="code-your-settings-ts" aria-label="Copy your-settings.ts"><span data-copied="copied">copy</span></button>
+      </div>
+      <pre tabindex="0"><code id="code-your-settings-ts">{snippet(d, "liquid", false)}</code></pre>
     </div>
   </div>
-</Band>
+</section>
 
 <script>
   // The playground's module (and three.js after it) loads only when it's needed: at once on its own
-  // page, or when the landing's band scrolls within 800 px.
+  // page, or when the landing's section scrolls within 800 px.
+  import { wireCopy } from "../lib/copy";
   const root = document.querySelector<HTMLElement>("[data-playground]");
   if (root) {
+    wireCopy(root);
     // Offline, or a stale chunk after a redeploy: say so on the message line rather than die silently.
     const load = () =>
       void import("../lib/playground/playground")
@@ -193,66 +174,67 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
 </script>
 
 <style>
-  .pg {
-    max-width: 1312px;
-    margin: 0 auto;
+  /* The hero's language carried on: black, hairlines, small type. The stage is the only loud thing. */
+  .pgs {
+    --focus: var(--lavender);
+    background: var(--black);
+    color: var(--lavender);
   }
   .pg [hidden] {
     display: none !important;
   }
-
-  .head {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
+  .head,
+  .console,
+  .snippet {
+    padding: 28px max(16px, 2.2vw);
+    border-top: 1px solid var(--line);
   }
-  .title :global(.painted-text) {
-    font-size: clamp(80px, 17.4vw, 250px);
-    letter-spacing: -0.02em;
+  .head,
+  .snippet {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+  .label {
+    margin: 0;
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .label i {
+    margin-right: 8px;
+    font-style: normal;
+    color: var(--lilac);
+  }
+  .label a {
+    color: var(--lilac);
+    text-decoration: none;
   }
   .sub {
-    max-width: 680px;
+    max-width: 62ch;
     margin: 0;
-    font: 400 var(--body-lg) / 1.55 var(--font-body);
+    font: 400 15px/23px var(--font-body);
+    color: var(--muted);
   }
-  .head-full {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3) var(--space-4);
-    margin-bottom: var(--space-4);
+  .say {
+    display: grid;
+    gap: var(--space-2);
   }
-  .head-full h1 {
-    font-size: var(--display-md);
+  h1 {
+    font-size: 30px;
+    line-height: 1.1;
     letter-spacing: -0.01em;
   }
-  .head-full .sub {
-    font-size: var(--body-md);
-  }
-  .head-full :global(.keycap) {
-    --keycap-edge: var(--black);
-    padding: 8px 14px;
-    font: 500 13px/16px var(--font-mono);
-  }
 
-  .main {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 400px;
-    gap: 32px;
-  }
-
-  /* Stage: a black slab, violet edge. */
   .stage {
     position: relative;
-    min-width: 0;
-    aspect-ratio: 16 / 10;
+    height: min(72svh, 640px);
+    min-height: 320px;
     background: var(--black);
-    box-shadow: var(--slab) var(--slab) 0 var(--violet);
+    border-top: 1px solid var(--line);
   }
   .stage.is-dragging {
-    outline: 2px dashed var(--lavender);
+    outline: 1px dashed var(--lavender);
     outline-offset: -10px;
   }
   .stage canvas {
@@ -262,30 +244,32 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
     width: 100%;
     height: 100%;
   }
-  .stage-hud {
+  .stage-hud,
+  .drop {
     position: absolute;
-    top: 14px;
     margin: 0;
-    padding: 6px 9px;
+    padding: 7px 10px;
     background: var(--black);
-    font: 500 11px/1 var(--font-mono);
+    font: 500 11px/13px var(--font-mono);
     letter-spacing: 0.06em;
     color: var(--lavender);
+    white-space: nowrap;
+  }
+  .stage-hud {
+    top: 20px;
     pointer-events: none;
   }
   .stage-hud-live {
-    left: 14px;
-    padding-left: 22px;
+    left: max(16px, 2.2vw);
   }
   .stage-hud-cells {
-    right: 14px;
+    right: max(16px, 2.2vw);
   }
   .dot {
-    position: absolute;
-    left: 9px;
-    top: 8px;
-    width: 7px;
-    height: 7px;
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 8px;
     background: var(--violet);
   }
   .pg[data-fallback] .stage-hud {
@@ -301,95 +285,61 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
     }
   }
   .drop {
-    --keycap-edge: var(--cobalt);
-    position: absolute;
-    left: 50%;
-    bottom: 16px;
-    transform: translateX(-50%);
+    left: max(16px, 2.2vw);
+    bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 5px 5px 5px 14px;
-    background: var(--navy);
-    border: 1.5px solid var(--cobalt);
-    box-shadow: 4px 4px 0 var(--cobalt);
+    gap: 10px;
+  }
+
+  button {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
     font: 500 12px/1 var(--font-mono);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .link {
+    color: var(--lilac);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  button:hover {
     color: var(--lavender);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    button {
+      transition: color 150ms ease;
+    }
+  }
+
+  /* The controls: one strip under the stage, a small label over each. */
+  .console {
+    display: grid;
+    grid-template-columns: auto minmax(180px, 1fr) minmax(0, 1.3fr) auto auto;
+    align-items: start;
+    gap: var(--space-4) var(--space-5);
+  }
+  .console .label {
+    display: block;
+    margin-bottom: 14px;
+  }
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  .choice {
+    padding-bottom: 6px;
+    border-bottom: 1px solid transparent;
     white-space: nowrap;
   }
-
-  /* Console: lavender, dark text, black keycap edges. */
-  .console {
-    --focus: var(--cobalt);
-    --keycap-edge: var(--black);
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    min-width: 0;
-    padding: 20px;
-    background: var(--lavender);
-    color: var(--navy);
-    border: 1.5px solid var(--black);
-    box-shadow: var(--slab) var(--slab) 0 var(--violet);
-  }
-  .label {
-    margin: 0 0 10px;
-    font: 500 12px/1 var(--font-mono);
-    letter-spacing: 0.06em;
-    color: var(--muted-light);
-  }
-
-  .tiles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px 10px;
-  }
-  .tile {
-    display: flex;
-    flex-direction: column;
-    height: 100px;
-    padding: 6px;
-    background: var(--black);
-    text-align: left;
-  }
-  .tile[aria-pressed="true"] {
-    border: 2px solid var(--violet);
-  }
-  .thumb {
-    position: relative;
-    flex: 1;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    color: var(--muted);
-    font: 500 18px/1 var(--font-mono);
-  }
-  .thumb.dashed {
-    border: 1px dashed var(--line);
-  }
-  .thumb-fill {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-  .thumb-fill :global(ascii-img) {
-    display: block;
-  }
-  .thumb-three {
-    object-fit: cover;
-    display: none;
-  }
-  .tile:global(.has-thumb) .thumb-three {
-    display: block;
-  }
-  .tile:global(.has-thumb) .thumb-glyph {
-    display: none;
-  }
-  .tile-label {
-    padding: 6px 2px 0;
-    font: 500 13px/1 var(--font-mono);
+  .choice[aria-pressed="true"] {
+    border-color: var(--lavender);
+    color: var(--lavender);
   }
 
   .cell {
@@ -398,9 +348,9 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
     align-items: baseline;
   }
   .value {
-    font: 500 12px/1 var(--font-mono);
+    font: 500 11px/13px var(--font-mono);
     letter-spacing: 0.06em;
-    color: var(--violet-ink);
+    color: var(--lilac);
   }
   .cell input {
     grid-column: 1 / -1;
@@ -409,33 +359,22 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
     margin: 0;
     appearance: none;
     background:
-      linear-gradient(var(--violet), var(--violet)) 0 50% / var(--fill) 2px no-repeat,
-      linear-gradient(var(--navy), var(--navy)) 0 50% / 100% 2px no-repeat;
+      linear-gradient(var(--lavender), var(--lavender)) 0 50% / var(--fill) 1px no-repeat,
+      linear-gradient(var(--line), var(--line)) 0 50% / 100% 1px no-repeat;
     cursor: pointer;
   }
   .cell input::-webkit-slider-thumb {
     appearance: none;
-    width: 16px;
-    height: 16px;
-    background: var(--violet);
-    border: 1.5px solid var(--navy);
-    box-shadow: 2px 2px 0 var(--navy);
+    width: 9px;
+    height: 17px;
+    background: var(--lavender);
   }
   .cell input::-moz-range-thumb {
-    width: 16px;
-    height: 16px;
+    width: 9px;
+    height: 17px;
+    border: 0;
     border-radius: 0;
-    background: var(--violet);
-    border: 1.5px solid var(--navy);
-    box-shadow: 2px 2px 0 var(--navy);
-  }
-  .ticks {
-    grid-column: 1 / -1;
-    height: 12px;
-    margin-top: 4px;
-    background:
-      linear-gradient(90deg, var(--navy) 1px, transparent 1px) 0 0 / 40% 12px repeat-x,
-      linear-gradient(90deg, var(--muted-light) 1px, transparent 1px) 0 0 / 10% 5px repeat-x;
+    background: var(--lavender);
   }
 
   .ramp {
@@ -454,204 +393,144 @@ const sub = "Drop your own picture onto the stage. It is painted on your machine
   .keys {
     display: flex;
     flex-wrap: wrap; /* a long ramp makes rows, never a sideways scroll */
-    gap: 6px;
+    gap: 4px;
   }
   .keys :global(.glyph) {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 44px;
+    width: 26px;
+    height: 30px;
     padding: 0;
-    font: 500 18px/1 var(--font-mono);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    font: 500 15px/1 var(--font-mono);
+    color: var(--lavender);
+    cursor: pointer;
+  }
+  .keys :global(.glyph:hover) {
+    border-color: var(--lavender);
   }
   .ramp-input {
-    height: 44px;
-    padding: 0 12px;
-    border: 1.5px solid var(--black);
-    background: var(--navy);
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
     color: var(--lavender);
-    font: 500 18px/1 var(--font-mono);
+    font: 500 15px/1 var(--font-mono);
     letter-spacing: 0.2em;
-    --focus: var(--cobalt);
   }
   .ramp-input[aria-invalid="true"] {
-    border-color: var(--violet-ink);
-    box-shadow: 4px 4px 0 var(--violet);
+    border-color: var(--violet);
   }
   .edit {
     grid-area: edit;
-    padding: 0;
-    border: 0;
-    background: none;
-    font: 500 12px/1 var(--font-mono);
-    letter-spacing: 0.06em;
-    color: var(--violet-ink);
-    cursor: pointer;
-  }
-  .edit:hover {
-    text-decoration: underline;
   }
 
-  .row {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-  .swatches,
-  .pair {
+  .swatches {
     display: flex;
     gap: 8px;
   }
   .swatch {
-    width: 28px;
-    height: 28px;
-    padding: 0;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--line);
     background: var(--swatch);
   }
   .swatch[aria-pressed="true"] {
-    border: 2px solid var(--violet);
-  }
-  .toggle {
-    min-width: 40px;
-    text-align: center;
-  }
-  .toggle[aria-pressed="true"] {
-    background: var(--violet);
-    color: var(--black);
+    outline: 1px solid var(--lavender);
+    outline-offset: 3px;
   }
   .message {
     min-height: 1.4em;
-    margin: auto 0 0;
-    font: 500 13px/1.4 var(--font-mono);
-    color: var(--violet-ink);
+    margin: 0;
+    padding: 0 max(16px, 2.2vw) 20px;
+    font: 500 12px/1.4 var(--font-mono);
+    color: var(--lilac);
+  }
+  .message:empty {
+    min-height: 0;
+    padding-bottom: 0;
   }
 
-  /* Snippet: violet header, coloured tokens (spans made client-side, so global). */
-  .snippet {
-    margin-top: 32px;
-    --card-edge: var(--violet);
+  /* The settings as code; its tokens are spans made client-side, so global. */
+  .card-note {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted-light);
+    text-transform: uppercase;
   }
-  .snippet :global(.card-head) {
-    background: var(--violet);
-    color: var(--black);
+  .about {
+    display: grid;
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-3);
   }
-  .snippet :global(.card-note) {
-    color: var(--black);
-    text-transform: none;
+  pre {
+    min-width: 0;
+    margin: 0;
+    overflow-x: auto;
+    font: 400 15px/26px var(--font-mono);
   }
-  .snippet :global(.card-note)::before {
-    content: "· " / "";
-  }
-  .snippet :global(.card-head .keycap) {
-    --keycap-edge: var(--black);
-    --focus: var(--black);
-    background: var(--black);
-    color: var(--lavender);
-    border-color: var(--lavender);
-  }
-  .snippet :global(pre) {
-    padding: var(--space-4);
-    font-size: 15px;
+  pre code {
+    font: inherit;
   }
   .snippet :global(.tok-keyword) {
-    color: var(--blue-light);
+    color: var(--lilac);
   }
   .snippet :global(.tok-literal) {
-    color: var(--lilac);
+    color: var(--blue-light);
   }
   .snippet :global(.tok-punctuation) {
     color: var(--muted);
   }
 
-  /* Full screen: the stage takes the viewport's height beside the console. */
-  :global(.band:has(> .pg-full)) {
-    min-height: 100svh;
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-5);
+  /* Full screen: the stage takes what the viewport has left above the controls. */
+  .pg-full .head {
+    border-top: 0;
   }
   @media (min-width: 1100px) {
-    .pg-full {
-      max-width: none;
-    }
-    .pg-full .main {
-      height: max(520px, calc(100svh - 132px));
-    }
     .pg-full .stage {
-      aspect-ratio: auto;
-    }
-    .pg-full .console {
-      overflow-y: auto;
+      height: max(360px, calc(100svh - 330px));
     }
   }
 
   @media (max-width: 1099px) {
-    .main {
-      grid-template-columns: minmax(0, 1fr);
+    .console {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-
-  @media (max-width: 640px) {
-    .head {
+  @media (max-width: 899px) {
+    .head,
+    .snippet {
+      grid-template-columns: minmax(0, 1fr);
       gap: var(--space-3);
-      margin-bottom: var(--space-4);
+      padding: 24px 16px;
     }
-    .sub {
-      font-size: var(--body-md);
+    .console {
+      padding: 24px 16px;
     }
-    .main {
-      gap: 24px;
+  }
+  @media (max-width: 640px) {
+    .console {
+      grid-template-columns: minmax(0, 1fr);
     }
     .stage {
-      box-shadow: 6px 6px 0 var(--violet);
+      height: 60svh;
     }
     .stage-hud-cells,
     .wide {
       display: none;
     }
     .stage-hud {
-      top: 10px;
-    }
-    .stage-hud-live {
-      left: 10px;
+      top: 12px;
     }
     .drop {
-      bottom: 10px;
-      gap: 8px;
-      font-size: 11px;
+      bottom: 12px;
     }
-    .console {
-      padding: 16px;
-      box-shadow: 6px 6px 0 var(--violet);
-    }
-    .tiles {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px 10px;
-    }
-    .tile {
-      height: auto;
-      padding: 8px 12px;
-    }
-    .thumb {
-      display: none;
-    }
-    .tile-label {
-      padding: 0;
-    }
-    .keys {
-      gap: 10px;
-    }
-    .keys :global(.glyph) {
-      flex: 1;
-      width: auto;
-      max-width: 40px;
-    }
-    .snippet {
-      margin-top: 24px;
-    }
-    .snippet :global(pre) {
-      padding: var(--space-3);
-      font-size: 14px;
+    pre {
+      font-size: 13px;
     }
   }
 </style>

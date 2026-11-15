@@ -228,7 +228,7 @@ test("Tab runs sources, slider, ramp keys, EDIT, swatches, sparkle, then copy", 
       "EDIT",
       "#000000", "#0A0D1F", "#ECE8FF", "#1A2C9A", "#7C5CF2",
       "on", "off",
-      "[ copy ]",
+      "copy",
     ]);
   } finally {
     await site.close();

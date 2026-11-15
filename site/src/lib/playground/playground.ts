@@ -1,8 +1,6 @@
 import { asciipaint, autoRender, type LiveOptions } from "asciipaint";
 import { glyphFont } from "../glyph-font";
-import { liquid } from "../liquid";
 import type { Stage3d } from "../scene";
-import { paintStill } from "../still";
 import { cellFor, DEFAULT_SETTINGS, isRamp, type Settings } from "./settings";
 import { snippet, tokens } from "./snippet";
 import {
@@ -106,23 +104,13 @@ export function playground(root: HTMLElement): void {
     };
   }
 
-  /** The 3D stage, made once. Its first raw frame becomes the 3D tile's thumbnail. */
+  /** The 3D stage, made once. */
   function stageFor(three: SceneModule): Stage3d {
     if (scene) return scene;
     try {
       scene = three.stage3d(solid);
     } catch (e) {
       throw new Problem("asciipaint needs WebGL2", { cause: e });
-    }
-    const thumb = root.querySelector<HTMLCanvasElement>("[data-thumb-three]");
-    const ctx = thumb?.getContext("2d");
-    if (thumb && ctx) {
-      scene.edge(); // one raw render, readable in this task
-      const raw = scene.renderer.domElement;
-      thumb.width = 320;
-      thumb.height = Math.round((320 * raw.height) / Math.max(raw.width, 1));
-      ctx.drawImage(raw, 0, 0, thumb.width, thumb.height);
-      thumb.closest("[data-source]")?.classList.add("has-thumb");
     }
     return scene;
   }
@@ -255,8 +243,8 @@ export function playground(root: HTMLElement): void {
     if (file) void pick(() => dropped(file));
   });
 
-  // The band (inline) or the whole page (full) takes a dropped file; dragged text is left alone.
-  const zone = root.dataset.playground === "full" ? document.documentElement : (root.closest<HTMLElement>(".band") ?? root);
+  // The section (inline) or the whole page (full) takes a dropped file; dragged text is left alone.
+  const zone = root.dataset.playground === "full" ? document.documentElement : (root.closest<HTMLElement>("section") ?? root);
   const carriesFile = (e: DragEvent) => !!e.dataTransfer?.types.includes("Files");
   let depth = 0;
   zone.addEventListener("dragenter", (e) => {
@@ -297,7 +285,7 @@ export function playground(root: HTMLElement): void {
       ...Array.from(settings.ramp, (glyph, i) => {
         const key = document.createElement("button");
         key.type = "button";
-        key.className = "keycap keycap-dark keycap-sm glyph";
+        key.className = "glyph";
         key.dataset.glyph = String(i);
         key.textContent = glyph;
         return key;
@@ -381,24 +369,6 @@ export function playground(root: HTMLElement): void {
   }
   phone.addEventListener("change", renderSnippet);
   renderSnippet();
-
-  // -- The liquid tile's still; the 3D tile waits for three.js to load for its own reasons.
-
-  const liquidThumb = root.querySelector<HTMLElement>("[data-thumb-liquid]");
-  if (liquidThumb) {
-    paintStill(
-      liquidThumb,
-      (w, h) => {
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(w);
-        canvas.height = Math.round(h);
-        const frame = liquid()?.frame(11, canvas.width, canvas.height, "stage");
-        if (frame) canvas.getContext("2d")?.drawImage(frame, 0, 0);
-        return canvas;
-      },
-      { background: "#000000" },
-    );
-  }
 
   void pick(liquidSource);
 }
