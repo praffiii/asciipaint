@@ -27,6 +27,8 @@ With `<ascii-img>`, give a viewBox-only SVG a `width` and `height`. Like `<img>`
 
 Sources keep their alpha. Where a pixel is transparent the cell shows `background`, the paper, and partly transparent cells fade into it. A transparent PNG or an SVG paints as glyphs on the paper, with nothing behind them.
 
+One exception: an `ImageBitmap` made with `premultiplyAlpha: "none"` paints its partly transparent pixels too bright. Leave that option at its default.
+
 `<ascii-img>` takes its paper from the page: the first `background-color` up the ancestor chain that isn't fully transparent, or white. So a transparent logo sits on your page without a box around it.
 
 ## The paper is always opaque
