@@ -174,8 +174,41 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     background: var(--navy);
     color: var(--lavender);
   }
+  /* It drops in from the top bar and leaves faster than it came. Browsers without
+     @starting-style or allow-discrete just show and hide it. */
+  .menu {
+    translate: 0 -100%;
+    transition:
+      translate 150ms var(--ease-out),
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+  }
+  .menu[open] {
+    translate: 0 0;
+    transition-duration: 250ms;
+    transition-timing-function: var(--ease-drawer);
+  }
+  @starting-style {
+    .menu[open] {
+      translate: 0 -100%;
+    }
+  }
   .menu::backdrop {
     background: var(--navy);
+    opacity: 0;
+    transition:
+      opacity 150ms ease,
+      overlay 150ms allow-discrete,
+      display 150ms allow-discrete;
+  }
+  .menu[open]::backdrop {
+    opacity: 1;
+    transition-duration: 250ms;
+  }
+  @starting-style {
+    .menu[open]::backdrop {
+      opacity: 0;
+    }
   }
   .menu form {
     margin: 0;
