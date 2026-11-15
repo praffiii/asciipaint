@@ -1,4 +1,5 @@
 import "asciipaint/element";
+import { cellAt, coarse, resolve } from "./resolve";
 
 let webgl2: boolean | undefined;
 
@@ -22,17 +23,25 @@ export interface StillAttrs {
 /**
  * Paints `draw`'s canvas into `host` through one shared `<ascii-img>`: first when `host` is in view,
  * again (debounced) when it resizes. Without WebGL2 it paints nothing. Returns a disposer.
+ * With `resolving`, it waits until `host` is well in view, then resolves from big cells to its own.
  */
 export function paintStill(
   host: HTMLElement,
   draw: (w: number, h: number) => HTMLCanvasElement,
   attrs: StillAttrs = {},
+  resolving = false,
 ): () => void {
   if (!canPaint()) return () => {};
   const img = document.createElement("ascii-img");
   // Every still is decorative: the element always takes role="img", so it is hidden rather than left unnamed.
   img.setAttribute("aria-hidden", "true");
   for (const [name, value] of Object.entries(attrs)) img.setAttribute(name, value);
+  if (resolving) {
+    const [w = 2.4, h = 3.4] = (attrs.cell ?? "").split(" ").filter(Boolean).map(Number);
+    const cell = (scale: number) => img.setAttribute("cell", cellAt([w, h], scale).join(" "));
+    cell(coarse());
+    img.addEventListener("paint", resolve(cell));
+  }
   let url: string | undefined;
   let painted = { w: 0, h: 0 };
   let token = 0;
@@ -64,7 +73,7 @@ export function paintStill(
     visible.disconnect();
     paint();
     resize.observe(host);
-  });
+  }, resolving ? { rootMargin: "0px 0px -15% 0px" } : undefined);
   visible.observe(host);
 
   return () => {

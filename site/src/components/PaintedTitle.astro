@@ -47,7 +47,7 @@ const { text, palette, band, as: Tag = "h2" } = Astro.props;
     await document.fonts.load(`900 100px ${family}`);
     // `paint` doesn't bubble, so the host catches it on the way down.
     host.addEventListener("paint", () => (box.dataset.stillPainted = ""), { capture: true, once: true });
-    paintStill(host, (w, h) => titleCanvas(text, palette, w, h), { background: box.dataset.band ?? "#000000" });
+    paintStill(host, (w, h) => titleCanvas(text, palette, w, h), { background: box.dataset.band ?? "#000000" }, true);
   });
 </script>
 

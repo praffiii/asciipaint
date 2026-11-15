@@ -29,3 +29,29 @@ test("under reduced motion the hero holds one frame, the slabs stay put and the 
     await site.close();
   }
 });
+
+const TITLE_CELL = "#one-tag .painted-still ascii-img";
+
+test("a painted title resolves from big cells down to its real ones", async () => {
+  const site = await open("/");
+  const { page, errors } = site;
+  try {
+    await page.locator("#one-tag").scrollIntoViewIfNeeded();
+    await page.locator(`${TITLE_CELL}[cell="2.4 3.4"]`).waitFor({ state: "attached" });
+    expect(errors).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});
+
+test("under reduced motion a painted title is painted once, at its real cells", async () => {
+  const site = await open("/", { reducedMotion: true });
+  const { page } = site;
+  try {
+    await page.locator("#one-tag").scrollIntoViewIfNeeded();
+    await page.locator("#one-tag .painted-title[data-still-painted]").waitFor({ state: "attached" });
+    expect(await page.locator(TITLE_CELL).getAttribute("cell")).toBe("2.4 3.4");
+  } finally {
+    await site.close();
+  }
+});

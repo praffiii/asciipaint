@@ -2,12 +2,15 @@ import { asciipaint, autoRender, type Paint } from "asciipaint";
 import { wireCopy } from "./copy";
 import { glyphFont } from "./glyph-font";
 import { liquid } from "./liquid";
+import { cellAt, coarse, resolve } from "./resolve";
 import { tilt } from "./tilt";
 
 const CELL = [2.4, 3.4] as const;
 /** The lens radius on the 760 px desktop slab; it scales with the slab. */
 const LENS = 130 / 760;
 const DRIFT_MS = 12_000;
+/** How long the painted slab shows its big cells before they resolve: most of its 400 ms fade. */
+const RESOLVE_AFTER_MS = 300;
 
 /** Wires the hero: the live liquid source, its painting, the lens to the original, the readout and the fallbacks. */
 export function hero(root: HTMLElement): void {
@@ -28,8 +31,13 @@ export function hero(root: HTMLElement): void {
     return;
   }
   let paint: Paint | null = null;
+  // A new cell size needs a new paint; it reuses the canvas, so the context stays the same one.
+  const repaint = (scale: number) => {
+    paint?.dispose();
+    paint = asciipaint(painted, { cell: cellAt(CELL, scale), font: glyphFont(), background: "#000000", edgeFade: 0 });
+  };
   try {
-    paint = asciipaint(painted, { font: glyphFont(), background: "#000000", edgeFade: 0 });
+    repaint(coarse());
   } catch (error) {
     // Kept visible in the console: a bad option or font fails here just like a missing context does.
     console.warn("asciipaint couldn't start the hero painting; showing the source instead.", error);
@@ -66,6 +74,7 @@ export function hero(root: HTMLElement): void {
   release();
 
   let readout = "";
+  let shown: (() => void) | undefined;
   const tick = (now: number) => {
     const w = Math.round(source.clientWidth * dpr);
     const h = Math.round(source.clientHeight * dpr);
@@ -79,7 +88,12 @@ export function hero(root: HTMLElement): void {
     lctx.drawImage(frame, 0, 0);
     if (paint) {
       paint.draw(source);
-      root.dataset.live = "";
+      if (!("live" in root.dataset)) {
+        root.dataset.live = "";
+        // The painting fades in over its big cells, then they resolve to the real ones.
+        setTimeout(() => (shown = resolve((scale) => paint && repaint(scale))), RESOLVE_AFTER_MS);
+      }
+      shown?.();
     }
     const text = `${Math.floor(slab.clientWidth / CELL[0])} × ${Math.floor(slab.clientHeight / CELL[1])}`;
     if (text !== readout) cells.textContent = readout = text;
@@ -88,7 +102,9 @@ export function hero(root: HTMLElement): void {
 
   // The source keeps running on its own canvas if the painting's context is lost.
   const sourceOnly = { canvas: source, resize: () => {} };
-  autoRender(paint ?? sourceOnly, tick, {
+  // The paint is replaced as it resolves, so the loop gets a stand-in that always reaches the current one.
+  const current = { canvas: painted, resize: () => paint?.resize() };
+  autoRender(paint ? current : sourceOnly, tick, {
     onContextLost: () => {
       paint = null;
       root.dataset.fallback = "source";

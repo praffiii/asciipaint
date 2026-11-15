@@ -35,6 +35,7 @@ pass.render(scene, camera);`;
   import { autoRender } from "asciipaint";
   import { glyphFont } from "../lib/glyph-font";
   import { loadScene } from "../lib/playground/sources";
+  import { cellAt, coarse, resolve } from "../lib/resolve";
   import { canPaint } from "../lib/still";
 
   // three.js (~150 kB gzip) loads only when the band is within 800 px, through the same module
@@ -45,15 +46,40 @@ pass.render(scene, camera);`;
   async function start(stage: HTMLElement, canvas: HTMLCanvasElement) {
     const three = await loadScene();
     const scene = three.stage3d(canvas);
-    const paint = three.asciipaintThree(scene.renderer, { font: glyphFont(), background: "#0A0D1F" });
+    // A new cell size needs a new pass; it reuses the renderer, so the context stays the same one.
+    const pass = (scale: number) =>
+      three.asciipaintThree(scene.renderer, { cell: cellAt([2.4, 3.4], scale), font: glyphFont(), background: "#0A0D1F" });
+    let paint = pass(coarse());
+    let lost = false;
+    let shown: (() => void) | undefined;
     autoRender(
-      paint,
+      { canvas, resize: () => paint.resize() },
       (now) => {
         scene.frame(now, paint);
         stage.dataset.painting = "";
+        shown?.();
       },
-      { onContextLost: () => delete stage.dataset.painting },
+      {
+        onContextLost: () => {
+          lost = true;
+          delete stage.dataset.painting;
+        },
+      },
     );
+    // It starts on big cells and resolves to the real ones once the slab is well in view.
+    const seen = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        seen.disconnect();
+        shown = resolve((scale) => {
+          if (lost) return;
+          paint.dispose();
+          paint = pass(scale);
+        });
+      },
+      { threshold: 0.35 },
+    );
+    seen.observe(stage);
   }
 
   if (stage && canvas && canPaint()) {

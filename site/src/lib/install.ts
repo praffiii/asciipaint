@@ -85,7 +85,7 @@ function wireStack(root: ParentNode): void {
     cells.getContext("2d")?.drawImage(flat, 0, 0);
 
     glyphs.addEventListener("paint", () => (glyphs.dataset.painted = ""), { capture: true, once: true });
-    paintStill(glyphs, () => picture, { cell: CELL.join(" "), background: "#02030A" });
+    paintStill(glyphs, () => picture, { cell: CELL.join(" "), background: "#02030A" }, true);
   });
   visible.observe(stack);
 }
