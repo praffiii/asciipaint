@@ -4,6 +4,8 @@
   box-sizing: border-box;
 }
 html {
+  /* The whole site is on black, so the browser's own scrollbars and controls are dark too. */
+  color-scheme: dark;
   background: var(--black);
   color: var(--lavender);
   font-family: var(--font-body);

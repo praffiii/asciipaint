@@ -169,8 +169,11 @@ pass.render(scene, camera);`;
     }
   }
   @media (max-width: 640px) {
+    /* A tall stage would crop the scene at both sides, so the phone keeps a landscape one. */
     .stage {
-      height: 60svh;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 4 / 3;
     }
     .call {
       top: 12px;
