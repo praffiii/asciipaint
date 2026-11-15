@@ -32,6 +32,20 @@ test("under reduced motion the hero holds one frame, the slabs stay put and the 
 
 const TITLE_CELL = "#one-tag .painted-still ascii-img";
 
+test("the hero title is its own plain text again once it has painted in", async () => {
+  const site = await open("/");
+  const { page, errors } = site;
+  try {
+    await page.waitForFunction(() => performance.now() > 1200 && !document.querySelector("#hero-title [data-g]"));
+    const title = page.locator("#hero-title");
+    expect(await title.innerText()).toBe("Paint anything as coloured ASCII.");
+    expect(await title.locator("*").count()).toBe(3); // the two lines and the <em>, no leftover glyph spans
+    expect(errors).toEqual([]);
+  } finally {
+    await site.close();
+  }
+});
+
 test("a painted title resolves from big cells down to its real ones", async () => {
   const site = await open("/");
   const { page, errors } = site;

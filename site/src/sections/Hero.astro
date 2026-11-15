@@ -39,7 +39,10 @@ import Keycap from "../components/Keycap.astro";
 
 <script>
   import { hero } from "../lib/hero";
+  import { paintIn } from "../lib/paint-in";
   const root = document.querySelector<HTMLElement>(".hero");
+  const title = document.querySelector<HTMLElement>("#hero-title");
+  if (title) paintIn(title);
   if (root) hero(root);
 </script>
 
@@ -153,6 +156,21 @@ import Keycap from "../components/Keycap.astro";
     .hud {
       animation: appear 400ms ease 650ms backwards;
     }
+  }
+  /* A letter still being painted in (lib/paint-in.ts): hidden under the ramp glyph it has reached. */
+  h1 :global([data-g]) {
+    position: relative;
+    -webkit-text-fill-color: transparent;
+  }
+  h1 :global([data-g])::after {
+    content: attr(data-g);
+    content: attr(data-g) / "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font: 500 0.62em/1.6 var(--font-mono);
+    -webkit-text-fill-color: var(--violet);
   }
 
   .stage {
