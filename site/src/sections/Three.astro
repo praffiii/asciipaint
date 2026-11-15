@@ -1,8 +1,5 @@
 ---
-import Band from "../components/Band.astro";
-import Chip from "../components/Chip.astro";
-import CodeCard from "../components/CodeCard.astro";
-import PaintedTitle from "../components/PaintedTitle.astro";
+import PlainCode from "../components/PlainCode.astro";
 
 const code = `import { asciipaintThree }
   from "asciipaint/three";
@@ -11,25 +8,25 @@ const pass = asciipaintThree(renderer);
 pass.render(scene, camera);`;
 ---
 
-<Band tone="violet-deep" grain edgeBelow="navy" id="three">
-  <div class="wrap">
-    <Chip label="04 — THREE.JS" tone="lavender" />
-    <div class="title">
-      <PaintedTitle text="three.js" palette="light" band="violet-deep" />
-    </div>
-    <div class="cols">
-      <div class="stage" data-three-stage>
-        <canvas role="img" aria-label="A three.js scene of a torus knot, a sphere and a gem, painted live"></canvas>
-        <p class="tag"><code>pass.render(scene, camera)</code></p>
-      </div>
-      <div class="copy">
-        <p class="sub">Swap renderer.render for pass.render. Same scene, same camera, painted in the same frame.</p>
-        <CodeCard file="scene.ts" code={code} />
-        <p class="note">Graded with ACES Filmic and output as sRGB, so lit scenes keep their highlights.</p>
-      </div>
+<section class="three" id="three" aria-labelledby="three-title">
+  <header class="row">
+    <h2 class="label" id="three-title"><i>05</i> THREE.JS</h2>
+    <p class="sub">Swap renderer.render for pass.render. Same scene, same camera, painted in the same frame.</p>
+  </header>
+
+  <div class="stage" data-three-stage>
+    <canvas role="img" aria-label="A three.js scene of a torus knot, a sphere and a gem, painted live"></canvas>
+    <p class="call"><code>pass.render(scene, camera)</code></p>
+  </div>
+
+  <div class="row">
+    <p class="label">SCENE.TS</p>
+    <div class="use">
+      <PlainCode id="three-code" file="scene.ts" code={code} />
+      <p class="sub">Graded with ACES Filmic and output as sRGB, so lit scenes keep their highlights.</p>
     </div>
   </div>
-</Band>
+</section>
 
 <script>
   import { autoRender } from "asciipaint";
@@ -38,8 +35,8 @@ pass.render(scene, camera);`;
   import { cellAt, coarse, resolve } from "../lib/resolve";
   import { canPaint } from "../lib/still";
 
-  // three.js (~150 kB gzip) loads only when the band is within 800 px, through the same module
-  // promise as the playground's 3D source. Without WebGL2 the slab stays black and nothing loads.
+  // three.js (~150 kB gzip) loads only when the section is within 800 px, through the same module
+  // promise as the playground's 3D source. Without WebGL2 the stage stays black and nothing loads.
   const stage = document.querySelector<HTMLElement>("[data-three-stage]");
   const canvas = stage?.querySelector("canvas");
 
@@ -48,7 +45,7 @@ pass.render(scene, camera);`;
     const scene = three.stage3d(canvas);
     // A new cell size needs a new pass; it reuses the renderer, so the context stays the same one.
     const pass = (scale: number) =>
-      three.asciipaintThree(scene.renderer, { cell: cellAt([2.4, 3.4], scale), font: glyphFont(), background: "#0A0D1F" });
+      three.asciipaintThree(scene.renderer, { cell: cellAt([2.4, 3.4], scale), font: glyphFont(), background: "#000000" });
     let paint = pass(coarse());
     let lost = false;
     let shown: (() => void) | undefined;
@@ -66,7 +63,7 @@ pass.render(scene, camera);`;
         },
       },
     );
-    // It starts on big cells and resolves to the real ones once the slab is well in view.
+    // It starts on big cells and resolves to the real ones once the stage is well in view.
     const seen = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
@@ -87,7 +84,7 @@ pass.render(scene, camera);`;
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
         near.disconnect();
-        start(stage, canvas).catch((e: unknown) => console.warn("asciipaint couldn't start the three.js scene; its slab stays black.", e));
+        start(stage, canvas).catch((e: unknown) => console.warn("asciipaint couldn't start the three.js scene; its stage stays black.", e));
       },
       { rootMargin: "800px" },
     );
@@ -96,91 +93,87 @@ pass.render(scene, camera);`;
 </script>
 
 <style>
-  .wrap {
-    max-width: 1312px;
-    margin: 0 auto;
+  /* The hero's language carried on: black, hairlines, small type. */
+  .three {
+    background: var(--black);
+    color: var(--lavender);
   }
-  .title {
-    margin: var(--space-5) 0 var(--space-4);
-  }
-  .title :global(.painted-text) {
-    font-size: clamp(64px, 21.9vw, 251px);
-    letter-spacing: -0.02em;
-  }
-  .cols {
+  .row {
     display: grid;
-    grid-template-columns: minmax(0, 720px) minmax(0, 1fr);
-    gap: var(--space-5) 56px;
-    align-items: start;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: var(--space-4);
+    padding: 28px max(16px, 2.2vw);
+    border-top: 1px solid var(--line);
+  }
+  .label {
+    margin: 0;
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .label i {
+    margin-right: 8px;
+    font-style: normal;
+    color: var(--lilac);
+  }
+  .sub {
+    max-width: 62ch;
+    margin: 0;
+    font: 400 15px/23px var(--font-body);
+    color: var(--muted);
   }
 
-  /* The scene: a black slab on a violet edge, tagged with the one call that paints it. */
+  /* The scene, full width, tagged with the one call that paints it. */
   .stage {
     position: relative;
-    aspect-ratio: 16 / 10;
+    height: min(72svh, 640px);
+    min-height: 320px;
+    border-top: 1px solid var(--line);
     background: var(--black);
-    box-shadow: var(--slab) var(--slab) 0 var(--violet);
   }
   .stage canvas {
     display: block;
     width: 100%;
     height: 100%;
   }
-  .tag {
+  .call {
     position: absolute;
-    left: 14px;
-    top: 14px;
+    left: max(16px, 2.2vw);
+    top: 20px;
     margin: 0;
-    padding: 6px 10px;
-    background: var(--lavender);
-    color: var(--navy);
-    font: 500 12px/1 var(--font-mono);
+    padding: 7px 10px;
+    background: var(--black);
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.04em;
     pointer-events: none;
   }
-  .tag code {
+  .call code {
     font: inherit;
   }
-
-  .copy {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    min-width: 0;
-    --card-edge: var(--lilac);
-  }
-  .copy :global(.card) {
-    border-color: var(--lavender);
-  }
-  .sub {
-    margin: 0;
-    font: 400 var(--body-lg) / 1.55 var(--font-body);
-  }
-  .note {
-    margin: 0;
-    font: 400 var(--body-md) / 1.55 var(--font-body);
+  .use {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-5);
   }
 
-  @media (max-width: 1099px) {
-    .cols {
+  @media (max-width: 899px) {
+    .row {
       grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+      padding: 24px 16px;
     }
-    .copy {
-      max-width: 640px;
+    .use {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
     }
   }
-  @media (max-width: 767px) {
-    .title {
-      margin: var(--space-3) 0 var(--space-3);
-    }
+  @media (max-width: 640px) {
     .stage {
-      box-shadow: 6px 6px 0 var(--violet);
+      height: 60svh;
     }
-    .tag {
-      left: 8px;
-      top: 8px;
-    }
-    .sub {
-      font-size: var(--body-md);
+    .call {
+      top: 12px;
     }
   }
 </style>

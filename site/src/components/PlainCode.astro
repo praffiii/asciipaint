@@ -1,0 +1,67 @@
+---
+import { Code } from "astro:components";
+import type { ComponentProps } from "astro/types";
+import shikiNightJson from "../../shiki-night.json";
+
+type CodeProps = ComponentProps<typeof Code>;
+
+interface Props {
+  /** The element id the copy link reads. */
+  id: string;
+  /** The file name, for the copy link's label. */
+  file: string;
+  code: string;
+  lang?: CodeProps["lang"];
+}
+const { id, file, code, lang = "ts" } = Astro.props;
+---
+
+<div class="plain-code">
+  <Code id={id} code={code} lang={lang} theme={{ ...shikiNightJson, type: "dark" }} />
+  <button type="button" data-copy={id} aria-label={`Copy ${file}`}><span data-copied="copied">copy</span></button>
+</div>
+
+<script>
+  import { wireCopy } from "../lib/copy";
+  wireCopy(document);
+</script>
+
+<style>
+  /* Code with no card around it: it sits straight on the black page. */
+  .plain-code {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    min-width: 0;
+  }
+  .plain-code :global(pre) {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    background: none !important;
+    font: 400 15px/26px var(--font-mono);
+  }
+  .plain-code :global(code) {
+    font: inherit;
+  }
+  button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 500 12px/1 var(--font-mono);
+    letter-spacing: 0.04em;
+    color: var(--lilac);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    color: var(--lavender);
+  }
+  @media (max-width: 640px) {
+    .plain-code :global(pre) {
+      font-size: 13px;
+    }
+  }
+</style>

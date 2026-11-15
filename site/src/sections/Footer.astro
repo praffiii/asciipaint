@@ -1,91 +1,70 @@
 ---
 import pkg from "../../../package.json";
-import Band from "../components/Band.astro";
-import Keycap from "../components/Keycap.astro";
-import PaintedTitle from "../components/PaintedTitle.astro";
 
 const links = [
+  { label: "Docs", href: "/docs/" },
   { label: "GitHub ↗", href: "https://github.com/praffiii/asciipaint" },
   { label: "npm ↗", href: "https://www.npmjs.com/package/asciipaint" },
   { label: "MIT licence", href: "https://github.com/praffiii/asciipaint/blob/main/LICENSE" },
 ];
 ---
 
-<Band tone="navy" grain as="footer">
-  <div class="wrap">
-    <div class="title">
-      <PaintedTitle text="asciipaint" palette="title" band="navy" as="p" />
-    </div>
-    <div class="keys">
-      <Keycap href="/docs/" tone="violet">Read the docs →</Keycap>
-      <nav class="links" aria-label="Project">
-        {links.map((l) => <Keycap href={l.href} size="sm">{l.label}</Keycap>)}
-      </nav>
-    </div>
-    <div class="meta">
-      <p>ASCIIPAINT {pkg.version}</p>
-      <p>EVERY PICTURE ON THIS PAGE IS PAINTED LIVE BY THE LIBRARY</p>
-    </div>
-  </div>
-</Band>
+<footer class="foot">
+  <p class="name">ASCIIPAINT <span>{pkg.version}</span></p>
+  <p class="note">Every picture on this page is painted live by the library.</p>
+  <nav class="links" aria-label="Project">
+    {links.map((l) => <a href={l.href}>{l.label}</a>)}
+  </nav>
+</footer>
 
 <style>
-  .wrap {
-    max-width: 1312px;
-    margin: 0 auto;
-  }
-  .title {
-    margin-bottom: var(--space-5);
-  }
-  .title :global(.painted-text) {
-    font-size: clamp(56px, 17.4vw, 231px);
-    letter-spacing: -0.02em;
-  }
-  .keys {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--space-4);
-    --keycap-edge: var(--violet-deep);
-  }
-  .keys > :global(.keycap) {
-    border-color: var(--lavender);
-  }
-  .links {
-    --keycap-edge: var(--line);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .links :global(.keycap) {
-    background: var(--ink-2);
-    padding: 10px 18px;
-    font-size: 13px;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2) var(--space-4);
-    margin-top: var(--space-5);
-    padding-top: var(--space-4);
+  .foot {
+    --focus: var(--lavender);
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-3) var(--space-4);
+    padding: 28px max(16px, 2.2vw) 40px;
     border-top: 1px solid var(--line);
-    font: 500 11px/1.5 var(--font-mono);
+    background: var(--black);
+    font: 500 11px/13px var(--font-mono);
     letter-spacing: 0.06em;
     color: var(--muted);
   }
-  .meta p {
+  p {
     margin: 0;
   }
-
-  @media (max-width: 767px) {
-    .keys {
-      flex-direction: column;
-      align-items: flex-start;
+  .name {
+    color: var(--lavender);
+  }
+  .name span {
+    color: var(--lilac);
+  }
+  .note {
+    font: 400 15px/23px var(--font-body);
+    letter-spacing: 0;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+  }
+  a {
+    color: var(--lilac);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--lavender);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a {
+      transition: color 150ms ease;
     }
-    .meta {
-      flex-direction: column;
+  }
+  @media (max-width: 899px) {
+    .foot {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 24px 16px 32px;
     }
   }
 </style>

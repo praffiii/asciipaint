@@ -56,7 +56,7 @@ test("the One tag wall paints 12 stickers, alternating SVG and PNG in the frame'
     expect(stickers.map((s) => s.file)).toEqual(FILES);
     stickers.forEach((s, i) => {
       expect(s.src.startsWith(i % 2 ? "blob:" : "data:image/svg+xml")).toBe(true);
-      expect(s.background).toBe("#0A0D1F");
+      expect(s.background).toBe("#000000");
     });
     expect(errors).toEqual([]);
   } finally {

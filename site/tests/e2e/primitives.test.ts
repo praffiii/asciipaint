@@ -1,15 +1,14 @@
 import { expect, test } from "vite-plus/test";
 import { open } from "./harness";
 
-test("copy puts the card's code on the clipboard and announces it", async () => {
+test("copy puts the code on the clipboard and announces it", async () => {
   const site = await open("/");
   const { page, errors } = site;
   try {
     await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-    const card = page.locator(".card").filter({ has: page.getByRole("button", { name: "Copy logos.html" }) });
-    await card.getByRole("button", { name: "Copy logos.html" }).click();
+    await page.getByRole("button", { name: "Copy logos.html" }).click();
     await page.locator('[aria-live="polite"]').filter({ hasText: "copied" }).waitFor();
-    const expected = await card.locator("pre").innerText();
+    const expected = await page.locator("#one-tag pre").innerText();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(expected.replace(/\n$/, ""));
     expect(errors).toEqual([]);
   } finally {

@@ -1,9 +1,0 @@
----
-interface Props {
-  label: string;
-  tone?: "violet" | "lavender" | "black";
-}
-const { label, tone = "violet" } = Astro.props;
----
-
-<span class={`chip chip-mark chip-${tone}`}>{label}</span>

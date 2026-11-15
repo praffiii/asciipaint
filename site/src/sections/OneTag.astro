@@ -1,8 +1,5 @@
 ---
-import Band from "../components/Band.astro";
-import Chip from "../components/Chip.astro";
-import CodeCard from "../components/CodeCard.astro";
-import PaintedTitle from "../components/PaintedTitle.astro";
+import PlainCode from "../components/PlainCode.astro";
 import { LOGOS } from "../lib/logos";
 
 const code = `import "asciipaint/element";
@@ -10,58 +7,57 @@ const code = `import "asciipaint/element";
 <ascii-img src="orbit.svg"></ascii-img>
 <ascii-img src="chevrons.png"></ascii-img>`;
 
-const bullets = [
+const facts = [
   "SVG with only a viewBox, or a transparent PNG",
   "Transparent pixels stay paper",
   "One shared WebGL context for every tag",
   "Fires paint and error events, like <img>",
 ];
 
-// Every other mark ships as a PNG; each card leans by a fixed amount, as in the frame.
-const TILT = [-2, 1.5, -1, 2, 1, -1.5, 2.5, -2, -1, 1.5, -2.5, 3];
+// Every other mark ships as a PNG.
 const stickers = LOGOS.map((logo, i) => {
   const kind = i % 2 ? "png" : "svg";
-  return { file: `${logo.name.toLowerCase()}.${kind}`, kind, tilt: TILT[i] ?? 0 };
+  return { file: `${logo.name.toLowerCase()}.${kind}`, kind };
 });
 ---
 
-<Band tone="lavender" grain id="one-tag">
-  <div class="wrap">
-    <Chip label="03 — ONE TAG" tone="black" />
-    <div class="title">
-      <PaintedTitle text="One tag." palette="title" band="lavender" />
-    </div>
-    <div class="cols">
-      <div class="copy">
-        <p class="sub">
-          Import the element once, then use it like &lt;img&gt;. Every &lt;ascii-img&gt; on the page shares one WebGL
-          context, so a whole wall of them costs one GPU setup.
-        </p>
-        <CodeCard file="logos.html" code={code} lang="jsx" />
-        <ul class="bullets">{bullets.map((b) => <li>{b}</li>)}</ul>
-      </div>
-      <ul class="wall" aria-label="Twelve logos, each painted by its own <ascii-img>">
-        {
-          stickers.map((s, i) => (
-            <li class="sticker" style={`--tilt: ${s.tilt}deg; --i: ${i}`} data-sticker={i} data-kind={s.kind}>
-              <div class="art" data-art />
-              <p class="label">
-                <span data-file>{s.file}</span>
-                <span class="tag">{s.kind.toUpperCase()}</span>
-              </p>
-            </li>
-          ))
-        }
-      </ul>
+<section class="tag" id="one-tag" aria-labelledby="tag-title">
+  <header class="row">
+    <h2 class="label" id="tag-title"><i>04</i> ONE TAG</h2>
+    <p class="sub">
+      Import the element once, then use it like &lt;img&gt;. Every &lt;ascii-img&gt; on the page shares one WebGL
+      context, so a whole wall of them costs one GPU setup.
+    </p>
+  </header>
+
+  <ul class="wall" aria-label="Twelve logos, each painted by its own <ascii-img>">
+    {
+      stickers.map((s, i) => (
+        <li class="sticker" style={`--i: ${i}`} data-sticker={i} data-kind={s.kind}>
+          <div class="art" data-art />
+          <p class="cap">
+            <span data-file>{s.file}</span>
+            <span class="kind">{s.kind.toUpperCase()}</span>
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="row">
+    <p class="label">LOGOS.HTML</p>
+    <div class="use">
+      <PlainCode id="tag-code" file="logos.html" code={code} lang="jsx" />
+      <ul class="facts">{facts.map((f) => <li>{f}</li>)}</ul>
     </div>
   </div>
-</Band>
+</section>
 
 <script>
   import { LOGOS, night, pngUrl, svgUrl } from "../lib/logos";
   import { canPaint } from "../lib/still";
 
-  // Each sticker is a real <ascii-img> (they all share one WebGL context), made once the wall is
+  // Each logo is a real <ascii-img> (they all share one WebGL context), made once the wall is
   // near. Without WebGL2 the element can't paint, so a plain <img> shows the unpainted mark.
   const wall = document.querySelector<HTMLElement>("#one-tag .wall");
   if (wall) {
@@ -85,7 +81,7 @@ const stickers = LOGOS.map((logo, i) => {
           }
           const el = canPaint() ? document.createElement("ascii-img") : new Image();
           el.setAttribute("alt", `${logo.name} logo`);
-          el.setAttribute("background", "#0A0D1F");
+          el.setAttribute("background", "#000000");
           el.setAttribute("src", src);
           art.append(el);
         });
@@ -94,7 +90,7 @@ const stickers = LOGOS.map((logo, i) => {
     );
     near.observe(wall);
 
-    // The stickers land one after another once the wall is well in view. They are only held back
+    // The logos land one after another once the wall is well in view. They are only held back
     // here, in script, so without it they are simply there.
     wall.dataset.wall = "waiting";
     const seen = new IntersectionObserver(
@@ -110,130 +106,155 @@ const stickers = LOGOS.map((logo, i) => {
 </script>
 
 <style>
-  .wrap {
-    max-width: 1312px;
-    margin: 0 auto;
+  /* The hero's language carried on: black, hairlines, small type. */
+  .tag {
+    background: var(--black);
+    color: var(--lavender);
   }
-  .title {
-    margin: var(--space-5) 0 var(--space-4);
-  }
-  .title :global(.painted-text) {
-    font-size: clamp(64px, 20.5vw, 258px);
-    letter-spacing: -0.02em;
-  }
-  .cols {
+  .row {
     display: grid;
-    grid-template-columns: minmax(0, 556px) minmax(0, 1fr);
-    gap: var(--space-5) 52px;
-    align-items: start;
-  }
-  .copy {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 200px minmax(0, 1fr);
     gap: var(--space-4);
-    min-width: 0;
+    padding: 28px max(16px, 2.2vw);
+    border-top: 1px solid var(--line);
+  }
+  .label {
+    margin: 0;
+    font: 500 11px/13px var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .label i {
+    margin-right: 8px;
+    font-style: normal;
+    color: var(--lilac);
   }
   .sub {
+    max-width: 62ch;
     margin: 0;
-    font: 400 var(--body-lg) / 1.55 var(--font-body);
-  }
-  .bullets {
-    display: grid;
-    gap: 10px;
-    margin: var(--space-2) 0 0;
-    padding: 0;
-    list-style: none;
-    font: 500 13px/1.4 var(--font-mono);
-  }
-  .bullets li {
-    position: relative;
-    padding-left: 18px;
-  }
-  .bullets li::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0.35em;
-    width: 8px;
-    height: 8px;
-    background: var(--violet);
-    border: 1px solid var(--navy);
+    font: 400 15px/23px var(--font-body);
+    color: var(--muted);
   }
 
-  /* The wall: navy cards on a 6 px cobalt edge, each leaning a little. */
+  /* The wall: twelve logos flat on one grid, a hairline between each. */
   .wall {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 24px 18px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     margin: 0;
-    padding: 0 6px 6px 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
     list-style: none;
   }
   .sticker {
-    padding: 8px 8px 0;
-    background: var(--navy);
-    color: var(--lavender);
-    border: 1.5px solid var(--black);
-    box-shadow: 6px 6px 0 var(--cobalt);
-    transform: rotate(var(--tilt));
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
     transition:
       opacity 300ms var(--ease-out),
-      translate 300ms var(--ease-out),
-      scale 300ms var(--ease-out);
+      translate 300ms var(--ease-out);
     transition-delay: calc(var(--i) * 40ms);
+  }
+  .sticker:nth-child(6n) {
+    border-right: 0;
+  }
+  .sticker:nth-last-child(-n + 6) {
+    border-bottom: 0;
   }
   .wall[data-wall="waiting"] .sticker {
     opacity: 0;
     translate: 0 12px;
-    scale: 0.94;
   }
   .art {
     aspect-ratio: 1;
+    padding: 12%;
   }
   .art > :global(*) {
     display: block;
     width: 100%;
     height: 100%;
   }
-  .label {
+  .cap {
     display: flex;
     justify-content: space-between;
     gap: 4px;
     margin: 0;
-    padding: 8px 2px 10px;
-    font: 500 11px/1 var(--font-mono);
+    padding: 0 12px 12px;
+    font: 500 11px/13px var(--font-mono);
     letter-spacing: 0.04em;
     white-space: nowrap;
+    color: var(--muted);
   }
-  .tag {
-    color: var(--blue-light);
+  .kind {
+    color: var(--muted-light);
   }
 
-  @media (max-width: 1099px) {
-    .cols {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .copy {
-      max-width: 640px;
-    }
+  .use {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-5);
   }
-  @media (max-width: 767px) {
-    .title {
-      margin: var(--space-3) 0 var(--space-3);
+  .facts {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 400 15px/23px var(--font-body);
+    color: var(--muted);
+  }
+  .facts li {
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .facts li:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  @media (max-width: 899px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3);
+      padding: 24px 16px;
     }
-    .sub {
-      font-size: var(--body-md);
+    .use {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
     }
     .wall {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .sticker:nth-child(6n) {
+      border-right: 1px solid var(--line);
+    }
+    .sticker:nth-child(4n) {
+      border-right: 0;
+    }
+    .sticker:nth-last-child(-n + 6) {
+      border-bottom: 1px solid var(--line);
+    }
+    .sticker:nth-last-child(-n + 4) {
+      border-bottom: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .wall {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px 12px;
     }
-    .sticker {
-      padding: 6px 6px 0;
+    .sticker:nth-child(4n) {
+      border-right: 1px solid var(--line);
     }
-    .label {
-      gap: 2px;
-      padding: 6px 0 8px;
+    .sticker:nth-child(3n) {
+      border-right: 0;
+    }
+    .sticker:nth-last-child(-n + 4) {
+      border-bottom: 1px solid var(--line);
+    }
+    .sticker:nth-last-child(-n + 3) {
+      border-bottom: 0;
+    }
+    .cap {
+      padding: 0 6px 8px;
       font-size: 9px;
       letter-spacing: 0;
     }
