@@ -16,28 +16,13 @@ test("copy puts the code on the clipboard and announces it", async () => {
   }
 });
 
-test("every keycap has a hard edge (or, pressed, has moved onto it) and a visible focus outline", async () => {
+test("every keycap takes focus by keyboard and shows a focus outline", async () => {
   const site = await open("/");
   const { page } = site;
   try {
     const keycaps = page.locator('.keycap:visible:not([role="tab"])'); // the phone menu is hidden on desktop; tabs rove, so Tab skips them
     const count = await keycaps.count();
     expect(count).toBeGreaterThan(0);
-    for (let i = 0; i < count; i++) {
-      const { pressed, shadow, transform } = await keycaps.nth(i).evaluate((el) => ({
-        pressed: el.getAttribute("aria-pressed") === "true",
-        shadow: getComputedStyle(el).boxShadow,
-        transform: getComputedStyle(el).transform,
-      }));
-      if (pressed) {
-        // pressed: moved by the offset onto where its edge was, so no edge is left
-        expect(shadow).toBe("none");
-        expect(transform).not.toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
-      } else {
-        // computed form: "rgb(r, g, b) 4px 4px 0px 0px" — offsets, then blur
-        expect(shadow).toMatch(/[1-9]\d*px [1-9]\d*px 0px/);
-      }
-    }
     for (let i = 0; i < count; i++) {
       await keycaps.nth(i).focus();
       await page.keyboard.press("Shift+Tab");

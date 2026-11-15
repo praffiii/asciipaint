@@ -70,7 +70,7 @@ test("every code block on every docs page sits in a card with a copy button for 
         }),
       );
       expect(cards.length, path).toBeGreaterThan(0);
-      for (const card of cards) expect(card, path).toEqual({ label: "[ copy ]", copiesThisBlock: true, sameText: true });
+      for (const card of cards) expect(card, path).toEqual({ label: "copy", copiesThisBlock: true, sameText: true });
       blocks += cards.length;
     }
     expect(blocks).toBeGreaterThan(pages.length);

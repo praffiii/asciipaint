@@ -55,6 +55,9 @@ export function hero(root: HTMLElement): void {
 
   let W = 0;
   let H = 0;
+  // The painted size: the field rounded up to whole coarsest cells, so no part cell is left as bare paper at an edge.
+  let PW = 0;
+  let PH = 0;
   let gw = 0;
   let gh = 0;
   let heat = new Float32Array(0);
@@ -74,7 +77,7 @@ export function hero(root: HTMLElement): void {
         // A context this code released also fires this, but by then the level is no longer current.
         canvas.addEventListener("webglcontextlost", () => levels?.some((p) => p.canvas === canvas) && fail());
         const paint = asciipaint(canvas, { cell, font: glyphFont(), background: "#000000", edgeFade: 0, dpr });
-        paint.resize({ width: W, height: H });
+        paint.resize({ width: PW, height: PH });
         made.push(paint);
       }
       levels = made;
@@ -89,12 +92,14 @@ export function hero(root: HTMLElement): void {
   const size = () => {
     W = field.clientWidth;
     H = field.clientHeight;
+    PW = Math.ceil(W / LEVELS[0][0]) * LEVELS[0][0];
+    PH = Math.ceil(H / LEVELS[0][1]) * LEVELS[0][1];
     view.width = Math.round(W * dpr);
     view.height = Math.round(H * dpr);
     gw = Math.ceil(W / GX);
     gh = Math.ceil(H / GY);
     heat = new Float32Array(gw * gh);
-    for (const paint of levels ?? []) paint.resize({ width: W, height: H });
+    for (const paint of levels ?? []) paint.resize({ width: PW, height: PH });
   };
 
   /** Warms the grid around (x, y) px up to `amp`; a block only ever gets warmer here. */
@@ -126,10 +131,10 @@ export function hero(root: HTMLElement): void {
   let readout = "";
   const tick = (now: number) => {
     if (W !== field.clientWidth || H !== field.clientHeight) size();
-    const frame = W && H ? liquid()?.frame(now / 1000, Math.round(W * dpr), Math.round(H * dpr), "night") : undefined;
+    const frame = W && H ? liquid()?.frame(now / 1000, Math.round(PW * dpr), Math.round(PH * dpr), "night") : undefined;
     if (!frame) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (!levels) return void ctx.drawImage(frame, 0, 0, W, H);
+    if (!levels) return void ctx.drawImage(frame, 0, 0, PW, PH);
 
     if (calm.matches) {
       // One held frame: a fixed composition, resolved on the right and coarse at the edges.
@@ -167,7 +172,7 @@ export function hero(root: HTMLElement): void {
         ctx.clip();
       }
       paint.draw(frame);
-      ctx.drawImage(paint.canvas, 0, 0, W, H);
+      ctx.drawImage(paint.canvas, 0, 0, PW, PH);
       if (k) ctx.restore();
     });
     root.dataset.live = "";

@@ -52,45 +52,47 @@ pre {
   }
 }
 
-/* Keycap: a hard offset edge that the press collapses. */
+/* Keycap: a flat tag on a hairline. The name is historical; nothing is raised any more. */
 .keycap {
   display: inline-block;
-  padding: 12px 20px;
-  border: 1.5px solid var(--keycap-edge, var(--cobalt));
+  padding: 7px 10px;
+  border: 1px solid var(--line);
   border-radius: 0;
-  box-shadow: var(--keycap) var(--keycap) 0 var(--keycap-edge, var(--cobalt));
-  font: 700 var(--body-md) / 1 var(--font-body);
+  background: var(--black);
+  color: var(--lavender);
+  font: 500 12px/13px var(--font-mono);
+  letter-spacing: 0.04em;
   text-decoration: none;
   cursor: pointer;
-  transition: transform 80ms, box-shadow 80ms;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .keycap {
+    transition:
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+}
+.keycap:hover {
+  border-color: var(--lavender);
 }
 .keycap-sm {
-  padding: 7px 12px;
-  font: 500 12px/1 var(--font-mono);
+  padding: 5px 8px;
+  font-size: 11px;
 }
-.keycap-dark {
-  background: var(--navy);
-  color: var(--lavender);
-}
-.keycap-violet {
-  background: var(--violet);
+/* The one call to action on a row: the tag inverted. */
+.keycap-violet,
+.keycap-light {
+  border-color: var(--lavender);
+  background: var(--lavender);
   color: var(--black);
 }
-.keycap-light {
-  background: var(--lavender);
-  color: var(--navy);
-}
-.keycap:active,
 .keycap[aria-pressed="true"] {
-  transform: translate(var(--keycap), var(--keycap));
-  box-shadow: none;
+  border-color: var(--lavender);
 }
 .keycap[data-state="copied"] {
-  background: var(--lilac);
-  color: var(--navy);
+  border-color: var(--lilac);
+  color: var(--lilac);
 }
-
-.slab {
-  box-shadow: var(--slab-depth, var(--slab)) var(--slab-depth, var(--slab)) 0 var(--slab-edge);
+.keycap-violet[data-state="copied"] {
+  color: var(--black);
 }
-

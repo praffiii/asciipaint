@@ -73,8 +73,7 @@ const ramp = !colour && /^".+"$/.test(value) ? Array.from(value.slice(1, -1)) : 
   .key {
     display: flex;
     max-width: 100%;
-    border: 1.5px solid var(--black);
-    box-shadow: var(--keycap) var(--keycap) 0 var(--keycap-edge);
+    border: 1px solid var(--line);
     font: 400 13px/1 var(--font-mono);
   }
   dt {
@@ -86,12 +85,12 @@ const ramp = !colour && /^".+"$/.test(value) ? Array.from(value.slice(1, -1)) : 
     text-transform: uppercase;
   }
   .key-type dt {
-    background: var(--cobalt);
-    color: var(--lavender);
+    border-right: 1px solid var(--line);
+    color: var(--blue-light);
   }
   .key-default dt {
-    background: var(--violet);
-    color: var(--black);
+    border-right: 1px solid var(--line);
+    color: var(--lilac);
   }
   dd {
     display: flex;
@@ -100,7 +99,6 @@ const ramp = !colour && /^".+"$/.test(value) ? Array.from(value.slice(1, -1)) : 
     min-width: 0;
     margin: 0;
     padding: 9px 12px;
-    background: var(--black);
     color: var(--lavender);
   }
   dd code {

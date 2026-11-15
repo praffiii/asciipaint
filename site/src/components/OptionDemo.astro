@@ -94,16 +94,14 @@ const rows = OPTIONS.filter((row) => !row.demo);
     display: flex;
     flex-direction: column;
     gap: 28px;
-    margin: var(--space-4) var(--slab) var(--space-5) 0;
+    margin: var(--space-4) 0 var(--space-5);
   }
   .options > :global(figure.card) {
     margin: 0 0 var(--space-2);
   }
   .card,
   .table {
-    background: var(--lavender);
-    border: 1.5px solid var(--black);
-    box-shadow: var(--slab) var(--slab) 0 var(--cobalt);
+    border: 1px solid var(--line);
   }
   .card {
     display: grid;
@@ -120,13 +118,13 @@ const rows = OPTIONS.filter((row) => !row.demo);
     margin: 0;
     font: 400 22px/1.2 var(--font-mono);
     letter-spacing: 0;
-    color: var(--black);
+    color: var(--lavender);
     scroll-margin-top: var(--space-4);
   }
   .live {
     padding: 3px 6px;
-    background: var(--violet);
-    color: var(--black);
+    border: 1px solid var(--line);
+    color: var(--lilac);
     font: 500 10px/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -144,17 +142,17 @@ const rows = OPTIONS.filter((row) => !row.demo);
   .options p {
     margin: 4px 0 0;
     font: 400 var(--body-md) / 1.55 var(--font-body);
+    color: var(--muted);
   }
 
-  /* The demo: a black stage on a cobalt edge, its caption on the paint. */
+  /* The demo: a black stage on a hairline, its caption on the paint. */
   .demo {
     position: relative;
     align-self: start;
     margin: 0;
     aspect-ratio: 270 / 196;
     background: var(--black);
-    border: 1.5px solid var(--black);
-    box-shadow: 6px 6px 0 var(--cobalt);
+    border: 1px solid var(--line);
   }
   .still {
     position: absolute;
@@ -170,7 +168,6 @@ const rows = OPTIONS.filter((row) => !row.demo);
     bottom: 8px;
     padding: 5px 8px;
     background: var(--black);
-    border: 1px solid var(--muted);
     color: var(--lavender);
     font: 500 11px/1 var(--font-mono);
     white-space: pre;
@@ -185,7 +182,7 @@ const rows = OPTIONS.filter((row) => !row.demo);
     padding: 20px;
   }
   .row + .row {
-    border-top: 1.5px solid var(--black);
+    border-top: 1px solid var(--line);
   }
   .facts {
     display: contents;
@@ -204,11 +201,11 @@ const rows = OPTIONS.filter((row) => !row.demo);
     overflow-wrap: anywhere;
   }
   .type {
-    color: var(--muted-light);
+    color: var(--muted);
   }
   .default {
     font-weight: 600;
-    color: var(--navy);
+    color: var(--lavender);
   }
   .row p {
     margin: 0;

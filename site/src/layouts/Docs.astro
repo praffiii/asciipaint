@@ -93,10 +93,6 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
 </Base>
 
 <script>
-  import { grainTile } from "../lib/grain";
-
-  document.querySelector<HTMLElement>("[data-side]")?.style.setProperty("--grain", `url(${grainTile("#0A0D1F", "#2440D0")})`);
-
   const menu = document.querySelector<HTMLDialogElement>("#docs-menu");
   const open = document.querySelector<HTMLButtonElement>("[data-menu-open]");
   if (menu && open) {
@@ -132,11 +128,6 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     background: var(--black);
     border-bottom: 1px solid var(--line);
   }
-  .top :global(.keycap) {
-    padding: 8px 14px;
-    border-color: var(--lavender);
-    font: 500 13px/16px var(--font-mono);
-  }
   .brand,
   .site {
     display: flex;
@@ -171,7 +162,7 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     margin: 0;
     padding: 0;
     border: 0;
-    background: var(--navy);
+    background: var(--black);
     color: var(--lavender);
   }
   /* It drops in from the top bar and leaves faster than it came. Browsers without
@@ -194,7 +185,7 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     }
   }
   .menu::backdrop {
-    background: var(--navy);
+    background: var(--black);
     opacity: 0;
     transition:
       opacity 150ms ease,
@@ -218,14 +209,9 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     padding: var(--space-4) var(--gutter) var(--space-5);
   }
   .extra {
-    --keycap-edge: var(--line);
     display: flex;
     gap: 10px;
     margin-top: var(--space-4);
-  }
-  .extra :global(.keycap) {
-    padding: 8px 12px;
-    font: 500 13px/16px var(--font-mono);
   }
 
   /* Body */
@@ -235,8 +221,8 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     min-height: calc(100vh - 62px);
   }
   .side {
-    background-color: var(--navy);
-    background-image: var(--grain, none);
+    border-right: 1px solid var(--line);
+    background: var(--black);
   }
   .side-in {
     position: sticky;
@@ -246,16 +232,15 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     padding: var(--space-5) 20px;
   }
   .read {
-    --keycap-edge: var(--cobalt);
-    --focus: var(--cobalt);
+    --focus: var(--lavender);
     display: grid;
     grid-template-columns: minmax(0, 760px) 252px;
     grid-template-rows: auto 1fr;
     column-gap: 72px;
     align-content: start;
     padding: 56px 20px 96px 56px;
-    background: var(--lavender);
-    color: var(--navy);
+    background: var(--black);
+    color: var(--lavender);
   }
   .read > :global(.rail) {
     grid-column: 2;
@@ -271,19 +256,20 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     font: 500 11px/1.4 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--cobalt);
+    color: var(--lilac);
   }
   h1 {
-    font-size: var(--display-xl);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--black);
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    color: var(--lavender);
   }
   .intro {
     max-width: 640px;
     margin: var(--space-4) 0 var(--space-5);
     font-size: var(--body-lg);
     line-height: 1.55;
+    color: var(--muted);
   }
   .chips {
     display: flex;
@@ -296,20 +282,21 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
   }
   .chips :global(a) {
     padding: 5px 8px;
-    border: 1px solid var(--black);
+    border: 1px solid var(--line);
     font: 500 12px/1 var(--font-mono);
-    color: var(--navy);
+    color: var(--lavender);
     text-decoration: none;
   }
   .chips :global(a[aria-current]) {
-    background: var(--black);
-    color: var(--lavender);
+    border-color: var(--lavender);
+    background: var(--lavender);
+    color: var(--black);
   }
   article :global(h2) {
     margin: var(--space-5) 0 var(--space-3);
-    font-size: 30px;
+    font-size: 22px;
     letter-spacing: -0.01em;
-    color: var(--black);
+    color: var(--lavender);
     scroll-margin-top: var(--space-4);
   }
   article :global(p),
@@ -319,12 +306,13 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
   }
   article :global(:not(pre) > code) {
     padding: 1px 5px;
-    background: color-mix(in srgb, var(--lilac) 40%, transparent);
+    background: var(--ink-2);
+    color: var(--lilac);
     font-size: 0.9em;
   }
   /* Every code block is a code card (MDX blocks come through CodePre). */
   article :global(figure.card) {
-    margin: var(--space-3) var(--slab) var(--space-5) 0;
+    margin: var(--space-3) 0 var(--space-5);
   }
 
   /* Previous and next */
@@ -339,16 +327,12 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
     flex-direction: column;
     gap: 8px;
     padding: var(--space-3) var(--space-3) 18px;
-    background: var(--navy);
     color: var(--lavender);
-    border: 1.5px solid var(--black);
-    box-shadow: var(--keycap) var(--keycap) 0 var(--cobalt);
+    border: 1px solid var(--line);
     text-decoration: none;
-    transition: transform 80ms, box-shadow 80ms;
   }
-  .card:active {
-    transform: translate(var(--keycap), var(--keycap));
-    box-shadow: none;
+  .card:hover {
+    border-color: var(--lavender);
   }
   .card:hover .name {
     color: var(--lilac);
@@ -403,7 +387,7 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
       padding: 32px var(--gutter) 64px;
     }
     h1 {
-      font-size: 44px;
+      font-size: 32px;
     }
     .intro {
       font-size: var(--body-md);

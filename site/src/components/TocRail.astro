@@ -48,10 +48,10 @@ const { edit } = Astro.props;
     font: 500 11px/1.4 var(--font-mono);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--muted-light);
+    color: var(--muted);
   }
   .count {
-    color: var(--violet-deep);
+    color: var(--lilac);
   }
   .track {
     position: relative;
@@ -84,7 +84,7 @@ const { edit } = Astro.props;
     fill: var(--violet);
   }
   svg :global(circle.next) {
-    fill: var(--lavender);
+    fill: var(--black);
     stroke: var(--muted-light);
     stroke-width: 1.5;
   }
@@ -108,7 +108,7 @@ const { edit } = Astro.props;
     align-items: baseline;
     gap: 12px;
     min-width: 0;
-    color: var(--muted-light);
+    color: var(--muted);
     text-decoration: none;
     font: 400 14px/1.2 var(--font-mono);
   }
@@ -121,16 +121,16 @@ const { edit } = Astro.props;
     white-space: nowrap;
   }
   ol :global(.toc-link:hover) {
-    color: var(--navy);
+    color: var(--lavender);
   }
   /* Read and being read: every link up to the current one. */
   ol :global(li:has(~ li [aria-current]) .toc-link),
   ol :global([aria-current]) {
-    color: var(--navy);
+    color: var(--lavender);
   }
   ol :global(li:has(~ li [aria-current]) .toc-n),
   ol :global([aria-current] .toc-n) {
-    color: var(--violet-deep);
+    color: var(--lilac);
   }
   ol :global([aria-current]) {
     font-weight: 600;
@@ -138,8 +138,8 @@ const { edit } = Astro.props;
   ol :global(.toc-tag) {
     display: none;
     padding: 3px 6px;
-    background: var(--black);
-    color: var(--lavender);
+    background: var(--lavender);
+    color: var(--black);
     font: 500 9px/1 var(--font-mono);
     letter-spacing: 0.08em;
   }
@@ -153,7 +153,7 @@ const { edit } = Astro.props;
     gap: 14px;
     margin-top: var(--space-3);
     padding-top: var(--space-4);
-    border-top: 1px solid color-mix(in srgb, var(--muted-light) 35%, transparent);
+    border-top: 1px solid var(--line);
   }
   .keys :global(.keycap) {
     padding: 8px 12px;
