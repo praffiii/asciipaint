@@ -29,7 +29,7 @@ const id = live ? name : uid(name);
   <figcaption class="card-head">
     <span class="card-file">{file}</span>
     {note && <span class="card-note">{note}</span>}
-    <Keycap size="sm" data-copy={id} aria-label={`Copy ${file}`}>[ copy ]</Keycap>
+    <Keycap size="sm" data-copy={id} aria-label={`Copy ${file}`}><span data-copied="[ copied ]">[ copy ]</span></Keycap>
   </figcaption>
   {
     code === undefined ? (
