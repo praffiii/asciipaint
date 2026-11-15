@@ -114,6 +114,47 @@ import Keycap from "../components/Keycap.astro";
     display: none;
   }
 
+  /* Load: the pitch comes in line by line, then the stage, then its labels. The slabs rise as one,
+     on the stage: an opacity of their own would pull each out of the 3D stack they share, and the
+     original would sit over the painted one, lens and all, until it finished. */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 10px;
+    }
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .facts,
+    .sub,
+    .keys,
+    .stage {
+      animation: rise 500ms var(--ease-out) backwards;
+    }
+    h1 {
+      animation: appear 300ms ease 60ms backwards;
+    }
+    .sub {
+      animation-delay: 120ms;
+    }
+    .keys {
+      animation-delay: 180ms;
+    }
+    .stage {
+      animation-duration: 600ms;
+      animation-delay: 220ms;
+    }
+    .leads,
+    .label,
+    .hud {
+      animation: appear 400ms ease 650ms backwards;
+    }
+  }
+
   .stage {
     position: relative;
     height: calc(900 * var(--u));
