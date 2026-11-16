@@ -32,7 +32,7 @@ const managers = Object.keys(MANAGERS) as (keyof typeof MANAGERS)[];
         <code id="install-command"><span class="prompt">$</span> <span id="install-cmd">{MANAGERS.npm}</span><span class="caret" aria-hidden="true"></span></code>
         <button type="button" class="copy" data-copy="install-cmd" aria-label="Copy install command"><span data-copied="copied">copy</span></button>
       </div>
-      <p class="foot">
+      <p class="foot agent">
         <button type="button" class="copy" data-copy="agent-prompt" aria-label="Copy a prompt for your AI agent"><span data-copied="copied">copy a prompt for your agent</span></button>
         <a href="/llms.txt">llms.txt →</a>
       </p>
@@ -214,6 +214,12 @@ const managers = Object.keys(MANAGERS) as (keyof typeof MANAGERS)[];
     margin: 0;
     font: 500 12px/1 var(--font-mono);
     letter-spacing: 0.04em;
+  }
+  /* The agent line is its own thing, not part of the package manager tabs above it. */
+  .agent {
+    margin-top: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line);
   }
   .foot a {
     color: var(--muted);
