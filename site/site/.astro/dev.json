@@ -1,0 +1,14 @@
+{
+	"pid": 67206,
+	"port": 4410,
+	"url": "http://localhost:4410",
+	"urls": {
+		"local": [
+			"http://localhost:4410/"
+		],
+		"network": [],
+		"networkInterfaceNames": []
+	},
+	"background": true,
+	"startedAt": "2026-11-16T03:37:49.130Z"
+}

@@ -62,6 +62,31 @@ else {
 }
 ```
 
+## React and TypeScript
+
+The package has no JSX types for the element yet, so TypeScript rejects `<ascii-img>` in a React component until you declare it once:
+
+```ts file="ascii-img.d.ts"
+import type { DetailedHTMLProps, HTMLAttributes } from "react";
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      "ascii-img": DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
+        src?: string;
+        alt?: string;
+        width?: number | string;
+        height?: number | string;
+        background?: string;
+        "edge-fade"?: number | string;
+        cell?: string;
+        ramp?: string;
+      };
+    }
+  }
+}
+```
+
 ## One shared context
 
 Every `<ascii-img>` on the page is painted by one hidden painter on one WebGL context. The elements take turns: each paint is queued, drawn, and copied into the element's own 2D canvas. A whole wall of them costs one GPU setup, where a canvas each would cost a context each.
