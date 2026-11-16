@@ -57,3 +57,25 @@ test("the three lines paint for real and the phone layout has no sideways scroll
     await site.close();
   }
 });
+
+test("the agent prompt copies whole from the landing page and from the docs sidebar", async () => {
+  for (const [path, scope] of [
+    ["/", "#install"],
+    ["/docs/options/", "[data-side]"],
+  ] as const) {
+    const site = await open(path);
+    const { page } = site;
+    try {
+      await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+      await page.locator(scope).getByRole("button", { name: "Copy a prompt for your AI agent" }).click();
+      await page.locator('[aria-live="polite"]').filter({ hasText: "copied" }).waitFor();
+      const copied = await page.evaluate(() => navigator.clipboard.readText());
+      expect(copied).toMatch(/^Add asciipaint to this project/);
+      expect(copied).toContain('use <ascii-img src alt width height> in place of <img>');
+      expect(copied).toContain("/llms-full.txt for the exact API");
+      expect(copied).toMatch(/see it painted\.$/);
+    } finally {
+      await site.close();
+    }
+  }
+});

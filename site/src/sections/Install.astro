@@ -1,4 +1,5 @@
 ---
+import { agentPrompt } from "../data/agent-prompt";
 import { MANAGERS } from "../lib/install";
 
 const managers = Object.keys(MANAGERS) as (keyof typeof MANAGERS)[];
@@ -31,6 +32,11 @@ const managers = Object.keys(MANAGERS) as (keyof typeof MANAGERS)[];
         <code id="install-command"><span class="prompt">$</span> <span id="install-cmd">{MANAGERS.npm}</span><span class="caret" aria-hidden="true"></span></code>
         <button type="button" class="copy" data-copy="install-cmd" aria-label="Copy install command"><span data-copied="copied">copy</span></button>
       </div>
+      <p class="foot">
+        <button type="button" class="copy" data-copy="agent-prompt" aria-label="Copy a prompt for your AI agent"><span data-copied="copied">copy a prompt for your agent</span></button>
+        <a href="/llms.txt">llms.txt →</a>
+      </p>
+      <pre id="agent-prompt" hidden>{agentPrompt(Astro.site!.origin)}</pre>
     </div>
   </div>
 

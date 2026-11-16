@@ -9,7 +9,7 @@ test("the sidebar lists every page in order and marks the current one", async ()
   const { page, errors } = site;
   try {
     const links = page.getByRole("navigation", { name: "Docs" }).first().locator("a");
-    expect(await links.evaluateAll((as) => as.map((a) => a.getAttribute("href")))).toEqual(hrefs);
+    expect(await links.evaluateAll((as) => as.map((a) => a.getAttribute("href")))).toEqual([...hrefs, "/llms.txt"]);
     expect(hrefs).toHaveLength(12);
     const current = page.getByRole("navigation", { name: "Docs" }).first().locator('[aria-current="page"]');
     expect(await current.getAttribute("href")).toBe("/docs/install/");
@@ -31,7 +31,7 @@ test("at phone width the menu is a dialog that Escape closes, handing focus back
       as.map((a) => [a.getAttribute("href"), a.textContent?.trim()]),
     );
     expect(names.slice(0, 12).map(([href]) => href)).toEqual(hrefs);
-    expect(names.slice(12).map(([, text]) => text)).toEqual(["GitHub ↗", "npm ↗"]);
+    expect(names.slice(12).map(([, text]) => text)).toEqual(["llms.txt ↗", "GitHub ↗", "npm ↗"]);
     await page.keyboard.press("Escape");
     await dialog.waitFor({ state: "hidden" });
     expect(await button.evaluate((el) => el === document.activeElement)).toBe(true);

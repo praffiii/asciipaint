@@ -3,6 +3,7 @@ import pkg from "../../../package.json";
 import DocsNav from "../components/DocsNav.astro";
 import Keycap from "../components/Keycap.astro";
 import TocRail from "../components/TocRail.astro";
+import { agentPrompt } from "../data/agent-prompt";
 import { href, NAV, neighbours } from "../data/nav";
 import Base from "./Base.astro";
 
@@ -56,6 +57,8 @@ const next = nextPage ?? NAV.flatMap((g) => g.items).find((i) => i.external);
       </DocsNav>
     </div>
   </dialog>
+
+  <pre id="agent-prompt" hidden>{agentPrompt(Astro.site!.origin)}</pre>
 
   <div class="docs" data-docs>
     <div class="side" data-side>
