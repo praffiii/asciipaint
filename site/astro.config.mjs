@@ -17,7 +17,7 @@ const fileLabel = {
 
 export default defineConfig({
   output: "static",
-  site: "https://asciipaint.pages.dev",
+  site: "https://asciipaint.prafficoding.workers.dev",
   integrations: [mdx()],
   markdown: { shikiConfig: { theme: shikiNight, transformers: [fileLabel] } },
   vite: {

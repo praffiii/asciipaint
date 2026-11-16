@@ -1,0 +1,7 @@
+// The website (site/) as a static-assets Worker. The library itself is not deployed here.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "asciipaint",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./site/dist" }
+}
