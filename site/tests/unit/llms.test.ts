@@ -10,7 +10,12 @@ test("plain drops MDX imports and components but keeps imports inside code", () 
 
 test("pages come out in sidebar order, whatever order they arrive in", () => {
   const page = (id: string) => ({ id, title: id, description: `about ${id}`, body: `body of ${id}` });
-  const pages = [page("options"), page("quick-start"), page("install")];
-  expect(full(pages, SITE).match(/body of [\w-]+/g)).toEqual(["body of install", "body of quick-start", "body of options"]);
+  const pages = [page("asciipaint"), page("quick-start"), page("install")];
+  expect(full(pages, SITE).match(/body of [\w-]+/g)).toEqual(["body of install", "body of quick-start", "body of asciipaint"]);
   expect(index(pages, SITE)).toContain("- [install](https://example.test/docs/install/): about install");
+});
+
+test("the Options page carries every option, though its MDX holds only a component", () => {
+  const text = full([{ id: "options", title: "Options", description: "d", body: "<OptionDemo />" }], SITE);
+  for (const name of ["cell", "ramp", "font", "background", "edgeFade", "sparkle", "dpr"]) expect(text).toContain(`| \`${name}\` |`);
 });
