@@ -14,3 +14,16 @@ test.each([1440, 390])("the landing page renders cleanly at %i px", async (width
     await site.close();
   }
 });
+
+test("the tab icons load", async () => {
+  const site = await open("/");
+  try {
+    const hrefs = await site.page
+      .locator('link[rel="icon"]')
+      .evaluateAll((links) => links.map((link) => (link as HTMLLinkElement).href));
+    expect(hrefs.map((href) => new URL(href).pathname)).toEqual(["/favicon.ico", "/favicon.svg"]);
+    for (const href of hrefs) expect((await site.page.request.get(href)).status()).toBe(200);
+  } finally {
+    await site.close();
+  }
+});
