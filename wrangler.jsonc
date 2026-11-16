@@ -3,5 +3,5 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "asciipaint",
   "compatibility_date": "2026-11-01",
-  "assets": { "directory": "./site/dist" }
+  "assets": { "directory": "./site/dist" },
 }
