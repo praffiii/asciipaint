@@ -1,10 +1,17 @@
-# asciipaint
+<h1 align="center">asciipaint</h1>
 
-Site and docs: https://asciipaint.prafficoding.workers.dev
+<p align="center">Paint any image, video, canvas or three.js scene as fine, coloured ASCII glyphs on WebGL2.<br>From a distance it reads as a painting; up close it is text.</p>
 
-Paint any image, video, canvas or three.js scene as fine, coloured ASCII glyphs on WebGL2. From a distance it reads as a painting; up close it is text.
+<p align="center"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/facts.png" height="36" alt="About 6 kB min+gzip · zero dependencies · WebGL2 · MIT"></p>
 
-<!-- TODO: demo screenshot -->
+<p align="center"><a href="https://asciipaint.prafficoding.workers.dev"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/hero.webp" alt="One painting going from large glyphs on the left to fine glyphs on the right, where it reads as a picture"></a></p>
+
+<p align="center">
+  <a href="https://asciipaint.prafficoding.workers.dev/playground/"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/playground.png" height="37" alt="Playground"></a>
+  <a href="https://asciipaint.prafficoding.workers.dev/docs/quick-start/"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/docs.png" height="37" alt="Docs"></a>
+  <a href="https://asciipaint.prafficoding.workers.dev"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/site.png" height="37" alt="Site"></a>
+  <a href="https://www.npmjs.com/package/asciipaint"><img src="https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/npm.png" height="37" alt="npm"></a>
+</p>
 
 ## Install
 
@@ -25,6 +32,10 @@ import { asciipaint } from "https://esm.sh/asciipaint"; // or cdn.jsdelivr.net/n
 The default font, Geist Mono, is not bundled: load it yourself (for example from Google Fonts), or the glyphs fall back to `ui-monospace`.
 
 ## Use
+
+|                                                                  `<ascii-img>`                                                                  |                                                      Any image, video or canvas                                                      |                                                              A three.js scene                                                               |
+| :---------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+| ![Six logos, each painted by its own ascii-img element](https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/element.webp) | ![A liquid paint animation painted in glyphs](https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/source.webp) | ![A torus knot, a sphere and a gem painted in glyphs](https://raw.githubusercontent.com/praffiii/asciipaint/main/.github/readme/three.webp) |
 
 The one-line path, an image as an element:
 
